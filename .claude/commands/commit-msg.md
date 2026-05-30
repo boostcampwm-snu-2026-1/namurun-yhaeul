@@ -4,7 +4,14 @@
 
 ## 실행 순서
 
-1. `git status`를 실행해 변경된 파일 목록을 확인한다.
+1. `git status`를 실행해 변경된 파일 목록을 확인한다. staged 여부에 관계없이 변경된 파일 전체를 아래 형식으로 사용자에게 보여준다:
+
+```
+변경된 파일:
+  M .claude/settings.json      (staged)
+  ?? .claude/commands/foo.md   (untracked)
+  M src/App.tsx                (unstaged)
+```
 
 2. 별다른 지시가 없으면 `git add .`를 바로 실행한다. 특정 파일만 stage하라는 지시가 있으면 해당 파일만 추가한다.
 
