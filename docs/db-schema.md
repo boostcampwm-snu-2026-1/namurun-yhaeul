@@ -8,9 +8,17 @@
 CREATE TABLE articles (
   title      TEXT PRIMARY KEY,
   links      TEXT[],       -- 내부 링크 목록 ["이순신", "조선", ...]
-  byte_size  INTEGER,      -- 본문 바이트 수 (랜덤 문제 가중치, 필터링용)
+  byte_size  INTEGER,      -- 본문 바이트 수. 랜덤 시작/도착점 후보 선택 시 필터 기준으로 사용
   created_at TIMESTAMP DEFAULT NOW()
 );
+```
+
+랜덤 시작/도착점 후보 선택 쿼리 예시:
+```sql
+SELECT title FROM articles
+WHERE byte_size >= 3000        -- 한국어 약 1,000자 이상
+  AND array_length(links, 1) >= 5
+ORDER BY RANDOM() LIMIT 1;
 ```
 
 ### redirects — 리다이렉트 매핑

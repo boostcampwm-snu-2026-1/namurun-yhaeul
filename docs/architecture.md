@@ -8,6 +8,7 @@
   → 프론트엔드가 R2에서 "articles/{title}.json" fetch (CDN 캐시)
   → namumark-clone-core로 HTML 렌더링
   → Supabase articles.links[] 배열로 유효 내부 링크인지 검증
+    (links[]는 모든 일반 문서 기준 — 토막글 포함. 시작/도착 후보는 byte_size + 링크 수로 쿼리 시 필터)
   → 목표 문서 도달 시 game_records에 기록
 ```
 

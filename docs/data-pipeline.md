@@ -21,6 +21,15 @@
 - 867,024개 문서, `.parquet` 포맷, 약 2.8GB
 - 라이선스: CC BY-NC-SA 2.0 KR
 
+**실측 수치:**
+
+| 구분 | 수량 | 비고 |
+|------|------|------|
+| 전체 문서 | 867,024개 | |
+| 리다이렉트 | 295,649개 | 전체의 34% |
+| R2/Supabase 적재 대상 | 571,375개 | 리다이렉트 제외 전체 |
+| 랜덤 시작/도착 후보 | 약 487,984개 | byte_size↑ + 링크 5개↑ 조건 쿼리로 선택 |
+
 다운로드: HuggingFace 데이터셋 페이지에서 `.parquet` 파일 직접 다운로드  
 (`load_dataset` 라이브러리 사용 시 전체를 RAM에 올려야 해서 비효율적)
 
@@ -97,10 +106,9 @@ for chunk in pd.read_parquet("namuwiki.parquet", chunksize=chunk_size):
 
     chunk = chunk[~chunk["text"].str.startswith("#redirect")]
 
-    # 2. 토막글 제거 (1,000바이트 미만)
-    chunk = chunk[chunk["text"].str.len() > 1000]
-
-    # 3. 내부 링크 추출
+    # 2. 내부 링크 추출
+    # (토막글/링크 수 기준 필터링은 파이프라인에서 하지 않음 →
+    #  모든 일반 문서를 R2/Supabase에 적재하고, 시작/도착점 후보 선택은 쿼리에서 처리)
     # [[문서명]] 또는 [[실제명|표시텍스트]] → 실제 문서명만 추출
     # 제외 대상 (데이터셋에 존재하지 않거나 게임 이동 불가):
     #   파일:, 분류:         → 데이터셋에 없음
@@ -121,11 +129,9 @@ for chunk in pd.read_parquet("namuwiki.parquet", chunksize=chunk_size):
         ))
 
     chunk["links"] = chunk["text"].apply(extract_links)
+    chunk["byte_size"] = chunk["text"].apply(lambda t: len(t.encode('utf-8')))
 
-    # 4. 링크 5개 미만 문서 제거
-    chunk = chunk[chunk["links"].apply(len) >= 5]
-
-    # 5. 본문 → R2 업로드, 메타데이터 → Supabase INSERT
+    # 3. 본문 → R2 업로드, 메타데이터 → Supabase INSERT
 ```
 
 ## R2 업로드
