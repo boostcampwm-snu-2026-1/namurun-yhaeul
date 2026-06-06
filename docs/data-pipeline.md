@@ -18,7 +18,7 @@
 ## 데이터 소스
 
 - HuggingFace `heegyu/namuwiki` (2022년 3월 기준 덤프)
-- 867,024개 문서, `.parquet` 포맷, 약 2.8GB
+- 867,024개 문서, `.parquet` 포맷, 약 7.7GB
 - 라이선스: CC BY-NC-SA 2.0 KR
 
 **실측 수치:**
@@ -81,15 +81,7 @@ pip install -r scripts/requirements.txt
 
 `supabase==2.5.3` 으로 버전 고정 — 이후 버전의 `storage3`이 `pyiceberg`(C 확장)를 의존성으로 추가해 Windows에서 빌드 실패함.
 
-필요 환경변수 (`scripts/.env.example` 참고):
-```
-R2_ACCOUNT_ID=
-R2_ACCESS_KEY=
-R2_SECRET_KEY=
-R2_BUCKET=namuwiki-articles
-SUPABASE_URL=
-SUPABASE_SERVICE_ROLE_KEY=   # 파이프라인에서만 사용, 절대 프론트엔드 노출 금지
-```
+필요 환경변수는 `scripts/.env.example` 참고. `SUPABASE_SERVICE_ROLE_KEY`는 파이프라인에서만 사용, 절대 프론트엔드 노출 금지.
 
 ## 전처리 흐름
 
@@ -111,32 +103,12 @@ SUPABASE_SERVICE_ROLE_KEY=   # 파이프라인에서만 사용, 절대 프론트
 
 ## R2 업로드
 
-```python
-import boto3
-from concurrent.futures import ThreadPoolExecutor
-import json
+구현: `scripts/pipeline.py`
 
-r2 = boto3.client("s3",
-    endpoint_url=f"https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com",
-    aws_access_key_id=R2_ACCESS_KEY,
-    aws_secret_access_key=R2_SECRET_KEY
-)
-
-def upload_to_r2(title: str, text: str):
-    key = f"articles/{title}.json"
-    r2.put_object(
-        Bucket="namuwiki-articles",
-        Key=key,
-        Body=json.dumps({"title": title, "text": text}, ensure_ascii=False),
-        ContentType="application/json"
-    )
-
-# 50개씩 병렬 업로드
-with ThreadPoolExecutor(max_workers=50) as executor:
-    executor.map(lambda row: upload_to_r2(row["title"], row["text"]), rows)
-```
-
-한글 파일명은 boto3가 내부적으로 URL 인코딩 처리함.
+`boto3`로 R2 연결, `ThreadPoolExecutor(max_workers=50)`으로 병렬 업로드.  
+저장 형식: `articles/{title}.json` — `{"title": ..., "text": ...}` JSON, UTF-8 인코딩.  
+업로드 실패 시 해당 title을 로그에 출력하고 계속 진행, 종료 시 총 실패 수 요약 출력.  
+한글 파일명은 boto3가 내부적으로 URL 인코딩 처리.
 
 ## Supabase INSERT
 
