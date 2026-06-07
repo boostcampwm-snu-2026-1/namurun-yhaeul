@@ -8,20 +8,22 @@
     "light": "#4CAF70",
     "dark": "#1A6B34"
   },
-  "navigation": [
-    {
-      "group": "소개",
-      "pages": ["index"]
-    },
-    {
-      "group": "설계 문서",
-      "pages": [
-        "docs/architecture",
-        "docs/db-schema",
-        "docs/data-pipeline"
-      ]
-    }
-  ],
+  "navigation": {
+    "groups": [
+      {
+        "group": "소개",
+        "pages": ["index"]
+      },
+      {
+        "group": "설계 문서",
+        "pages": [
+          "docs/architecture",
+          "docs/db-schema",
+          "docs/data-pipeline"
+        ]
+      }
+    ]
+  },
   "feedback": {
     "thumbsRating": false
   }
