@@ -41,7 +41,7 @@ export interface Article {
 }
 
 export async function fetchArticle(title: string): Promise<Article> {
-  const url = `${r2BaseUrl}/${encodeURIComponent(title)}.json`
+  const url = `${r2BaseUrl}/articles/${encodeURIComponent(title)}.json`
 
   let response: Response
   try {
