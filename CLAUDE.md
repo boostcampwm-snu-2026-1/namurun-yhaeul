@@ -101,3 +101,5 @@ npm run lint     # ESLint
 | `docs/architecture.md` | 아키텍처, 컴포넌트 구조, 데이터 흐름 |
 | `docs/db-schema.md` | Supabase 테이블 스키마 + 인덱스 |
 | `docs/data-pipeline.md` | 전처리 스크립트 설계 및 실행 방법 |
+
+문서는 Mintlify에서 렌더링된다. 세션 시작 시 전체 문서 구조가 필요하면 `https://namurun.mintlify.app/llms.txt` 를 fetch한다.
