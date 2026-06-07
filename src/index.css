@@ -1,1 +1,32 @@
 @import "tailwindcss";
+
+.article-viewer table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.5rem 0;
+}
+
+.article-viewer th,
+.article-viewer td {
+  border: 1px solid #d1d5db;
+  padding: 4px 8px;
+  text-align: left;
+}
+
+.article-viewer th {
+  background-color: #f9fafb;
+  font-weight: 600;
+}
+
+/* 내부 링크 — namumark의 존재 여부 판정(opennamu_not_exist_link)과 무관하게 동일 스타일.
+   링크 유효성은 게임에서 Supabase articles.links[]로 검증한다. */
+.article-viewer a {
+  color: #0275d8;
+  text-decoration: none;
+}
+
+/* heading 옆 편집(✎) 링크 제거 — 게임에 불필요한 위키 편집 UI.
+   접기(⊖)는 window.opennamu_heading_folding으로 살려두므로 숨기지 않는다. */
+.article-viewer sub a[href^="/edit_section/"] {
+  display: none;
+}
