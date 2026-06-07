@@ -8,6 +8,7 @@
     "dark": "#1A6B34"
   },
   "navigation": [
+    "index",
     {
       "group": "설계 문서",
       "pages": [
@@ -19,8 +20,5 @@
   ],
   "feedback": {
     "thumbsRating": false
-  },
-  "redirects": [
-    { "source": "/", "destination": "/docs/architecture" }
-  ]
+  }
 }
