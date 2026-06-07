@@ -51,7 +51,7 @@ npm run lint     # ESLint
 
 ## 절대 하지 말 것
 
-- `dangerouslySetInnerHTML` 직접 사용 금지 — namumark 렌더링 결과는 반드시 라이브러리 통해서만 삽입 (XSS)
+- `dangerouslySetInnerHTML` 직접 사용 금지 — 단, `namumark-clone-core` 파싱 결과를 삽입하는 `ArticleViewer` 컴포넌트에서의 사용은 허용 (라이브러리 출력에 한정, XSS)
 - R2는 read-only — 데이터 파이프라인 외 코드에서 R2 write 금지
 - Supabase service role key 클라이언트 노출 금지 — anon key만 프론트엔드에서 사용
 

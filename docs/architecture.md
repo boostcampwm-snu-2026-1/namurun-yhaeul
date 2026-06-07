@@ -71,23 +71,30 @@
 - 표, 이미지, 복잡한 매크로 깨짐 허용
 - `[[문서명]]` / `[[실제명|표시텍스트]]` 링크 렌더링이 최우선
 
-## 컴포넌트 구조 (예정)
+## 컴포넌트 구조
+
+구현 완료 항목과 예정 항목을 함께 표기.
 
 ```
 src/
   pages/
-    MainPage.tsx
-    GamePage.tsx
-    ResultPage.tsx
+    MainPage.tsx          ← (예정) 오늘의 문제, 랜덤 시작
+    GamePage.tsx          ← (예정) 게임 화면
+    ResultPage.tsx        ← (예정) 결과 화면
+    RenderDemoPage.tsx    ← 개발용 렌더링 테스트 (/render-demo, 배포 무관)
   components/
-    ArticleViewer.tsx   ← namumark 렌더링
-    GameHeader.tsx      ← 타이머, 클릭 수, 목표 문서
-    Leaderboard.tsx
+    ArticleViewer.tsx     ← namumark 렌더링 ✅
+    GameHeader.tsx        ← (예정) 타이머, 클릭 수, 목표 문서
+    Leaderboard.tsx       ← (예정)
   hooks/
-    useGame.ts          ← 게임 상태 (클릭 수, 타이머, 경로)
-    useArticle.ts       ← R2 fetch + namumark 렌더링
-    useRedirect.ts      ← Supabase redirects 조회
+    useGame.ts            ← (예정) 게임 상태 (클릭 수, 타이머, 경로)
+    useArticle.ts         ← (예정) R2 fetch + namumark 렌더링
+    useRedirect.ts        ← (예정) Supabase redirects 조회
   lib/
-    supabase.ts         ← Supabase 클라이언트 싱글톤
-    r2.ts               ← R2 fetch 유틸
+    supabase.ts           ← Supabase 클라이언트 싱글톤 ✅
+    r2.ts                 ← R2 fetch 유틸 ✅
+  shims/
+    crypto.ts             ← namumark-clone-core가 요구하는 crypto mock ✅
+  types/
+    namumark-clone-core.d.ts  ← 외부 라이브러리 타입 선언 ✅
 ```
