@@ -1,0 +1,116 @@
+---
+title: "architecture"
+---
+
+# 아키텍처
+
+나무런 프론트엔드 구조와 데이터 흐름을 정리한다.
+
+## 기술 스택
+
+| 영역 | 선택 |
+| --- | --- |
+| 프레임워크 | React 18 \+ TypeScript |
+| 빌드 | Vite 6 |
+| 라우팅 | React Router 6 (`BrowserRouter`) |
+| 스타일 | Tailwind CSS 4 (`@tailwindcss/vite`) |
+| 백엔드 | Supabase (PostgreSQL \+ Auth \+ RLS) |
+| 문서 스토리지 | Cloudflare R2 (정적 JSON) |
+| 본문 렌더링 | `namumark-clone-core` (GitHub 직접 의존) |
+
+## 라우트 구성
+
+진입점은 `src/main.tsx` → `BrowserRouter` → `App`. 라우트는 `src/App.tsx`에 평탄하게 선언되어 있다.
+
+| 경로 | 컴포넌트 | 용도 |
+| --- | --- | --- |
+| `/` | `MainPage` | 메인 (시작/문제 선택) |
+| `/game` | `GamePage` | 인게임 화면 |
+| `/result` | `ResultPage` | 종료 후 결과 |
+| `/render-demo` | `RenderDemoPage` | 개발용 나무마크 렌더링 데모 |
+
+`MainPage`, `GamePage`, `ResultPage`는 현재 골격만 존재하는 placeholder다.
+
+## 환경변수
+
+`.env.example` 기준 세 가지가 필수다. 누락 시 `src/lib/supabase.ts`, `src/lib/r2.ts`가 모듈 로드 시점에 throw 한다.
+
+| 변수 | 사용처 |
+| --- | --- |
+| `VITE_SUPABASE_URL` | Supabase 클라이언트 초기화 |
+| `VITE_SUPABASE_ANON_KEY` | Supabase 클라이언트 초기화 (RLS 통과용) |
+| `VITE_R2_BASE_URL` | R2 버킷의 공개 베이스 URL (`{base}/articles/{title}.json`) |
+
+`SUPABASE_SERVICE_ROLE_KEY`는 데이터 파이프라인 전용이며 프론트엔드에 노출하지 않는다.
+
+## 데이터 흐름
+
+```text
+[브라우저]
+  ├── Supabase (anon key)
+  │     ├── articles  : 랜덤 시작/도착 후보, 메타데이터 조회
+  │     ├── redirects : 링크 클릭 시 리다이렉트 해석
+  │     └── game_records / daily_prompts : 기록·일일 문제
+  └── R2 (공개 GET)
+        └── articles/{title}.json : 나무마크 본문 fetch → 클라이언트 렌더링
+```
+
+프론트엔드는 Supabase에는 anon key로 접근하고, R2에는 인증 없이 GET 요청만 보낸다. 따라서 R2 버킷은 CORS에서 배포 도메인을 허용해야 한다 ([데이터 파이프라인](/docs/data-pipeline#r2-cors-설정-필수) 참고).
+
+## 문서 fetch 계층 (`src/lib/r2.ts`)
+
+```ts
+export async function fetchArticle(title: string): Promise<Article>
+export interface Article { title: string; text: string }
+```
+
+- URL: `${VITE_R2_BASE_URL}/articles/${encodeURIComponent(title)}.json`
+- 응답 형식: `{ "title": string, "text": string }` (나무마크 원문)
+- 에러는 호출자가 분기할 수 있도록 타입을 분리해 던진다.
+
+| 에러 클래스 | 발생 조건 |
+| --- | --- |
+| `ArticleNotFoundError` | HTTP 404 |
+| `ArticleFetchError` | 그 외 비 2xx (status 포함) |
+| `ArticleNetworkError` | `fetch` 자체가 실패 (네트워크 단절 등) |
+| `ArticleParseError` | JSON 파싱 실패 |
+
+## 나무마크 렌더링 (`src/components/ArticleViewer.tsx`)
+
+- `namumark-clone-core`의 `NamuMark(text, { docName }, database).parse()`를 호출해 HTML 문자열을 생성한다.
+- 결과는 **유일한 `dangerouslySetInnerHTML` 사용 지점**이다. 라이브러리 출력 외 어떤 사용자 입력도 이 경로로 흘리지 않는다 (XSS 정책).
+- 라이브러리가 heading에 인라인 `onclick="opennamu_heading_folding(...)"`을 박기 때문에, 원본 `media/render.js`에 있던 섹션 접기 함수를 `window.opennamu_heading_folding`으로 그대로 등록한다. 서버 API 의존 없는 순수 DOM 토글.
+- 파싱 실패 시 `<p>렌더링 실패</p>`로 폴백.
+
+## 렌더 데모 페이지 (`/render-demo`)
+
+개발용으로 R2 → 렌더 파이프라인을 빠르게 검증하는 화면이다.
+
+- **문서 검색**: 제목 입력 → `fetchArticle` → `ArticleViewer`.
+- **랜덤 표본**: `RANDOM_GROUPS = 5`, `PER_GROUP = 4`로 총 20개를 가져온다.
+  - `articles` 테이블의 총 개수를 먼저 `head: true` count 쿼리로 받아온 뒤,
+  - 5개의 랜덤 offset을 만들어 `range(offset, offset+3)`로 **병렬 쿼리**한다.
+  - 단일 offset에서 20개를 뽑으면 PostgreSQL 기본 정렬(주로 PK = 가나다순)에 인접한 문서만 나와 표본이 편중되기 때문에 여러 구간에서 분할 추출한다.
+
+## 코드 트리
+
+```text
+src/
+  main.tsx                 # Router 부트스트랩
+  App.tsx                  # 라우트 정의
+  index.css                # Tailwind 엔트리
+  pages/
+    MainPage.tsx           # (placeholder)
+    GamePage.tsx           # (placeholder)
+    ResultPage.tsx         # (placeholder)
+    RenderDemoPage.tsx     # R2 + 렌더 데모
+  components/
+    ArticleViewer.tsx      # namumark → HTML 렌더 (XSS 경계)
+  lib/
+    supabase.ts            # Supabase 클라이언트 (env 검증)
+    r2.ts                  # fetchArticle + 에러 타입
+  shims/
+    crypto.ts              # 브라우저 crypto polyfill
+  types/
+    namumark-clone-core.d.ts
+```
