@@ -17,9 +17,9 @@
       {
         "group": "설계 문서",
         "pages": [
-          "docs/architecture.mdx",
-          "docs/db-schema",
-          "docs/data-pipeline"
+          "docs/architecture.md",
+          "docs/db-schema.md",
+          "docs/data-pipeline.md"
         ]
       }
     ]
