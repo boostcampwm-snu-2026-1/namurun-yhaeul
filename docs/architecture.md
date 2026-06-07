@@ -37,6 +37,10 @@
   ├─ 링크 클릭 → redirects 확인 → articles.links[] 검증 → 이동
   ├─ 외부 링크: 비활성화 처리
   ├─ R2 fetch 실패 시: "문서를 불러올 수 없습니다" 안내 + 건너뛰기 버튼
+  │    ArticleNetworkError  — 연결 실패 (오프라인, CORS 등)
+  │    ArticleNotFoundError — 404, R2에 파일 없음
+  │    ArticleFetchError    — 기타 HTTP 오류
+  │    ArticleParseError    — 200 응답이지만 JSON 파싱 실패
   └─ 막힌 경우: "문서 건너뛰기" 버튼
 
       ↓ (목표 문서 도달)
