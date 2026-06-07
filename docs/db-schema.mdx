@@ -1,4 +1,7 @@
-# DB 스키마 (Supabase / PostgreSQL)
+---
+title: "DB 스키마"
+description: "나무런이 사용하는 Supabase PostgreSQL 테이블, 인덱스, RLS 정책 및 실측 데이터 규모를 정리한 문서입니다."
+---
 
 ## 테이블
 
@@ -14,6 +17,7 @@ CREATE TABLE articles (
 ```
 
 랜덤 시작/도착점 후보 선택 쿼리 예시:
+
 ```sql
 SELECT title FROM articles
 WHERE byte_size >= 3000        -- 한국어 약 1,000자 이상
@@ -30,7 +34,7 @@ CREATE TABLE redirects (
 );
 ```
 
-게임 중 링크 클릭 시 이 테이블을 먼저 확인. 리다이렉트면 target으로 이동.  
+게임 중 링크 클릭 시 이 테이블을 먼저 확인. 리다이렉트면 target으로 이동.
 리다이렉트 문서는 게임 시작/도착점 후보에서 제외 (본문 없음).
 
 ### game_records — 게임 기록
