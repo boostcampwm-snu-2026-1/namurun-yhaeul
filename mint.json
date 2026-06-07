@@ -19,5 +19,8 @@
   ],
   "feedback": {
     "thumbsRating": false
-  }
+  },
+  "redirects": [
+    { "source": "/", "destination": "/docs/architecture" }
+  ]
 }
