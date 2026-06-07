@@ -1,7 +1,3 @@
----
-title: "architecture"
----
-
 # 아키텍처
 
 나무런 프론트엔드 구조와 데이터 흐름을 정리한다.
@@ -9,12 +5,12 @@ title: "architecture"
 ## 기술 스택
 
 | 영역 | 선택 |
-| --- | --- |
-| 프레임워크 | React 18 \+ TypeScript |
+|------|------|
+| 프레임워크 | React 18 + TypeScript |
 | 빌드 | Vite 6 |
 | 라우팅 | React Router 6 (`BrowserRouter`) |
 | 스타일 | Tailwind CSS 4 (`@tailwindcss/vite`) |
-| 백엔드 | Supabase (PostgreSQL \+ Auth \+ RLS) |
+| 백엔드 | Supabase (PostgreSQL + Auth + RLS) |
 | 문서 스토리지 | Cloudflare R2 (정적 JSON) |
 | 본문 렌더링 | `namumark-clone-core` (GitHub 직접 의존) |
 
@@ -23,7 +19,7 @@ title: "architecture"
 진입점은 `src/main.tsx` → `BrowserRouter` → `App`. 라우트는 `src/App.tsx`에 평탄하게 선언되어 있다.
 
 | 경로 | 컴포넌트 | 용도 |
-| --- | --- | --- |
+|------|----------|------|
 | `/` | `MainPage` | 메인 (시작/문제 선택) |
 | `/game` | `GamePage` | 인게임 화면 |
 | `/result` | `ResultPage` | 종료 후 결과 |
@@ -36,7 +32,7 @@ title: "architecture"
 `.env.example` 기준 세 가지가 필수다. 누락 시 `src/lib/supabase.ts`, `src/lib/r2.ts`가 모듈 로드 시점에 throw 한다.
 
 | 변수 | 사용처 |
-| --- | --- |
+|------|--------|
 | `VITE_SUPABASE_URL` | Supabase 클라이언트 초기화 |
 | `VITE_SUPABASE_ANON_KEY` | Supabase 클라이언트 초기화 (RLS 통과용) |
 | `VITE_R2_BASE_URL` | R2 버킷의 공개 베이스 URL (`{base}/articles/{title}.json`) |
@@ -69,7 +65,7 @@ export interface Article { title: string; text: string }
 - 에러는 호출자가 분기할 수 있도록 타입을 분리해 던진다.
 
 | 에러 클래스 | 발생 조건 |
-| --- | --- |
+|-------------|-----------|
 | `ArticleNotFoundError` | HTTP 404 |
 | `ArticleFetchError` | 그 외 비 2xx (status 포함) |
 | `ArticleNetworkError` | `fetch` 자체가 실패 (네트워크 단절 등) |
