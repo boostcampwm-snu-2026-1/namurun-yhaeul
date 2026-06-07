@@ -68,9 +68,23 @@ CREATE INDEX idx_articles_byte_size ON articles(byte_size DESC);
 CREATE INDEX idx_game_records_articles ON game_records(start_article, end_article);
 ```
 
-## 데이터 규모 (예상)
+## RLS 정책
 
-- `articles`: ~50만 건 (필터링 후)
-- `redirects`: ~수십만 건
+`articles`, `redirects`는 프론트엔드에서 anon key로 읽어야 하므로 SELECT 허용 정책 적용.
+
+```sql
+ALTER TABLE articles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE redirects ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "public read" ON articles FOR SELECT USING (true);
+CREATE POLICY "public read" ON redirects FOR SELECT USING (true);
+```
+
+`game_records`, `daily_prompts`는 필요 시 추가.
+
+## 데이터 규모 (실측)
+
+- `articles`: 571,375건
+- `redirects`: 295,649건
 - `game_records`: 게임 플레이 누적
 - `daily_prompts`: 날짜당 1건
