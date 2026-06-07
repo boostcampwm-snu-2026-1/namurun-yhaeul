@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import MainPage from './pages/MainPage'
 import GamePage from './pages/GamePage'
 import ResultPage from './pages/ResultPage'
+import RenderDemoPage from './pages/RenderDemoPage'
 
 function App() {
   return (
@@ -9,6 +10,7 @@ function App() {
       <Route path="/" element={<MainPage />} />
       <Route path="/game" element={<GamePage />} />
       <Route path="/result" element={<ResultPage />} />
+      <Route path="/render-demo" element={<RenderDemoPage />} />
     </Routes>
   )
 }
