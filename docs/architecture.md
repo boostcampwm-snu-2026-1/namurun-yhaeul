@@ -78,7 +78,7 @@
 ```
 src/
   pages/
-    MainPage.tsx          ← (예정) 오늘의 문제, 랜덤 시작
+    MainPage.tsx          ← 오늘의 문제, 랜덤 시작 ✅
     GamePage.tsx          ← (예정) 게임 화면
     ResultPage.tsx        ← (예정) 결과 화면
     RenderDemoPage.tsx    ← 개발용 렌더링 테스트 (/render-demo, 배포 무관)
@@ -88,6 +88,7 @@ src/
     Leaderboard.tsx       ← (예정)
   hooks/
     useGame.ts            ← 게임 상태 (elapsedMs, clickCount, path) ✅
+    useMainPage.ts        ← 메인 화면 데이터 (일일 문제 조회, 랜덤 문서 선택) ✅
     useArticle.ts         ← (예정) R2 fetch + namumark 렌더링
     useRedirect.ts        ← Supabase redirects 조회 ✅
   lib/
