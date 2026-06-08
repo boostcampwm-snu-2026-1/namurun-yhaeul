@@ -58,10 +58,19 @@ For each remaining commit unit:
   - `dangerouslySetInnerHTML` only in `ArticleViewer` with library output
 
 **3b. Verify**
-- Run `npm run lint`
-- Run `npm run build`
-- If either fails: fix the errors and re-run once
-- If still failing after one retry: post stop comment to issue and stop entire pipeline
+
+Check if `package.json` has a `test:run` script:
+
+- **테스트 환경 있음 (`test:run` 스크립트 존재):**
+  - 구현한 파일에 대응하는 테스트 파일이 없으면 작성한다 (`<filename>.test.ts`)
+  - 최소 커버리지: 정상 케이스 1개 + 경계/오류 케이스 1개
+  - `npm run lint` → `npm run test:run` 순서로 실행
+  - 실패 시 수정 후 1회 재시도. 재시도 후에도 실패하면 stop comment 후 중단
+
+- **테스트 환경 없음 (`test:run` 스크립트 없음):**
+  - `npm run lint` + `npm run build` 실행
+  - 실패 시 수정 후 1회 재시도. 재시도 후에도 실패하면 stop comment 후 중단
+  - 커밋 메시지 body에 한 줄 추가: `테스트 환경 없음 — #23 해결 후 테스트 추가 필요`
 
 **3c. Commit**
 Derive commit type from the issue label (`feat`/`fix`/`refactor`/`chore`/`test`).  
