@@ -49,23 +49,42 @@ Use the field structure matching the chosen type:
 
 ### Step 4 — Ask focused questions
 
-After the draft, ask about **every item that is ambiguous or underspecified** — because the issue will be executed fully autonomously with no human in the loop during implementation.
+This step is the most important. The issue will be executed **fully autonomously** with no human in the loop — every ambiguity will become a wrong implementation decision.
 
-Ask about anything where the wrong assumption would cause incorrect implementation:
-- 완료 기준이 모호할 때: "어떤 동작이 보장되면 완료로 볼 수 있을까요?"
-- 범위 판단이 어려울 때: "A 방식과 B 방식 중 어느 쪽인가요?"
-- fix에서 재현 조건이 없을 때: "어떤 상황에서 발생하나요?"
-- 구현 방식이 여러 갈래일 때: 선택지를 제시하고 확인
-- 엣지 케이스 처리가 불명확할 때: 예상 동작을 확인
+**There is no limit on the number of questions. Ask every question that needs asking.**
 
-Do **not** ask about:
-- 탐색 시작점 — find it in the code
-- File paths — use Glob/Grep
-- Anything already clearly inferable from the description or codebase
+#### 4a — Collect candidates
 
-Group related questions together. After user answers, check if any answers introduce new ambiguities — if so, ask follow-up questions until nothing is underspecified.
+Go through these two sources and list every question candidate:
 
-Output format:
+1. **Draft markers**: every `[?]` you wrote in Step 3 must become a question — no exceptions.
+2. **Mandatory checklist**: go through each item below and ask yourself "do I know the answer with certainty?" If not, add it as a question.
+
+| Category | What to verify |
+|----------|---------------|
+| 완료 기준 | Each criterion unambiguous? No vague verbs like "잘 보여야 한다"? |
+| 구현 방식 | Multiple valid approaches exist? (DB vs client, hook vs inline, A vs B) |
+| 오류/예외 처리 | What happens on network error? Empty state? Loading state? |
+| UI/UX | If UI is involved: layout, navigation behavior, what text to show? |
+| 날짜/시간/지역 | Any timezone, locale, or format dependency? |
+| 범위 경계 | What is explicitly OUT of scope this issue? Risk of scope creep? |
+| 데이터 흐름 | Where does data come from? Who owns the state? What triggers refetch? |
+| 기술 제약 | Must use a specific library/pattern? Must NOT use something? |
+
+#### 4b — Filter and ask
+
+Remove from the candidate list anything that is:
+- Derivable from the codebase (file paths, existing patterns, library APIs)
+- Already answered clearly in the user's description
+
+Ask all remaining candidates. Group related questions under a shared heading when they belong to the same concern.
+
+#### 4c — Follow-up loop
+
+After the user answers, re-check: do any answers introduce new ambiguities? If yes, ask follow-up questions. Repeat until nothing is underspecified.
+
+#### Output format
+
 ```
 ## 이슈 초안 — [type] <제목>
 
@@ -74,7 +93,13 @@ Output format:
 ---
 
 확인이 필요한 항목:
+
+**[그룹명 (있을 때만)]**
 1. <질문>
+2. <질문>
+
+**[다른 그룹]**
+3. <질문>
 ```
 
 ### Step 5 — Refine and confirm
