@@ -5,6 +5,7 @@ import { useArticle } from '../hooks/useArticle'
 import { useRedirect } from '../hooks/useRedirect'
 import { ArticleViewer } from '../components/ArticleViewer'
 import { GameHeader } from '../components/GameHeader'
+import { PathSidebar } from '../components/PathSidebar'
 
 interface LocationState {
   start: string
@@ -30,7 +31,7 @@ function GamePage() {
   const [gameStart] = useState<string>(() => locationState?.start ?? '')
   const [gameEnd] = useState<string>(() => locationState?.end ?? '')
 
-  const { elapsedMs, clickCount, startGame, recordVisit } = useGame()
+  const { elapsedMs, clickCount, path, startGame, recordVisit } = useGame()
   const { article, isLoading, error: articleError, loadArticle } = useArticle()
   const { resolveRedirect } = useRedirect()
 
@@ -104,23 +105,27 @@ function GamePage() {
     <div className="flex flex-col min-h-screen">
       <GameHeader targetTitle={gameEnd} elapsedMs={elapsedMs} clickCount={clickCount} />
 
-      <div className="flex-1 relative">
-        {isLoading && !article && (
-          <div className="flex items-center justify-center p-8">
-            <p className="text-gray-500">불러오는 중...</p>
-          </div>
-        )}
+      <div className="flex flex-1">
+        <PathSidebar path={path} />
 
-        {article && (
-          <div className="relative" onClick={(e) => void handleClick(e)}>
-            {isLoading && (
-              <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center pointer-events-none">
-                <p className="text-gray-400 text-sm">이동 중...</p>
-              </div>
-            )}
-            <ArticleViewer article={article} />
-          </div>
-        )}
+        <div className="flex-1 relative">
+          {isLoading && !article && (
+            <div className="flex items-center justify-center p-8">
+              <p className="text-gray-500">불러오는 중...</p>
+            </div>
+          )}
+
+          {article && (
+            <div className="relative" onClick={(e) => void handleClick(e)}>
+              {isLoading && (
+                <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center pointer-events-none">
+                  <p className="text-gray-400 text-sm">이동 중...</p>
+                </div>
+              )}
+              <ArticleViewer article={article} />
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="fixed bottom-4 left-4">
