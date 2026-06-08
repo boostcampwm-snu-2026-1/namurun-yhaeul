@@ -38,6 +38,7 @@ function GamePage() {
   const [toast, setToast] = useState<string | null>(null)
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isNavigatingRef = useRef(false)
+  const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!gameStart) return
@@ -76,6 +77,7 @@ function GamePage() {
         const resolved = await resolveRedirect(rawTitle)
         await loadArticle(resolved)
         recordVisit(resolved)
+        if (contentRef.current) contentRef.current.scrollTop = 0
       } catch {
         showToast('이동이 불가능합니다')
       } finally {
@@ -102,13 +104,13 @@ function GamePage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col h-screen">
       <GameHeader targetTitle={gameEnd} elapsedMs={elapsedMs} clickCount={clickCount} />
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 overflow-hidden">
         <PathSidebar path={path} />
 
-        <div className="flex-1 relative">
+        <div className="flex-1 overflow-y-auto relative" ref={contentRef}>
           {isLoading && !article && (
             <div className="flex items-center justify-center p-8">
               <p className="text-gray-500">불러오는 중...</p>

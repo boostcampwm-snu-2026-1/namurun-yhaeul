@@ -4,7 +4,7 @@ interface Props {
 
 export function PathSidebar({ path }: Props) {
   return (
-    <aside className="w-36 shrink-0 border-r bg-gray-50 flex flex-col p-3 gap-0.5 overflow-y-auto sticky top-0 h-[calc(100vh-3.5rem)]">
+    <aside className="w-36 shrink-0 border-r bg-gray-50 flex flex-col p-3 gap-0.5 overflow-y-auto">
       {path.map((title, i) => (
         <div key={i}>
           <div

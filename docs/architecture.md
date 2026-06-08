@@ -33,6 +33,7 @@
 
 [게임 화면]
   ├─ 상단 헤더: 목표 문서명 | 경과 시간 타이머 | 클릭 수 카운터
+  ├─ 좌측 사이드바: 이동 경로 (시작 문서부터 현재 문서까지 순서대로 표시)
   ├─ 문서 영역: R2 fetch → namumark-clone-core 렌더링
   ├─ 링크 클릭 → href 형식 판별 → redirects 확인 → R2 fetch → 이동
   ├─ 외부 링크: 클릭 차단
@@ -82,6 +83,7 @@
 
 - 타이머: `Date.now()` 스냅샷 방식 (`elapsedMs = Date.now() - startTime`) — 백그라운드 탭에서 `setInterval`이 throttle되어도 실제 경과 시간을 정확하게 추적. 누적 increment 방식이면 배경 탭에서 시간이 느리게 가는 문제 발생
 - 100ms 인터벌로 UI 갱신 — 타이머 표시에 충분한 주기
+- `startGame`/`recordVisit`/`stopGame` 모두 `useCallback(fn, [])` — 내부에서 ref와 setState만 사용하므로 외부 deps 없이 안정적
 
 ### useMainPage
 
@@ -98,7 +100,6 @@
 
 - namumark 내부 링크 href 형식: `/w/<url-encoded-title>` — 이 형식으로 내부/외부 구분. 카테고리 링크(`/w/category:`)는 게임에서 차단
 - 중복 클릭 방지: `isNavigatingRef`(ref) 사용 — 상태 대신 ref를 쓰면 재렌더 없이 동기적으로 잠금/해제 가능
-- `startGame` ref 패턴: `useGame`의 `startGame`이 `useCallback` 없이 선언되어 렌더마다 재생성됨 → `startGameRef.current = startGame`으로 최신 버전 추적하면서 `useEffect` deps 오류 방지
 - `location.state`를 `useState(() => ...)` 초기값으로 캡처 — 이후 리렌더에서도 gameStart/gameEnd가 안정적인 문자열로 유지됨
 
 ---
@@ -117,6 +118,7 @@ src/
   components/
     ArticleViewer.tsx     ← namumark 렌더링 ✅
     GameHeader.tsx        ← 타이머(MM:SS.s), 클릭 수, 목표 문서명 ✅
+    PathSidebar.tsx       ← 이동 경로 사이드바 (현재 문서 하이라이트) ✅
     Leaderboard.tsx       ← (예정)
   hooks/
     useGame.ts            ← 게임 상태 (elapsedMs, clickCount, path) ✅
