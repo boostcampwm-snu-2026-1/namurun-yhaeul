@@ -99,6 +99,9 @@
 ### GamePage
 
 - namumark 내부 링크 href 형식: `/w/<url-encoded-title>` — 이 형식으로 내부/외부 구분. 카테고리 링크(`/w/category:`)는 게임에서 차단
+- `#anchor` 링크(목차 `#s-1.1`, 주석 `#fn-1` 등)는 `preventDefault` 없이 브라우저 기본 스크롤에 위임 — 게임 이동과 무관하므로 인터셉트하지 않음
+- 콘텐츠 영역은 `overflow-y-auto` div로 독립 스크롤 (window 스크롤 아님) — 헤더·사이드바 고정을 위해 `h-screen + overflow-hidden` 레이아웃 사용
+- 문서 이동 성공 시 `contentRef.scrollTop = 0`으로 스크롤 초기화 — 이전 문서의 스크롤 위치가 유지되지 않도록
 - 중복 클릭 방지: `isNavigatingRef`(ref) 사용 — 상태 대신 ref를 쓰면 재렌더 없이 동기적으로 잠금/해제 가능
 - `location.state`를 `useState(() => ...)` 초기값으로 캡처 — 이후 리렌더에서도 gameStart/gameEnd가 안정적인 문자열로 유지됨
 
