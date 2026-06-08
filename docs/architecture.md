@@ -4,11 +4,11 @@
 
 ```
 사용자 링크 클릭
+  → namumark 렌더링 결과의 href 형식으로 내부/외부 링크 구분
+    (내부: /w/<title>, 외부: http:// 또는 opennamu_link_out 클래스)
   → Supabase redirects 테이블 확인 (NASDAQ → 나스닥 등 리다이렉트 처리)
   → 프론트엔드가 R2에서 "articles/{title}.json" fetch (CDN 캐시)
   → namumark-clone-core로 HTML 렌더링
-  → Supabase articles.links[] 배열로 유효 내부 링크인지 검증
-    (links[]는 모든 일반 문서 기준 — 토막글 포함. 시작/도착 후보는 byte_size + 링크 수로 쿼리 시 필터)
   → 목표 문서 도달 시 game_records에 기록
 ```
 
@@ -34,14 +34,14 @@
 [게임 화면]
   ├─ 상단 헤더: 목표 문서명 | 경과 시간 타이머 | 클릭 수 카운터
   ├─ 문서 영역: R2 fetch → namumark-clone-core 렌더링
-  ├─ 링크 클릭 → redirects 확인 → articles.links[] 검증 → 이동
-  ├─ 외부 링크: 비활성화 처리
-  ├─ R2 fetch 실패 시: "문서를 불러올 수 없습니다" 안내 + 건너뛰기 버튼
+  ├─ 링크 클릭 → href 형식 판별 → redirects 확인 → R2 fetch → 이동
+  ├─ 외부 링크: 클릭 차단
+  ├─ R2 fetch 실패 시: 우측 하단 토스트 "이동이 불가능합니다", 현재 문서 유지
   │    ArticleNetworkError  — 연결 실패 (오프라인, CORS 등)
   │    ArticleNotFoundError — 404, R2에 파일 없음
   │    ArticleFetchError    — 기타 HTTP 오류
   │    ArticleParseError    — 200 응답이지만 JSON 파싱 실패
-  └─ 막힌 경우: "문서 건너뛰기" 버튼
+  └─ 막힌 경우: "게임 포기" 버튼 → navigate('/')
 
       ↓ (목표 문서 도달)
 
@@ -60,7 +60,7 @@
 
 - 나무위키 특성상 바이트가 큰 인기 문서끼리는 6단계 내 연결 가능 (Six Degrees 효과)
 - BFS 사전 검증 시 비용이 크고 게임 시작이 느려짐
-- 대신 막히는 경우 **"문서 건너뛰기" 버튼**으로 UX에서 대응
+- 대신 막히는 경우 **"게임 포기" 버튼**으로 UX에서 대응
 
 ---
 
@@ -90,6 +90,17 @@
 - top-100 마운트 시 미리 fetch — 랜덤 시작 버튼 클릭 즉시 이동 가능 (클릭 시점 fetch면 딜레이 발생)
 - daily_prompts 오류 → graceful degradation: null 처리로 "오늘의 문제 없음" 상태 표시. articles 오류만 error state 설정 (랜덤 모드 자체가 불가한 경우)
 
+### useArticle
+
+- 실패 시 error 상태 설정 + rethrow — 호출부(GamePage)가 catch로 토스트 표시, 동시에 error 상태로 초기 로드 실패 감지 가능
+
+### GamePage
+
+- namumark 내부 링크 href 형식: `/w/<url-encoded-title>` — 이 형식으로 내부/외부 구분. 카테고리 링크(`/w/category:`)는 게임에서 차단
+- 중복 클릭 방지: `isNavigatingRef`(ref) 사용 — 상태 대신 ref를 쓰면 재렌더 없이 동기적으로 잠금/해제 가능
+- `startGame` ref 패턴: `useGame`의 `startGame`이 `useCallback` 없이 선언되어 렌더마다 재생성됨 → `startGameRef.current = startGame`으로 최신 버전 추적하면서 `useEffect` deps 오류 방지
+- `location.state`를 `useState(() => ...)` 초기값으로 캡처 — 이후 리렌더에서도 gameStart/gameEnd가 안정적인 문자열로 유지됨
+
 ---
 
 ## 컴포넌트 구조
@@ -100,17 +111,17 @@
 src/
   pages/
     MainPage.tsx          ← 오늘의 문제, 랜덤 시작 ✅
-    GamePage.tsx          ← (예정) 게임 화면
+    GamePage.tsx          ← 게임 화면 (링크 인터셉트, 이동 플로우) ✅
     ResultPage.tsx        ← (예정) 결과 화면
     RenderDemoPage.tsx    ← 개발용 렌더링 테스트 (/render-demo, 배포 무관)
   components/
     ArticleViewer.tsx     ← namumark 렌더링 ✅
-    GameHeader.tsx        ← (예정) 타이머, 클릭 수, 목표 문서
+    GameHeader.tsx        ← 타이머(MM:SS.s), 클릭 수, 목표 문서명 ✅
     Leaderboard.tsx       ← (예정)
   hooks/
     useGame.ts            ← 게임 상태 (elapsedMs, clickCount, path) ✅
     useMainPage.ts        ← 메인 화면 데이터 (일일 문제 조회, 랜덤 문서 선택) ✅
-    useArticle.ts         ← (예정) R2 fetch + namumark 렌더링
+    useArticle.ts         ← R2 fetch + 로딩/에러 상태 관리 ✅
     useRedirect.ts        ← Supabase redirects 조회 ✅
   lib/
     supabase.ts           ← Supabase 클라이언트 싱글톤 ✅
