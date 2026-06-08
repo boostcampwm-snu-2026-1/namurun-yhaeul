@@ -87,7 +87,7 @@ src/
     GameHeader.tsx        ← (예정) 타이머, 클릭 수, 목표 문서
     Leaderboard.tsx       ← (예정)
   hooks/
-    useGame.ts            ← (예정) 게임 상태 (클릭 수, 타이머, 경로)
+    useGame.ts            ← 게임 상태 (elapsedMs, clickCount, path) ✅
     useArticle.ts         ← (예정) R2 fetch + namumark 렌더링
     useRedirect.ts        ← Supabase redirects 조회 ✅
   lib/

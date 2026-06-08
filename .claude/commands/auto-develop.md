@@ -48,6 +48,8 @@ On completion: PR is open and targeting `dev`.
 
 ## Final output
 
+After Phase 4 completes, output the following debrief in Korean. Write each section only if there is meaningful content — omit sections that are empty or trivial.
+
 ```
 ✓ auto-develop 완료
 
@@ -57,6 +59,28 @@ PR:     <URL>
 
 커밋 이력:
 <git log --oneline dev..HEAD 출력>
+
+---
+
+## 구현 요약
+(신규/수정 파일 목록, 핵심 설계 결정 1–3줄)
+
+## 테스트
+(작성한 테스트 케이스 목록 + 결과. 테스트 환경 없으면 생략)
+
+## 중간 이슈 & 해결
+(구현 중 막혔거나 예상과 달랐던 점, 어떻게 해결했는지.
+ 순탄하게 진행됐으면 이 섹션 생략)
+
+## 꼭 확인할 것
+(보안·성능·breaking change·임시 처리 등 사람이 반드시 알아야 할 것.
+ 없으면 생략)
+
+## 리뷰 포인트
+(PR에서 집중해서 볼 파일/로직. 단순 chore면 생략)
+
+## 다음 이슈 제안
+(현재 열린 이슈 중 자연스러운 다음 작업 1개. gh issue list로 확인)
 ```
 
 ---
