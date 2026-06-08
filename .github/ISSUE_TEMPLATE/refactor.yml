@@ -1,0 +1,56 @@
+name: "refactor — 코드 정리"
+description: 동작 변경 없이 코드 구조를 개선합니다
+title: "[refactor] "
+labels: ["refactor"]
+body:
+  - type: textarea
+    id: current
+    attributes:
+      label: 현재 상태
+      description: 무엇이 문제인가? (복잡성, 중복, 구조적 문제 등)
+      placeholder: "예: RenderDemoPage가 Supabase를 직접 쿼리하고 있어 훅 분리 원칙과 불일치"
+    validations:
+      required: true
+
+  - type: textarea
+    id: target
+    attributes:
+      label: 목표 상태
+      description: 리팩토링 후 어떤 구조여야 하는가?
+      placeholder: "예: useArticleSearch 훅으로 분리, RenderDemoPage는 훅만 사용"
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: 범위
+      description: 건드릴 파일 / 건드리지 않을 파일
+      placeholder: |
+        변경: src/pages/RenderDemoPage.tsx
+        신규: src/hooks/useArticleSearch.ts
+        유지: src/lib/supabase.ts, src/lib/r2.ts
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 완료 기준
+      placeholder: |
+        - [ ] 기존 동작 그대로 유지
+        - [ ] lint/build 통과
+        - [ ] 훅 분리 원칙 준수
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 탐색 시작점
+      description: AI가 바로 읽어야 할 파일/컴포넌트
+      placeholder: |
+        - 참조: src/pages/RenderDemoPage.tsx, docs/architecture.md
+        - 신규 예상: src/hooks/useArticleSearch.ts
+    validations:
+      required: true

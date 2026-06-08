@@ -1,0 +1,48 @@
+name: "test — 테스트 추가 / 수정"
+description: 테스트를 추가하거나 기존 테스트를 수정합니다
+title: "[test] "
+labels: ["test"]
+body:
+  - type: textarea
+    id: target
+    attributes:
+      label: 테스트 대상
+      description: 어떤 함수/컴포넌트/훅을 테스트하는가?
+      placeholder: "예: src/lib/r2.ts — fetchArticle 에러 케이스 (404, 네트워크 오류, 파싱 실패)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: cases
+    attributes:
+      label: 테스트 케이스
+      description: 어떤 케이스를 커버하는가?
+      placeholder: |
+        - [ ] 정상 응답 → Article 반환
+        - [ ] 404 → ArticleNotFoundError
+        - [ ] 네트워크 실패 → ArticleNetworkError
+        - [ ] JSON 파싱 실패 → ArticleParseError
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: 파일 범위
+      placeholder: |
+        신규: src/lib/r2.test.ts
+        참조: src/lib/r2.ts
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 탐색 시작점
+      description: AI가 바로 읽어야 할 파일. mock 전략이나 테스트 환경 힌트도 함께 작성
+      placeholder: |
+        - 참조: src/lib/r2.ts (테스트 대상)
+        - 참고: vite.config.ts (테스트 환경 설정)
+        - mock 전략: fetch는 vi.stubGlobal로 mock
+    validations:
+      required: true

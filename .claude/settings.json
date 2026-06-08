@@ -3,15 +3,23 @@
     "allow": [
       "Bash(git add .)",
       "Bash(git add -A)",
-      "Bash(git status)",
+      "Bash(git add *)",
+      "Bash(git status*)",
       "Bash(git diff*)",
       "Bash(git log*)",
+      "Bash(git checkout*)",
+      "Bash(git commit*)",
+      "Bash(git push*)",
+      "Bash(git branch*)",
+      "Bash(git pull*)",
       "Bash(gh issue list*)",
       "Bash(gh issue view*)",
       "Bash(gh issue comment*)",
-      "Bash(git push*)",
       "Bash(gh pr create*)",
-      "Bash(gh pr view*)"
+      "Bash(gh pr view*)",
+      "Bash(gh pr list*)",
+      "Bash(npm run lint*)",
+      "Bash(npm run build*)"
     ]
   }
 }
