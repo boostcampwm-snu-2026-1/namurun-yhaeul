@@ -1,0 +1,46 @@
+name: "chore — 빌드 / 설정 / 환경"
+description: 빌드, 패키지, CI, 환경 설정을 변경합니다
+title: "[chore] "
+labels: ["chore"]
+body:
+  - type: textarea
+    id: background
+    attributes:
+      label: 배경
+      description: 왜 이 변경이 필요한가?
+      placeholder: "예: ESLint 규칙에 import/order가 없어서 import 순서가 제각각"
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: 변경 범위
+      description: 어떤 설정 파일 / 스크립트를 수정하는가?
+      placeholder: |
+        - eslint.config.js
+        - package.json (devDependencies)
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 완료 기준
+      placeholder: |
+        - [ ] npm run lint 통과
+        - [ ] npm run build 통과
+        - [ ] 런타임 동작 변경 없음
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 탐색 시작점
+      description: AI가 바로 읽어야 할 설정 파일/문서
+      placeholder: |
+        - 참조: eslint.config.js, package.json
+        - 관련 문서: https://eslint.org/docs/rules/import-order
+    validations:
+      required: true
