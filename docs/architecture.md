@@ -4,11 +4,11 @@
 
 ```
 사용자 링크 클릭
+  → namumark 렌더링 결과의 href 형식으로 내부/외부 링크 구분
+    (내부: /w/<title>, 외부: http:// 또는 opennamu_link_out 클래스)
   → Supabase redirects 테이블 확인 (NASDAQ → 나스닥 등 리다이렉트 처리)
   → 프론트엔드가 R2에서 "articles/{title}.json" fetch (CDN 캐시)
   → namumark-clone-core로 HTML 렌더링
-  → Supabase articles.links[] 배열로 유효 내부 링크인지 검증
-    (links[]는 모든 일반 문서 기준 — 토막글 포함. 시작/도착 후보는 byte_size + 링크 수로 쿼리 시 필터)
   → 목표 문서 도달 시 game_records에 기록
 ```
 
@@ -33,15 +33,16 @@
 
 [게임 화면]
   ├─ 상단 헤더: 목표 문서명 | 경과 시간 타이머 | 클릭 수 카운터
+  ├─ 좌측 사이드바: 이동 경로 (시작 문서부터 현재 문서까지 순서대로 표시)
   ├─ 문서 영역: R2 fetch → namumark-clone-core 렌더링
-  ├─ 링크 클릭 → redirects 확인 → articles.links[] 검증 → 이동
-  ├─ 외부 링크: 비활성화 처리
-  ├─ R2 fetch 실패 시: "문서를 불러올 수 없습니다" 안내 + 건너뛰기 버튼
+  ├─ 링크 클릭 → href 형식 판별 → redirects 확인 → R2 fetch → 이동
+  ├─ 외부 링크: 클릭 차단
+  ├─ R2 fetch 실패 시: 우측 하단 토스트 "이동이 불가능합니다", 현재 문서 유지
   │    ArticleNetworkError  — 연결 실패 (오프라인, CORS 등)
   │    ArticleNotFoundError — 404, R2에 파일 없음
   │    ArticleFetchError    — 기타 HTTP 오류
   │    ArticleParseError    — 200 응답이지만 JSON 파싱 실패
-  └─ 막힌 경우: "문서 건너뛰기" 버튼
+  └─ 막힌 경우: "게임 포기" 버튼 → navigate('/')
 
       ↓ (목표 문서 도달)
 
@@ -60,7 +61,7 @@
 
 - 나무위키 특성상 바이트가 큰 인기 문서끼리는 6단계 내 연결 가능 (Six Degrees 효과)
 - BFS 사전 검증 시 비용이 크고 게임 시작이 느려짐
-- 대신 막히는 경우 **"문서 건너뛰기" 버튼**으로 UX에서 대응
+- 대신 막히는 경우 **"게임 포기" 버튼**으로 UX에서 대응
 
 ---
 
@@ -82,6 +83,7 @@
 
 - 타이머: `Date.now()` 스냅샷 방식 (`elapsedMs = Date.now() - startTime`) — 백그라운드 탭에서 `setInterval`이 throttle되어도 실제 경과 시간을 정확하게 추적. 누적 increment 방식이면 배경 탭에서 시간이 느리게 가는 문제 발생
 - 100ms 인터벌로 UI 갱신 — 타이머 표시에 충분한 주기
+- `startGame`/`recordVisit`/`stopGame` 모두 `useCallback(fn, [])` — 내부에서 ref와 setState만 사용하므로 외부 deps 없이 안정적
 
 ### useMainPage
 
@@ -89,6 +91,19 @@
 - 랜덤 문서 선택: DB `ORDER BY RANDOM()` 대신 `byte_size DESC LIMIT 100` fetch 후 클라이언트 Fisher-Yates shuffle — `ORDER BY RANDOM()`은 인덱스를 타지 않아 571K 건 테이블에서 느림
 - top-100 마운트 시 미리 fetch — 랜덤 시작 버튼 클릭 즉시 이동 가능 (클릭 시점 fetch면 딜레이 발생)
 - daily_prompts 오류 → graceful degradation: null 처리로 "오늘의 문제 없음" 상태 표시. articles 오류만 error state 설정 (랜덤 모드 자체가 불가한 경우)
+
+### useArticle
+
+- 실패 시 error 상태 설정 + rethrow — 호출부(GamePage)가 catch로 토스트 표시, 동시에 error 상태로 초기 로드 실패 감지 가능
+
+### GamePage
+
+- namumark 내부 링크 href 형식: `/w/<url-encoded-title>` — 이 형식으로 내부/외부 구분. 카테고리 링크(`/w/category:`)는 게임에서 차단
+- `#anchor` 링크(목차 `#s-1.1`, 주석 `#fn-1` 등)는 `preventDefault` 없이 브라우저 기본 스크롤에 위임 — 게임 이동과 무관하므로 인터셉트하지 않음
+- 콘텐츠 영역은 `overflow-y-auto` div로 독립 스크롤 (window 스크롤 아님) — 헤더·사이드바 고정을 위해 `h-screen + overflow-hidden` 레이아웃 사용
+- 문서 이동 성공 시 `contentRef.scrollTop = 0`으로 스크롤 초기화 — 이전 문서의 스크롤 위치가 유지되지 않도록
+- 중복 클릭 방지: `isNavigatingRef`(ref) 사용 — 상태 대신 ref를 쓰면 재렌더 없이 동기적으로 잠금/해제 가능
+- `location.state`를 `useState(() => ...)` 초기값으로 캡처 — 이후 리렌더에서도 gameStart/gameEnd가 안정적인 문자열로 유지됨
 
 ---
 
@@ -100,17 +115,18 @@
 src/
   pages/
     MainPage.tsx          ← 오늘의 문제, 랜덤 시작 ✅
-    GamePage.tsx          ← (예정) 게임 화면
+    GamePage.tsx          ← 게임 화면 (링크 인터셉트, 이동 플로우) ✅
     ResultPage.tsx        ← (예정) 결과 화면
     RenderDemoPage.tsx    ← 개발용 렌더링 테스트 (/render-demo, 배포 무관)
   components/
     ArticleViewer.tsx     ← namumark 렌더링 ✅
-    GameHeader.tsx        ← (예정) 타이머, 클릭 수, 목표 문서
+    GameHeader.tsx        ← 타이머(MM:SS.s), 클릭 수, 목표 문서명 ✅
+    PathSidebar.tsx       ← 이동 경로 사이드바 (현재 문서 하이라이트) ✅
     Leaderboard.tsx       ← (예정)
   hooks/
     useGame.ts            ← 게임 상태 (elapsedMs, clickCount, path) ✅
     useMainPage.ts        ← 메인 화면 데이터 (일일 문제 조회, 랜덤 문서 선택) ✅
-    useArticle.ts         ← (예정) R2 fetch + namumark 렌더링
+    useArticle.ts         ← R2 fetch + 로딩/에러 상태 관리 ✅
     useRedirect.ts        ← Supabase redirects 조회 ✅
   lib/
     supabase.ts           ← Supabase 클라이언트 싱글톤 ✅
