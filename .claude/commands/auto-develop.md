@@ -20,6 +20,35 @@ Each phase delegates to its dedicated skill file. The issue number flows through
 
 ---
 
+## Pre-flight (runs after preconditions pass, before pipeline starts)
+
+### 1. Pull latest dev
+
+Always run `git pull`. Stop and report the error if it fails.
+
+### 2. Open PR check
+
+Run `gh pr list --state open --json number,title,headRefName` to list open PRs.
+
+If no open PRs exist, proceed to the pipeline immediately.
+
+If open PRs exist, extract the file list mentioned in the current issue's **구현 범위** and **탐색 시작점** fields.
+For each open PR, run `gh pr diff <number> --name-only` and compare against that file list.
+
+**If any open PR touches overlapping files — stop:**
+```
+⚠️  PR #N "제목"이 <겹치는 파일>을 수정합니다.
+해당 PR을 먼저 머지한 뒤 다시 실행하세요.
+```
+
+**If no overlap — warn and continue:**
+```
+ℹ️  열린 PR N개가 있습니다: #A "...", #B "..."
+현재 이슈와 파일 겹침 없음 — 파이프라인을 계속 진행합니다.
+```
+
+---
+
 ## Pipeline
 
 Execute each phase in order. If a phase posts a stop comment to the issue and halts, stop the entire pipeline immediately — do not proceed to the next phase.
