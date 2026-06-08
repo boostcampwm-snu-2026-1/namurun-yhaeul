@@ -31,7 +31,7 @@ function GamePage() {
   const [gameStart] = useState<string>(() => locationState?.start ?? '')
   const [gameEnd] = useState<string>(() => locationState?.end ?? '')
 
-  const { elapsedMs, clickCount, path, startGame, recordVisit } = useGame()
+  const { elapsedMs, clickCount, path, startGame, recordVisit, stopGame } = useGame()
   const { article, isLoading, error: articleError, loadArticle } = useArticle()
   const { resolveRedirect } = useRedirect()
 
@@ -92,13 +92,26 @@ function GamePage() {
         await loadArticle(resolved)
         recordVisit(resolved)
         if (contentRef.current) contentRef.current.scrollTop = 0
+
+        if (resolved === gameEnd) {
+          const finalElapsed = stopGame()
+          navigate('/result', {
+            state: {
+              startArticle: gameStart,
+              endArticle: gameEnd,
+              path: [...path, resolved],
+              elapsedMs: finalElapsed,
+              clickCount: clickCount + 1,
+            },
+          })
+        }
       } catch {
         showToast('이동이 불가능합니다')
       } finally {
         isNavigatingRef.current = false
       }
     },
-    [resolveRedirect, loadArticle, recordVisit, showToast],
+    [resolveRedirect, loadArticle, recordVisit, showToast, gameEnd, gameStart, path, clickCount, stopGame, navigate],
   )
 
   if (!gameStart || !gameEnd) {

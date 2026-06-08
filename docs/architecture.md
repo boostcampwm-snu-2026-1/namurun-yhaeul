@@ -47,9 +47,10 @@
       ↓ (목표 문서 도달)
 
 [결과 화면]
-  ├─ 소요 시간, 총 클릭 수, 거쳐온 경로
-  ├─ 닉네임 입력 → game_records INSERT
-  └─ 다시 하기 / 오늘의 문제 도전
+  ├─ 소요 시간(MM:SS.s), 총 클릭 수, 거쳐온 경로 표시
+  ├─ 마운트 시 game_records INSERT (user_name=null)
+  ├─ 닉네임 입력 → game_records UPDATE → #10 예정
+  └─ 다시 하기 버튼 → navigate('/')
 
 [리더보드]
   └─ 동일 start_article + end_article 기준 최소 클릭 수 → 동점 시 시간 순
@@ -96,6 +97,18 @@
 
 - 실패 시 error 상태 설정 + rethrow — 호출부(GamePage)가 catch로 토스트 표시, 동시에 error 상태로 초기 로드 실패 감지 가능
 
+### useGameRecord
+
+- `hasInsertedRef`로 마운트 시 단 1회 INSERT 보장 — `result`가 `useCallback(fn, [])` deps에 없으면 ESLint 경고이므로 deps에 포함하되 ref로 중복 실행 차단
+- 저장 실패 시 `saveError` 반환 — UI에서 "기록 저장에 실패했습니다" 안내. 저장 실패가 게임 흐름을 막지 않도록 예외를 상위로 던지지 않음
+- `user_name: null`로 INSERT — 닉네임 입력/업데이트는 후속 이슈(#10) 범위
+
+### ResultPage
+
+- `location.state`를 `useState(() => ...)` 초기값으로 캡처 — GamePage→ResultPage navigate 시 state 전달, 직접 접근 시 null → `useEffect`에서 `navigate('/', { replace: true })`
+- `stopGame()`이 finalElapsed(number)를 반환 — navigate 시점에 setState가 아직 반영되지 않으므로 ref에서 직접 계산한 값을 전달받아 정확한 종료 시각 보장
+- path는 GamePage의 `handleClick`에서 `[...path, resolved]`로 직접 조합 후 전달 — `recordVisit` setState가 비동기이므로 클로저의 path에 resolved를 직접 추가
+
 ### GamePage
 
 - namumark 내부 링크 href 형식: `/w/<url-encoded-title>` — 이 형식으로 내부/외부 구분. 카테고리 링크(`/w/category:`)는 게임에서 차단
@@ -116,7 +129,7 @@ src/
   pages/
     MainPage.tsx          ← 오늘의 문제, 랜덤 시작 ✅
     GamePage.tsx          ← 게임 화면 (링크 인터셉트, 이동 플로우) ✅
-    ResultPage.tsx        ← (예정) 결과 화면
+    ResultPage.tsx        ← 결과 화면 (소요 시간/클릭 수/경로 표시, game_records INSERT) ✅
     RenderDemoPage.tsx    ← 개발용 렌더링 테스트 (/render-demo, 배포 무관)
   components/
     ArticleViewer.tsx     ← namumark 렌더링 ✅
@@ -128,6 +141,7 @@ src/
     useMainPage.ts        ← 메인 화면 데이터 (일일 문제 조회, 랜덤 문서 선택) ✅
     useArticle.ts         ← R2 fetch + 로딩/에러 상태 관리 ✅
     useRedirect.ts        ← Supabase redirects 조회 ✅
+    useGameRecord.ts      ← game_records INSERT (마운트 시 1회, hasInsertedRef로 중복 방지) ✅
   lib/
     supabase.ts           ← Supabase 클라이언트 싱글톤 ✅
     r2.ts                 ← R2 fetch 유틸 ✅

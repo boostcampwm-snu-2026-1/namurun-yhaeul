@@ -54,16 +54,18 @@ export function useGame() {
     }))
   }, [])
 
-  const stopGame = useCallback(() => {
+  const stopGame = useCallback((): number => {
     if (intervalRef.current !== null) {
       clearInterval(intervalRef.current)
       intervalRef.current = null
     }
+    const finalElapsed = startTimeRef.current !== null ? Date.now() - startTimeRef.current : 0
     setState((prev) => ({
       ...prev,
-      elapsedMs: startTimeRef.current !== null ? Date.now() - startTimeRef.current : prev.elapsedMs,
+      elapsedMs: finalElapsed,
       isRunning: false,
     }))
+    return finalElapsed
   }, [])
 
   return { ...state, startGame, recordVisit, stopGame }

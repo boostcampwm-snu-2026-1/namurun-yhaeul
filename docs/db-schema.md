@@ -43,7 +43,7 @@ CREATE TABLE game_records (
   start_article    TEXT,
   end_article      TEXT,
   click_count      INTEGER,
-  elapsed_seconds  INTEGER,
+  elapsed_ms       INTEGER,
   path             TEXT[],   -- 거쳐온 문서 순서 ["시작", "중간1", ..., "도착"]
   created_at       TIMESTAMP DEFAULT NOW()
 );
