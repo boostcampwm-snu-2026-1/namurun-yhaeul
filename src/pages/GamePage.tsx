@@ -63,11 +63,25 @@ function GamePage() {
       const anchor = (e.target as HTMLElement).closest('a')
       if (!anchor) return
 
-      e.preventDefault()
-
       const href = anchor.getAttribute('href') ?? ''
-      // namumark 내부 링크는 /w/<encoded-title> 형식, 카테고리는 게임에서 차단
-      if (!href.startsWith('/w/') || href.startsWith('/w/category:')) return
+
+      // 섹션 앵커(#s-1.1, #fn-1 등): 브라우저 기본 스크롤에 맡김
+      if (href.startsWith('#')) return
+
+      // 외부 링크 차단
+      if (!href.startsWith('/w/')) {
+        e.preventDefault()
+        return
+      }
+
+      // 카테고리 링크 차단
+      if (href.startsWith('/w/category:')) {
+        e.preventDefault()
+        return
+      }
+
+      // 내부 wiki 문서 링크: 게임 이동 처리
+      e.preventDefault()
 
       if (isNavigatingRef.current) return
       isNavigatingRef.current = true
