@@ -19,7 +19,10 @@
       "Bash(gh pr view*)",
       "Bash(gh pr list*)",
       "Bash(npm run lint*)",
-      "Bash(npm run build*)"
+      "Bash(npm run build*)",
+      "Bash(gh issue edit*)",
+      "Bash(gh label*)",
+      "Bash(npx tsc*)"
     ]
   }
 }

@@ -71,6 +71,10 @@ Check if `package.json` has a `test:run` script:
   - `npm run lint` + `npm run build` 실행
   - 실패 시 수정 후 1회 재시도. 재시도 후에도 실패하면 stop comment 후 중단
   - 커밋 메시지 body에 한 줄 추가: `테스트 환경 없음 — #23 해결 후 테스트 추가 필요`
+- Run `npm run lint`
+- Run `npm run build`
+- If either fails: fix the errors and re-run once
+- If still failing after one retry: post stop comment to issue and stop entire pipeline
 
 **3c. Commit**
 Derive commit type from the issue label (`feat`/`fix`/`refactor`/`chore`/`test`).  

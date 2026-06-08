@@ -89,7 +89,7 @@ src/
   hooks/
     useGame.ts            ← (예정) 게임 상태 (클릭 수, 타이머, 경로)
     useArticle.ts         ← (예정) R2 fetch + namumark 렌더링
-    useRedirect.ts        ← (예정) Supabase redirects 조회
+    useRedirect.ts        ← Supabase redirects 조회 ✅
   lib/
     supabase.ts           ← Supabase 클라이언트 싱글톤 ✅
     r2.ts                 ← R2 fetch 유틸 ✅
