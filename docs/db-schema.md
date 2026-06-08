@@ -13,12 +13,13 @@ CREATE TABLE articles (
 );
 ```
 
-랜덤 시작/도착점 후보 선택 쿼리 예시:
+랜덤 시작/도착점 후보 선택: `ORDER BY RANDOM()`은 인덱스를 타지 않아 571K 건에서 느림. 실제 구현은 `byte_size DESC LIMIT 100`으로 상위 문서를 fetch한 뒤 클라이언트에서 Fisher-Yates shuffle로 2개 선택.
+
 ```sql
 SELECT title FROM articles
-WHERE byte_size >= 3000        -- 한국어 약 1,000자 이상
-  AND array_length(links, 1) >= 5
-ORDER BY RANDOM() LIMIT 1;
+ORDER BY byte_size DESC
+LIMIT 100;
+-- 이후 클라이언트 shuffle → 앞 2개 사용
 ```
 
 ### redirects — 리다이렉트 매핑

@@ -71,6 +71,27 @@
 - 표, 이미지, 복잡한 매크로 깨짐 허용
 - `[[문서명]]` / `[[실제명|표시텍스트]]` 링크 렌더링이 최우선
 
+## 훅 설계 결정
+
+### useRedirect
+
+- `.maybeSingle()` 사용 — `.single()`은 결과 없을 때 PostgREST 오류를 반환하지만, 리다이렉트 미등록이 정상 케이스이므로 null 반환으로 처리
+- 오류·미발견 시 원본 title 그대로 반환 — 호출부가 별도 오류 처리 없이도 안전하게 동작
+
+### useGame
+
+- 타이머: `Date.now()` 스냅샷 방식 (`elapsedMs = Date.now() - startTime`) — 백그라운드 탭에서 `setInterval`이 throttle되어도 실제 경과 시간을 정확하게 추적. 누적 increment 방식이면 배경 탭에서 시간이 느리게 가는 문제 발생
+- 100ms 인터벌로 UI 갱신 — 타이머 표시에 충분한 주기
+
+### useMainPage
+
+- KST 날짜: 클라이언트에서 `Date.now() + 9h` offset으로 ISO 문자열 생성. 서버 개입 없음
+- 랜덤 문서 선택: DB `ORDER BY RANDOM()` 대신 `byte_size DESC LIMIT 100` fetch 후 클라이언트 Fisher-Yates shuffle — `ORDER BY RANDOM()`은 인덱스를 타지 않아 571K 건 테이블에서 느림
+- top-100 마운트 시 미리 fetch — 랜덤 시작 버튼 클릭 즉시 이동 가능 (클릭 시점 fetch면 딜레이 발생)
+- daily_prompts 오류 → graceful degradation: null 처리로 "오늘의 문제 없음" 상태 표시. articles 오류만 error state 설정 (랜덤 모드 자체가 불가한 경우)
+
+---
+
 ## 컴포넌트 구조
 
 구현 완료 항목과 예정 항목을 함께 표기.
