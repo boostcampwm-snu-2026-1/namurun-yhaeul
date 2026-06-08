@@ -35,6 +35,7 @@ PR 흐름: `feature/*` → `dev` → (배포 시) `main`
 npm run dev      # 개발 서버 (http://localhost:5173)
 npm run build    # 프로덕션 빌드
 npm run lint     # ESLint
+npm run test:run # 테스트 (vitest)
 ```
 
 환경변수: `.env.example` 참고

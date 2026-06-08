@@ -13,4 +13,7 @@ export default defineConfig({
       crypto: fileURLToPath(new URL('./src/shims/crypto.ts', import.meta.url)),
     },
   },
+  test: {
+    environment: 'jsdom',
+  },
 })
