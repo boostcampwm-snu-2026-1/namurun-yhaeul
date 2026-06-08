@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 
 interface GameState {
   elapsedMs: number
@@ -25,7 +25,7 @@ export function useGame() {
     }
   }, [])
 
-  const startGame = (startArticle: string) => {
+  const startGame = useCallback((startArticle: string) => {
     if (intervalRef.current !== null) clearInterval(intervalRef.current)
 
     const startTime = Date.now()
@@ -44,17 +44,17 @@ export function useGame() {
         elapsedMs: Date.now() - startTime,
       }))
     }, 100)
-  }
+  }, [])
 
-  const recordVisit = (title: string) => {
+  const recordVisit = useCallback((title: string) => {
     setState((prev) => ({
       ...prev,
       path: [...prev.path, title],
       clickCount: prev.clickCount + 1,
     }))
-  }
+  }, [])
 
-  const stopGame = () => {
+  const stopGame = useCallback(() => {
     if (intervalRef.current !== null) {
       clearInterval(intervalRef.current)
       intervalRef.current = null
@@ -64,7 +64,7 @@ export function useGame() {
       elapsedMs: startTimeRef.current !== null ? Date.now() - startTimeRef.current : prev.elapsedMs,
       isRunning: false,
     }))
-  }
+  }, [])
 
   return { ...state, startGame, recordVisit, stopGame }
 }

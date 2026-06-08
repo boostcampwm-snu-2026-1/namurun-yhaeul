@@ -38,15 +38,11 @@ function GamePage() {
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isNavigatingRef = useRef(false)
 
-  // startGame is not memoized in useGame — store latest ref to avoid stale closure
-  const startGameRef = useRef(startGame)
-  startGameRef.current = startGame
-
   useEffect(() => {
     if (!gameStart) return
-    startGameRef.current(gameStart)
+    startGame(gameStart)
     void loadArticle(gameStart)
-  }, [gameStart, loadArticle])
+  }, [gameStart, startGame, loadArticle])
 
   useEffect(() => {
     return () => {
