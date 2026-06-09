@@ -66,6 +66,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="나무위키 덤프 전처리 파이프라인")
     parser.add_argument("parquet_file", help="입력 parquet 파일 경로")
     parser.add_argument("--dry-run", action="store_true", help="업로드 없이 처리 통계만 출력")
+    parser.add_argument("--r2-only", action="store_true", help="R2 업로드만 수행 (Supabase INSERT 생략)")
     args = parser.parse_args()
 
     if not args.dry_run:
@@ -76,10 +77,11 @@ def main() -> None:
             aws_secret_access_key=os.environ["R2_SECRET_KEY"],
         )
         r2_bucket = os.environ["R2_BUCKET"]
-        supa = create_client(
-            os.environ["SUPABASE_URL"],
-            os.environ["SUPABASE_SERVICE_ROLE_KEY"],
-        )
+        if not args.r2_only:
+            supa = create_client(
+                os.environ["SUPABASE_URL"],
+                os.environ["SUPABASE_SERVICE_ROLE_KEY"],
+            )
 
     pf = pq.ParquetFile(args.parquet_file)
 
@@ -131,19 +133,20 @@ def main() -> None:
                 ]
             total_r2_failures += len(failures)
 
-            try:
-                bulk_insert(
-                    supa,
-                    "articles",
-                    [
-                        {"title": a["title"], "links": a["links"], "byte_size": a["byte_size"]}
-                        for a in articles
-                    ],
-                )
-                bulk_insert(supa, "redirects", redirects)
-            except Exception as e:
-                print(f"[Supabase 실패] 배치 {batch_num}: {e}", flush=True)
-                total_supabase_failures += len(articles) + len(redirects)
+            if not args.r2_only:
+                try:
+                    bulk_insert(
+                        supa,
+                        "articles",
+                        [
+                            {"title": a["title"], "links": a["links"], "byte_size": a["byte_size"]}
+                            for a in articles
+                        ],
+                    )
+                    bulk_insert(supa, "redirects", redirects)
+                except Exception as e:
+                    print(f"[Supabase 실패] 배치 {batch_num}: {e}", flush=True)
+                    total_supabase_failures += len(articles) + len(redirects)
 
     avg_links = total_links / total_docs if total_docs else 0.0
     print(f"\n=== {'dry-run ' if args.dry_run else ''}처리 완료 ===", flush=True)
