@@ -37,12 +37,34 @@ function ResultPage() {
   const [result] = useState<ResultState | null>(() =>
     isResultState(location.state) ? location.state : null,
   )
+  const [nickname, setNickname] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!result) navigate('/', { replace: true })
   }, [result, navigate])
 
-  const { saveError } = useGameRecord(result)
+  const { isSaved, saveError, recordId, updateUserName } = useGameRecord(result)
+
+  const handleSubmit = async () => {
+    if (!nickname.trim() || isSubmitting || !isSaved) return
+    setIsSubmitting(true)
+    setSubmitError(null)
+    try {
+      await updateUserName(nickname.trim())
+      navigate('/leaderboard', {
+        state: {
+          startArticle: result!.startArticle,
+          endArticle: result!.endArticle,
+          recordId,
+        },
+      })
+    } catch {
+      setSubmitError('저장에 실패했습니다. 다시 시도해주세요.')
+      setIsSubmitting(false)
+    }
+  }
 
   if (!result) return null
 
@@ -93,12 +115,33 @@ function ResultPage() {
           <p className="text-xs text-red-400 text-center">기록 저장에 실패했습니다.</p>
         )}
 
-        <button
-          onClick={() => navigate('/')}
-          className="w-full py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors"
-        >
-          다시 하기
-        </button>
+        <div className="border-t pt-4 flex flex-col gap-2">
+          <p className="text-sm font-semibold text-gray-700">닉네임을 입력하고 순위를 확인하세요</p>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') void handleSubmit()
+              }}
+              placeholder="닉네임 입력"
+              disabled={isSubmitting}
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+            />
+            <button
+              onClick={() => void handleSubmit()}
+              disabled={!nickname.trim() || isSubmitting || !isSaved}
+              className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              {isSubmitting ? '저장 중...' : '확인'}
+            </button>
+          </div>
+          {submitError && <p className="text-xs text-red-400">{submitError}</p>}
+          {!isSaved && !saveError && (
+            <p className="text-xs text-gray-400">기록 저장 중...</p>
+          )}
+        </div>
       </div>
     </div>
   )
