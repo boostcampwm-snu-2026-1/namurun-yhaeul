@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import gzip
 import json
 import os
 import re
@@ -42,11 +43,13 @@ def parse_redirect_target(text: str) -> str:
 
 def upload_to_r2(r2_client, bucket: str, title: str, text: str) -> str | None:
     try:
+        body = json.dumps({"title": title, "text": text}, ensure_ascii=False).encode("utf-8")
         r2_client.put_object(
             Bucket=bucket,
             Key=f"articles/{title}.json",
-            Body=json.dumps({"title": title, "text": text}, ensure_ascii=False).encode("utf-8"),
+            Body=gzip.compress(body),
             ContentType="application/json; charset=utf-8",
+            ContentEncoding="gzip",
         )
         return None
     except Exception as e:

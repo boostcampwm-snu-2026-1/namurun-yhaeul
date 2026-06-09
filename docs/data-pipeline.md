@@ -106,7 +106,9 @@ pip install -r scripts/requirements.txt
 구현: `scripts/pipeline.py`
 
 `boto3`로 R2 연결, `ThreadPoolExecutor(max_workers=50)`으로 병렬 업로드.  
-저장 형식: `articles/{title}.json` — `{"title": ..., "text": ...}` JSON, UTF-8 인코딩.  
+저장 형식: `articles/{title}.json` — `{"title": ..., "text": ...}` JSON을 **gzip 압축**해서 저장.  
+`ContentEncoding: gzip` 메타데이터를 함께 설정 — 브라우저 Fetch API가 자동으로 압축 해제하므로 프론트엔드 코드 변경 불필요.  
+한국어 텍스트는 gzip으로 70~80% 압축 (288KB → ~60KB), fetch 속도 대폭 개선.  
 업로드 실패 시 해당 title을 로그에 출력하고 계속 진행, 종료 시 총 실패 수 요약 출력.  
 한글 파일명은 boto3가 내부적으로 URL 인코딩 처리.
 
