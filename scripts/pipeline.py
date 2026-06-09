@@ -11,6 +11,7 @@ import boto3
 import pyarrow.parquet as pq
 from dotenv import load_dotenv
 from supabase import Client, create_client
+from tqdm import tqdm
 
 load_dotenv(Path(__file__).parent / ".env")
 
@@ -84,19 +85,20 @@ def main() -> None:
             )
 
     pf = pq.ParquetFile(args.parquet_file)
+    total_rows = pf.metadata.num_rows
 
     total_docs = 0
     total_redirects = 0
     total_links = 0
     total_r2_failures = 0
     total_supabase_failures = 0
-    rows_processed = 0
+
+    progress = tqdm(total=total_rows, unit="행", desc="처리 중")
 
     for batch_num, batch in enumerate(
         pf.iter_batches(batch_size=BATCH_SIZE, columns=["title", "text"]), start=1
     ):
         df = batch.to_pandas()
-        rows_processed += len(df)
 
         redirect_mask = df["text"].str.startswith("#redirect")
         redirect_df = df[redirect_mask].copy()
@@ -115,12 +117,8 @@ def main() -> None:
         total_docs += len(articles)
         total_links += sum(len(a["links"]) for a in articles)
 
-        if batch_num % 5 == 0:
-            print(
-                f"[{rows_processed:,}행] 문서: {total_docs:,}, 리다이렉트: {total_redirects:,}"
-                + (f", R2 실패: {total_r2_failures:,}" if total_r2_failures else ""),
-                flush=True,
-            )
+        progress.update(len(df))
+        progress.set_postfix(문서=f"{total_docs:,}", R2실패=total_r2_failures, refresh=False)
 
         if not args.dry_run:
             with ThreadPoolExecutor(max_workers=R2_MAX_WORKERS) as executor:
@@ -132,6 +130,7 @@ def main() -> None:
                     if t is not None
                 ]
             total_r2_failures += len(failures)
+            progress.set_postfix(문서=f"{total_docs:,}", R2실패=total_r2_failures, refresh=False)
 
             if not args.r2_only:
                 try:
