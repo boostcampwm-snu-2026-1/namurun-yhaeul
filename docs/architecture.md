@@ -48,12 +48,16 @@
 
 [결과 화면]
   ├─ 소요 시간(MM:SS.s), 총 클릭 수, 거쳐온 경로 표시
-  ├─ 마운트 시 game_records INSERT (user_name=null)
-  ├─ 닉네임 입력 → game_records UPDATE → #10 예정
-  └─ 다시 하기 버튼 → navigate('/')
+  ├─ 마운트 시 game_records INSERT (user_name=null) → recordId 확보
+  ├─ 닉네임 입력 (필수) → game_records UPDATE (user_name)
+  └─ 제출 완료 → navigate('/leaderboard', { state: { startArticle, endArticle, recordId } })
 
-[리더보드]
-  └─ 동일 start_article + end_article 기준 최소 클릭 수 → 동점 시 시간 순
+[리더보드 화면 /leaderboard]
+  ├─ 동일 start_article + end_article 기준 상위 10개
+  ├─ 정렬: click_count ASC → elapsed_ms ASC
+  ├─ 컬럼: 순위, 닉네임, 클릭 수, 소요 시간, 시작 문서, 도착 문서
+  ├─ 현재 게임 행(recordId 일치) 하이라이트
+  └─ 다시 하기 버튼 → navigate('/')
 ```
 
 ## BFS 경로 검증 생략 이유
@@ -99,15 +103,23 @@
 
 ### useGameRecord
 
-- `hasInsertedRef`로 마운트 시 단 1회 INSERT 보장 — `result`가 `useCallback(fn, [])` deps에 없으면 ESLint 경고이므로 deps에 포함하되 ref로 중복 실행 차단
-- 저장 실패 시 `saveError` 반환 — UI에서 "기록 저장에 실패했습니다" 안내. 저장 실패가 게임 흐름을 막지 않도록 예외를 상위로 던지지 않음
-- `user_name: null`로 INSERT — 닉네임 입력/업데이트는 후속 이슈(#10) 범위
+- `hasInsertedRef`로 마운트 시 단 1회 INSERT 보장 — `result`가 deps에 포함하되 ref로 중복 실행 차단
+- INSERT에 `.select('id').single()` 추가 — 생성된 레코드 UUID를 `recordId`로 노출. ResultPage가 닉네임 UPDATE 시 사용
+- `updateUserName(name)` — `game_records WHERE id = recordId` UPDATE. recordId null이면 에러 throw
+- 저장 실패 시 `saveError` 반환 — saveError 발생 시 닉네임 입력 버튼 비활성화 (recordId 없으므로 UPDATE 불가)
+
+### useLeaderboard
+
+- `game_records WHERE start_article=X AND end_article=Y AND user_name IS NOT NULL ORDER BY click_count ASC, elapsed_ms ASC LIMIT 10`
+- startArticle/endArticle이 바뀔 때마다 재쿼리 (useEffect deps)
 
 ### ResultPage
 
 - `location.state`를 `useState(() => ...)` 초기값으로 캡처 — GamePage→ResultPage navigate 시 state 전달, 직접 접근 시 null → `useEffect`에서 `navigate('/', { replace: true })`
 - `stopGame()`이 finalElapsed(number)를 반환 — navigate 시점에 setState가 아직 반영되지 않으므로 ref에서 직접 계산한 값을 전달받아 정확한 종료 시각 보장
 - path는 GamePage의 `handleClick`에서 `[...path, resolved]`로 직접 조합 후 전달 — `recordVisit` setState가 비동기이므로 클로저의 path에 resolved를 직접 추가
+- 닉네임 입력은 필수 — 비어 있거나 isSaved=false(INSERT 미완료)이면 제출 불가
+- 제출 성공 시 `/leaderboard`로 navigate, state에 `{ startArticle, endArticle, recordId }` 전달
 
 ### GamePage
 
@@ -129,19 +141,20 @@ src/
   pages/
     MainPage.tsx          ← 오늘의 문제, 랜덤 시작 ✅
     GamePage.tsx          ← 게임 화면 (링크 인터셉트, 이동 플로우) ✅
-    ResultPage.tsx        ← 결과 화면 (소요 시간/클릭 수/경로 표시, game_records INSERT) ✅
+    ResultPage.tsx        ← 결과 화면 (소요 시간/클릭 수/경로 표시, 닉네임 입력 → /leaderboard) ✅
+    LeaderboardPage.tsx   ← 리더보드 화면 (동일 문제 기준 상위 10개, 현재 행 하이라이트) ✅
     RenderDemoPage.tsx    ← 개발용 렌더링 테스트 (/render-demo, 배포 무관)
   components/
     ArticleViewer.tsx     ← namumark 렌더링 ✅
     GameHeader.tsx        ← 타이머(MM:SS.s), 클릭 수, 목표 문서명 ✅
     PathSidebar.tsx       ← 이동 경로 사이드바 (현재 문서 하이라이트) ✅
-    Leaderboard.tsx       ← (예정)
   hooks/
     useGame.ts            ← 게임 상태 (elapsedMs, clickCount, path) ✅
     useMainPage.ts        ← 메인 화면 데이터 (일일 문제 조회, 랜덤 문서 선택) ✅
     useArticle.ts         ← R2 fetch + 로딩/에러 상태 관리 ✅
     useRedirect.ts        ← Supabase redirects 조회 ✅
-    useGameRecord.ts      ← game_records INSERT (마운트 시 1회, hasInsertedRef로 중복 방지) ✅
+    useGameRecord.ts      ← game_records INSERT + recordId 반환 + updateUserName ✅
+    useLeaderboard.ts     ← game_records 리더보드 쿼리 (상위 10개) ✅
   lib/
     supabase.ts           ← Supabase 클라이언트 싱글톤 ✅
     r2.ts                 ← R2 fetch 유틸 ✅
