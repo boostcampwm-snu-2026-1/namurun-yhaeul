@@ -106,9 +106,26 @@ pip install -r scripts/requirements.txt
 구현: `scripts/pipeline.py`
 
 `boto3`로 R2 연결, `ThreadPoolExecutor(max_workers=50)`으로 병렬 업로드.  
-저장 형식: `articles/{title}.json` — `{"title": ..., "text": ...}` JSON, UTF-8 인코딩.  
-업로드 실패 시 해당 title을 로그에 출력하고 계속 진행, 종료 시 총 실패 수 요약 출력.  
+저장 형식: `articles/{title}.json` — `{"title": ..., "text": ...}` JSON을 **gzip 압축**해서 저장.  
+`ContentEncoding: gzip` 메타데이터를 함께 설정 — 브라우저 Fetch API가 자동으로 압축 해제하므로 프론트엔드 코드 변경 불필요.  
+한국어 텍스트는 gzip으로 70~80% 압축 (288KB → ~60KB), fetch 속도 대폭 개선.  
 한글 파일명은 boto3가 내부적으로 URL 인코딩 처리.
+
+**실패 처리:**  
+업로드 실패 시 지수 백오프(1s/2s)로 최대 3회 재시도. 배치 루프 완료 후 남은 실패 문서를 일괄 재시도(최대 5회). 최종 실패 시 `scripts/failed_uploads.txt`에 제목 목록 저장.
+
+## CLI 플래그
+
+```bash
+python scripts/pipeline.py <parquet_file> [옵션]
+```
+
+| 플래그 | 설명 |
+|--------|------|
+| `--dry-run` | 업로드 없이 처리 통계만 출력 |
+| `--r2-only` | R2 업로드만 수행 (Supabase INSERT 생략) |
+| `--resume` | R2 `list_objects_v2`로 이미 업로드된 문서 건너뜀 |
+| `--gzip-fix DATETIME` | 지정 시각 이전에 업로드된 문서만 재업로드 (gzip 소급 적용용). `LastModified` 기준 필터링이므로 HEAD 요청 없이 효율적. 예: `--gzip-fix 2026-06-09T15:41:00+09:00` |
 
 ## Supabase INSERT
 
