@@ -278,6 +278,11 @@
   color: var(--color-on-surface-variant);
 }
 
+/* 본문 첫 줄 구분선 숨김 (제목 border-bottom과 중복) */
+.article-viewer hr.main_hr {
+  display: none;
+}
+
 /* 카테고리 섹션 숨김 */
 .article-viewer .opennamu_category {
   display: none;
