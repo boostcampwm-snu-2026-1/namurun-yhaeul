@@ -288,10 +288,13 @@
   display: none;
 }
 
-/* 깨진 이미지(src 미설정) 및 틀 자리표시 링크 숨김 */
+/* 깨진 이미지(src 미설정) 숨김 */
 .article-viewer img[src=""] {
   display: none;
 }
-.article-viewer a.opennamu_not_exist_link {
+
+/* 틀 자리표시 링크 숨김 — href가 /w/%ED%8B%80%3A(=틀:)로 시작하는 링크만 대상.
+   opennamu_not_exist_link는 database에 없는 모든 내부 링크에 붙으므로 클래스만으로 숨기면 게임 링크 전체가 사라짐 */
+.article-viewer a[href^="/w/%ED%8B%80%3A"] {
   display: none;
 }
