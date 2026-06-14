@@ -159,7 +159,7 @@
 ### 게임 플레이 (`src/pages/GamePage.tsx`, `src/components/GameHeader.tsx`, `src/components/PathSidebar.tsx`)
 
 - `h-20` HUD 헤더: 로고 + 목표 문서 | 타이머(`font-display-timer glow-timer`) + 클릭 수 | 포기하기 버튼
-- `w-sidebar-width` fixed 사이드바: 번호 매긴 경로, active `border-l-4 border-primary bg-surface-container-highest`
+- `w-36` fixed 사이드바 (경로 추적 전용 — 넓은 네비게이션 사이드바와 다름): 번호 매긴 경로, active `border-l-2 border-primary bg-surface-container-highest`
 - `<section class="ml-sidebar-width">` → `max-w-content-max-width` 위키 본문
 
 ### 결과 화면 (`src/pages/ResultPage.tsx`)
