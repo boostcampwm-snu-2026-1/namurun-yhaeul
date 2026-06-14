@@ -258,14 +258,33 @@
 .article-viewer .opennamu_TOC_title {
   font-weight: 700;
   display: block;
-  margin-bottom: var(--spacing-stack-sm);
+  margin-bottom: 0;
   color: var(--color-on-surface);
+  cursor: pointer;
+  user-select: none;
+}
+.article-viewer .opennamu_TOC_title::after {
+  content: ' ▼';
+  font-size: 0.7em;
+  opacity: 0.5;
+}
+.article-viewer .opennamu_TOC.toc-collapsed .opennamu_TOC_title::after {
+  content: ' ▶';
+}
+/* 목차 타이틀 바로 뒤 <br> 제거 (간격 원인) */
+.article-viewer .opennamu_TOC_title + br {
+  display: none;
+}
+/* 접힌 상태: 링크·줄바꿈 숨김 */
+.article-viewer .opennamu_TOC.toc-collapsed > a,
+.article-viewer .opennamu_TOC.toc-collapsed > br {
+  display: none;
 }
 .article-viewer .opennamu_TOC a {
-  color: var(--color-on-surface-variant);
+  color: var(--color-link);
 }
 .article-viewer .opennamu_TOC a:hover {
-  color: var(--color-primary);
+  text-decoration: underline;
 }
 
 /* 주석(footnote) */

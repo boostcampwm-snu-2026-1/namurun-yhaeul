@@ -36,6 +36,7 @@ export function ArticleViewer({ article }: Props) {
   const [html, setHtml] = useState('')
   const workerRef = useRef<Worker | null>(null)
   const latestIdRef = useRef(0)
+  const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const worker = new Worker(
@@ -64,11 +65,20 @@ export function ArticleViewer({ article }: Props) {
     workerRef.current.postMessage({ id, text: article.text, title: article.title })
   }, [article.title, article.text])
 
+  // HTML 주입 후 목차 접기 토글 연결
+  useEffect(() => {
+    const tocTitle = contentRef.current?.querySelector('.opennamu_TOC_title')
+    if (!tocTitle) return
+    const toggle = () => tocTitle.closest('.opennamu_TOC')?.classList.toggle('toc-collapsed')
+    tocTitle.addEventListener('click', toggle)
+    return () => tocTitle.removeEventListener('click', toggle)
+  }, [html])
+
   // namumark 렌더링 결과를 삽입하는 유일한 지점 — 라이브러리 출력만 허용 (XSS 정책)
   return (
     <div className="article-viewer">
       <h1 className="article-doc-title">{article.title}</h1>
-      <div dangerouslySetInnerHTML={{ __html: html }} />
+      <div ref={contentRef} dangerouslySetInnerHTML={{ __html: html }} />
     </div>
   )
 }
