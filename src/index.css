@@ -62,6 +62,9 @@
   --color-outline:                   #6c7a77;
   --color-outline-variant:           #bcc9c6;
 
+  /* ── 색상: Link ── */
+  --color-link:                      #1558d6;
+
   /* ── 스페이싱 ── */
   --spacing-sidebar-width:           320px;
   --spacing-content-max-width:       800px;
@@ -168,9 +171,18 @@
   font-weight: 600;
 }
 
+.article-viewer {
+  padding-left: var(--spacing-gutter);
+  padding-right: var(--spacing-gutter);
+  font-family: var(--font-body-article);
+  font-size: 17px;
+  line-height: 28px;
+  font-weight: 400;
+}
+
 /* 내부 링크 */
 .article-viewer a {
-  color: var(--color-primary);
+  color: var(--color-link);
   text-decoration: none;
 }
 

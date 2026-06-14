@@ -98,6 +98,7 @@
 | `on-error-container` | `#93000a` | error-container 위 텍스트 |
 | `outline` | `#6c7a77` | 테두리 |
 | `outline-variant` | `#bcc9c6` | 약한 구분선 |
+| `link` | `#1558d6` | 위키 본문 하이퍼링크 |
 
 ### 타이포그래피
 
