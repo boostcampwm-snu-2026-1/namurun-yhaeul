@@ -271,13 +271,8 @@
 .article-viewer .opennamu_TOC.toc-collapsed .opennamu_TOC_title::after {
   content: ' ▶';
 }
-/* 목차 타이틀 바로 뒤 <br> 제거 (간격 원인) */
-.article-viewer .opennamu_TOC_title + br {
-  display: none;
-}
-/* 접힌 상태: 링크·줄바꿈 숨김 */
-.article-viewer .opennamu_TOC.toc-collapsed > a,
-.article-viewer .opennamu_TOC.toc-collapsed > br {
+/* 접힌 상태: wrapper 전체 숨김 */
+.article-viewer .opennamu_TOC.toc-collapsed .toc-content {
   display: none;
 }
 .article-viewer .opennamu_TOC a {

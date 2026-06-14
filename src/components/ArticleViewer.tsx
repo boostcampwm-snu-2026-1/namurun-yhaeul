@@ -67,11 +67,30 @@ export function ArticleViewer({ article }: Props) {
 
   // HTML 주입 후 목차 접기 토글 연결
   useEffect(() => {
-    const tocTitle = contentRef.current?.querySelector('.opennamu_TOC_title')
-    if (!tocTitle) return
-    const toggle = () => tocTitle.closest('.opennamu_TOC')?.classList.toggle('toc-collapsed')
-    tocTitle.addEventListener('click', toggle)
-    return () => tocTitle.removeEventListener('click', toggle)
+    const toc = contentRef.current?.querySelector<HTMLElement>('.opennamu_TOC')
+    const title = toc?.querySelector<HTMLElement>('.opennamu_TOC_title')
+    if (!toc || !title) return
+
+    // 제목 이후 모든 노드를 div.toc-content로 감싸 toggle 대상을 단일화
+    const wrapper = document.createElement('div')
+    wrapper.className = 'toc-content'
+    Array.from(toc.childNodes).forEach((child) => {
+      if (child !== title) wrapper.appendChild(child)
+    })
+    toc.appendChild(wrapper)
+
+    const toggle = () => {
+      if (!toc.classList.contains('toc-collapsed')) {
+        // 접기 직전 너비 고정 — 내용이 사라져도 가로 길이 유지
+        toc.style.minWidth = `${toc.offsetWidth}px`
+      } else {
+        toc.style.minWidth = ''
+      }
+      toc.classList.toggle('toc-collapsed')
+    }
+
+    title.addEventListener('click', toggle)
+    return () => title.removeEventListener('click', toggle)
   }, [html])
 
   // namumark 렌더링 결과를 삽입하는 유일한 지점 — 라이브러리 출력만 허용 (XSS 정책)
