@@ -190,3 +190,11 @@
 .article-viewer sub a[href^="/edit_section/"] {
   display: none;
 }
+
+/* 깨진 이미지(src 미설정) 및 틀 자리표시 링크 숨김 */
+.article-viewer img[src=""] {
+  display: none;
+}
+.article-viewer a.opennamu_not_exist_link {
+  display: none;
+}
