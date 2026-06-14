@@ -42,13 +42,16 @@ export function useArticle(): UseArticleResult {
       setIsLoading(true)
       setError(null)
       try {
-        const [resolved, optimisticResult] = await Promise.all([
+        const [resolved, optimistic] = await Promise.all([
           resolveRedirectFn(rawTitle),
-          fetchArticle(rawTitle).catch((e: unknown) => e),
+          fetchArticle(rawTitle).then(
+            (a): { ok: true; article: Article } => ({ ok: true, article: a }),
+            (): { ok: false } => ({ ok: false }),
+          ),
         ])
 
-        if (resolved === rawTitle && !(optimisticResult instanceof Error)) {
-          setArticle(optimisticResult)
+        if (resolved === rawTitle && optimistic.ok) {
+          setArticle(optimistic.article)
         } else {
           const result = await fetchArticle(resolved)
           setArticle(result)
