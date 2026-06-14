@@ -65,5 +65,10 @@ export function ArticleViewer({ article }: Props) {
   }, [article.title, article.text])
 
   // namumark 렌더링 결과를 삽입하는 유일한 지점 — 라이브러리 출력만 허용 (XSS 정책)
-  return <div className="article-viewer" dangerouslySetInnerHTML={{ __html: html }} />
+  return (
+    <div className="article-viewer">
+      <h1 className="article-doc-title">{article.title}</h1>
+      <div dangerouslySetInnerHTML={{ __html: html }} />
+    </div>
+  )
 }
