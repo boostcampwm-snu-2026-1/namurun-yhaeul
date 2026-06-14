@@ -27,7 +27,6 @@ function GamePage() {
 
   const locationState = isLocationState(location.state) ? location.state : null
 
-  // Capture initial game params as stable strings (useState initial value runs once)
   const [gameStart] = useState<string>(() => locationState?.start ?? '')
   const [gameEnd] = useState<string>(() => locationState?.end ?? '')
 
@@ -65,22 +64,16 @@ function GamePage() {
 
       const href = anchor.getAttribute('href') ?? ''
 
-      // 섹션 앵커(#s-1.1, #fn-1 등): 브라우저 기본 스크롤에 맡김
       if (href.startsWith('#')) return
-
-      // 외부 링크 차단
       if (!href.startsWith('/w/')) {
         e.preventDefault()
         return
       }
-
-      // 카테고리 링크 차단
       if (href.startsWith('/w/category:')) {
         e.preventDefault()
         return
       }
 
-      // 내부 wiki 문서 링크: 게임 이동 처리
       e.preventDefault()
 
       if (isNavigatingRef.current) return
@@ -116,39 +109,39 @@ function GamePage() {
 
   if (!gameStart || !gameEnd) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-500">잘못된 접근입니다.</p>
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <p className="text-on-surface-variant">잘못된 접근입니다.</p>
       </div>
     )
   }
 
   if (!isLoading && !article && articleError) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-red-500">문서를 불러올 수 없습니다.</p>
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <p className="text-error">문서를 불러올 수 없습니다.</p>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen bg-background">
       <GameHeader targetTitle={gameEnd} elapsedMs={elapsedMs} clickCount={clickCount} />
 
       <div className="flex flex-1 overflow-hidden">
         <PathSidebar path={path} />
 
-        <div className="flex-1 overflow-y-auto relative" ref={contentRef}>
+        <div className="flex-1 overflow-y-auto relative bg-surface-container-lowest" ref={contentRef}>
           {isLoading && !article && (
             <div className="flex items-center justify-center p-8">
-              <p className="text-gray-500">불러오는 중...</p>
+              <p className="text-on-surface-variant font-mono text-sm">불러오는 중...</p>
             </div>
           )}
 
           {article && (
             <div className="relative" onClick={(e) => void handleClick(e)}>
               {isLoading && (
-                <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center pointer-events-none">
-                  <p className="text-gray-400 text-sm">이동 중...</p>
+                <div className="absolute inset-0 bg-surface/60 z-10 flex items-center justify-center pointer-events-none">
+                  <p className="text-on-surface-variant text-sm font-mono">이동 중...</p>
                 </div>
               )}
               <ArticleViewer article={article} />
@@ -160,14 +153,14 @@ function GamePage() {
       <div className="fixed bottom-4 left-4">
         <button
           onClick={() => navigate('/')}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm"
+          className="px-4 py-2 border border-outline-variant text-on-surface-variant rounded hover:border-error hover:text-error transition-colors text-sm font-mono"
         >
           게임 포기
         </button>
       </div>
 
       {toast !== null && (
-        <div className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg text-sm">
+        <div className="fixed bottom-4 right-4 bg-error-container text-on-error-container px-4 py-2 rounded shadow-lg text-sm font-mono">
           {toast}
         </div>
       )}

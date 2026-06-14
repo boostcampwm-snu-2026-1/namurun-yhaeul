@@ -52,9 +52,9 @@ describe('ResultPage', () => {
   it('유효한 state로 접근하면 결과를 표시한다', () => {
     mockLocationState = validState
     render(<ResultPage />)
-    expect(screen.getByText('도착!')).toBeTruthy()
+    expect(screen.getByText('목표 도달!')).toBeTruthy()
     expect(screen.getByText('00:12.3')).toBeTruthy()
-    expect(screen.getByText('2번')).toBeTruthy()
+    expect(screen.getByText('2')).toBeTruthy()
   })
 
   it('이동 경로의 모든 문서명이 표시된다', () => {

@@ -4,21 +4,22 @@ interface Props {
 
 export function PathSidebar({ path }: Props) {
   return (
-    <aside className="w-36 shrink-0 border-r bg-gray-50 flex flex-col p-3 gap-0.5 overflow-y-auto">
+    <aside className="w-52 shrink-0 border-r border-outline-variant bg-surface-container-low flex flex-col p-3 gap-0.5 overflow-y-auto">
+      <p className="text-xs text-on-surface-variant font-mono uppercase tracking-widest mb-2 px-2">경로</p>
       {path.map((title, i) => (
         <div key={i}>
           <div
-            className={`text-xs px-2 py-1 rounded truncate ${
+            className={`text-xs px-2 py-1.5 rounded truncate ${
               i === path.length - 1
-                ? 'bg-blue-100 text-blue-700 font-semibold'
-                : 'text-gray-400'
+                ? 'bg-primary-container text-on-primary-container font-semibold'
+                : 'text-on-surface-variant'
             }`}
             title={title}
           >
             {title}
           </div>
           {i < path.length - 1 && (
-            <div className="text-gray-300 text-center text-xs leading-none">↓</div>
+            <div className="text-outline text-center text-xs leading-none py-0.5">↓</div>
           )}
         </div>
       ))}
