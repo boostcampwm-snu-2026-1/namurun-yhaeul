@@ -21,7 +21,7 @@ window.opennamu_heading_folding = (data, element) => {
     if (sub) sub.style.opacity = '1'
   }
   if (element) {
-    element.innerHTML = element.innerHTML.trim() !== '∧' ? '∧' : '∨'
+    element.innerHTML = element.innerHTML.trim() !== '>' ? '>' : '∨'
   }
 }
 
@@ -70,7 +70,7 @@ export function ArticleViewer({ article }: Props) {
     // 초기 ⊖ → ∨ 교체 (namumark HTML에 하드코딩된 문자)
     contentRef.current?.querySelectorAll<HTMLElement>('[onclick*="opennamu_heading_folding"]').forEach((btn) => {
       if (btn.innerHTML.trim() === '⊖') btn.innerHTML = '∨'
-      else if (btn.innerHTML.trim() === '⊕') btn.innerHTML = '∧'
+      else if (btn.innerHTML.trim() === '⊕') btn.innerHTML = '>'
     })
 
     const toc = contentRef.current?.querySelector<HTMLElement>('.opennamu_TOC')
