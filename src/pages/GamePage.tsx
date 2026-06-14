@@ -132,7 +132,7 @@ function GamePage() {
 
   return (
     <div className="flex flex-col h-screen bg-background">
-      <GameHeader targetTitle={gameEnd} elapsedMs={elapsedMs} clickCount={clickCount} />
+      <GameHeader targetTitle={gameEnd} elapsedMs={elapsedMs} clickCount={clickCount} onQuit={() => navigate('/')} />
 
       <div className="flex flex-1 overflow-hidden">
         <PathSidebar path={path} />
@@ -155,15 +155,6 @@ function GamePage() {
             </div>
           )}
         </div>
-      </div>
-
-      <div className="fixed bottom-4 left-4">
-        <button
-          onClick={() => navigate('/')}
-          className="px-4 py-2 bg-surface-container text-on-surface rounded-lg border border-outline-variant hover:bg-surface-container-high transition-colors font-body-sm text-body-sm"
-        >
-          게임 포기
-        </button>
       </div>
 
       {toast !== null && (

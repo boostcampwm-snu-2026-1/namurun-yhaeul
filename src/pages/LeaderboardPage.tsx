@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useLeaderboard } from '../hooks/useLeaderboard'
+import { AppHeader } from '../components/AppHeader'
 
 interface LeaderboardState {
   startArticle: string
@@ -42,7 +43,9 @@ function LeaderboardPage() {
   if (!state) return null
 
   return (
-    <div className="min-h-screen bg-background circuit-bg flex flex-col items-center py-stack-lg px-gutter">
+    <div className="min-h-screen bg-background circuit-bg">
+      <AppHeader />
+      <div className="pt-16 flex flex-col items-center py-stack-lg px-gutter">
       <div className="w-full max-w-content-max-width flex flex-col gap-stack-lg">
         <div className="text-center">
           <p className="font-headline-md text-headline-md text-on-surface mb-1">전체 순위</p>
@@ -129,6 +132,7 @@ function LeaderboardPage() {
         >
           다시 하기
         </button>
+      </div>
       </div>
     </div>
   )

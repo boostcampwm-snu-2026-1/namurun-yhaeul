@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useGameRecord } from '../hooks/useGameRecord'
+import { AppHeader } from '../components/AppHeader'
 
 interface ResultState {
   startArticle: string
@@ -69,7 +70,9 @@ function ResultPage() {
   if (!result) return null
 
   return (
-    <div className="min-h-screen bg-background circuit-bg flex flex-col items-center justify-center p-gutter">
+    <div className="min-h-screen bg-background circuit-bg">
+      <AppHeader />
+      <div className="pt-16 flex flex-col items-center justify-center min-h-screen p-gutter">
       <div className="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant w-full max-w-lg p-stack-lg flex flex-col gap-stack-md">
         <div className="text-center">
           <p className="font-headline-md text-headline-md text-primary mb-1">목표 도달!</p>
@@ -142,6 +145,7 @@ function ResultPage() {
             <p className="text-xs text-on-surface-variant font-body-sm">기록 저장 중...</p>
           )}
         </div>
+      </div>
       </div>
     </div>
   )

@@ -141,6 +141,15 @@
   text-shadow: 0 0 12px rgba(0, 164, 149, 0.4);
 }
 
+/* ── 기본 폰트·색상 ── */
+@layer base {
+  body {
+    font-family: var(--font-body-sm);
+    color: var(--color-on-surface);
+    background-color: var(--color-background);
+  }
+}
+
 /* ── 위키 본문 스타일 ── */
 .article-viewer table {
   border-collapse: collapse;
