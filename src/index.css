@@ -1,5 +1,147 @@
 @import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap");
 
+@theme {
+  /* ── 색상: Surface / Background ── */
+  --color-background:                #f5fbf8;
+  --color-surface:                   #f5fbf8;
+  --color-surface-bright:            #f5fbf8;
+  --color-surface-dim:               #d5dbd9;
+  --color-surface-container-lowest:  #ffffff;
+  --color-surface-container-low:     #eff5f2;
+  --color-surface-container:         #e9efed;
+  --color-surface-container-high:    #e4e9e7;
+  --color-surface-container-highest: #dee4e1;
+  --color-surface-variant:           #dee4e1;
+  --color-inverse-surface:           #2b3230;
+  --color-inverse-on-surface:        #ecf2ef;
+
+  /* ── 색상: Text ── */
+  --color-on-surface:                #171d1c;
+  --color-on-background:             #171d1c;
+  --color-on-surface-variant:        #3d4947;
+
+  /* ── 색상: Primary (Teal) ── */
+  --color-primary:                   #006a60;
+  --color-primary-container:         #00a495;
+  --color-primary-fixed:             #7cf7e5;
+  --color-primary-fixed-dim:         #5ddac9;
+  --color-on-primary:                #ffffff;
+  --color-on-primary-container:      #00312c;
+  --color-on-primary-fixed:          #00201c;
+  --color-on-primary-fixed-variant:  #005048;
+  --color-inverse-primary:           #5ddac9;
+  --color-surface-tint:              #006a60;
+
+  /* ── 색상: Secondary ── */
+  --color-secondary:                 #5f5e5e;
+  --color-secondary-container:       #e2dfde;
+  --color-secondary-fixed:           #e5e2e1;
+  --color-secondary-fixed-dim:       #c8c6c5;
+  --color-on-secondary:              #ffffff;
+  --color-on-secondary-container:    #636262;
+  --color-on-secondary-fixed:        #1c1b1b;
+  --color-on-secondary-fixed-variant: #474746;
+
+  /* ── 색상: Tertiary (순위·강조) ── */
+  --color-tertiary:                  #984626;
+  --color-tertiary-container:        #d97854;
+  --color-tertiary-fixed:            #ffdbcf;
+  --color-tertiary-fixed-dim:        #ffb59b;
+  --color-on-tertiary:               #ffffff;
+  --color-on-tertiary-container:     #531700;
+  --color-on-tertiary-fixed:         #380d00;
+  --color-on-tertiary-fixed-variant: #7a2f11;
+
+  /* ── 색상: Error ── */
+  --color-error:                     #ba1a1a;
+  --color-error-container:           #ffdad6;
+  --color-on-error:                  #ffffff;
+  --color-on-error-container:        #93000a;
+
+  /* ── 색상: Outline ── */
+  --color-outline:                   #6c7a77;
+  --color-outline-variant:           #bcc9c6;
+
+  /* ── 스페이싱 ── */
+  --spacing-sidebar-width:           320px;
+  --spacing-content-max-width:       800px;
+  --spacing-gutter:                  24px;
+  --spacing-stack-lg:                32px;
+  --spacing-stack-md:                16px;
+  --spacing-stack-sm:                8px;
+  --spacing-unit:                    4px;
+
+  /* ── Border radius (각진 미감) ── */
+  --radius:                          0.125rem;
+  --radius-lg:                       0.25rem;
+  --radius-xl:                       0.5rem;
+  --radius-full:                     0.75rem;
+
+  /* ── 폰트 패밀리 ── */
+  --font-headline-lg:                "Hanken Grotesk", sans-serif;
+  --font-headline-md:                "Hanken Grotesk", sans-serif;
+  --font-body-sm:                    "Inter", sans-serif;
+  --font-body-article:               "Inter", sans-serif;
+  --font-label-mono:                 "JetBrains Mono", monospace;
+  --font-display-timer:              "JetBrains Mono", monospace;
+}
+
+/* ── 폰트 사이즈 + 굵기 + 행간 복합 유틸리티 ── */
+@layer utilities {
+  .text-headline-lg {
+    font-size: 32px;
+    line-height: 40px;
+    font-weight: 800;
+  }
+  .text-headline-md {
+    font-size: 24px;
+    line-height: 32px;
+    font-weight: 700;
+  }
+  .text-body-sm {
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 400;
+  }
+  .text-body-article {
+    font-size: 17px;
+    line-height: 28px;
+    font-weight: 400;
+  }
+  .text-label-mono {
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+  }
+  .text-display-timer {
+    font-size: 48px;
+    line-height: 48px;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+}
+
+/* ── 커스텀 클래스 ── */
+.circuit-bg {
+  background-image:
+    radial-gradient(circle at 2px 2px, rgba(0, 164, 149, 0.05) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+.glow-green {
+  box-shadow: 0 0 15px rgba(0, 164, 149, 0.2);
+}
+
+.glow-text {
+  text-shadow: 0 0 8px rgba(0, 164, 149, 0.3);
+}
+
+.glow-timer {
+  text-shadow: 0 0 12px rgba(0, 164, 149, 0.4);
+}
+
+/* ── 위키 본문 스타일 ── */
 .article-viewer table {
   border-collapse: collapse;
   width: 100%;
@@ -8,25 +150,23 @@
 
 .article-viewer th,
 .article-viewer td {
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color-outline-variant);
   padding: 4px 8px;
   text-align: left;
 }
 
 .article-viewer th {
-  background-color: #f9fafb;
+  background-color: var(--color-surface-container-low);
   font-weight: 600;
 }
 
-/* 내부 링크 — namumark의 존재 여부 판정(opennamu_not_exist_link)과 무관하게 동일 스타일.
-   링크 유효성은 게임에서 Supabase articles.links[]로 검증한다. */
+/* 내부 링크 */
 .article-viewer a {
-  color: #0275d8;
+  color: var(--color-primary);
   text-decoration: none;
 }
 
-/* heading 옆 편집(✎) 링크 제거 — 게임에 불필요한 위키 편집 UI.
-   접기(⊖)는 window.opennamu_heading_folding으로 살려두므로 숨기지 않는다. */
+/* heading 옆 편집(✎) 링크 제거 */
 .article-viewer sub a[href^="/edit_section/"] {
   display: none;
 }
