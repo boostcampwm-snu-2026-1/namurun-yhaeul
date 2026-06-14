@@ -100,6 +100,7 @@
 ### useArticle
 
 - 실패 시 error 상태 설정 + rethrow — 호출부(GamePage)가 catch로 토스트 표시, 동시에 error 상태로 초기 로드 실패 감지 가능
+- `loadArticleOptimistic(rawTitle, resolveRedirectFn)` — redirect 조회와 R2 fetch를 `Promise.all`로 병렬 실행해 Supabase RTT를 체감 지연에서 제거. redirect 문서는 R2에 업로드되지 않으므로 rawTitle fetch가 404(Error)로 끝나면 resolved title로 재fetch. resolved title을 반환하므로 호출부(GamePage)가 목표 문서 도달 여부 판단에 사용
 
 ### useGameRecord
 

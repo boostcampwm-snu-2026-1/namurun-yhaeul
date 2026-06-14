@@ -6,6 +6,10 @@ interface UseArticleResult {
   isLoading: boolean
   error: Error | null
   loadArticle: (title: string) => Promise<void>
+  loadArticleOptimistic: (
+    rawTitle: string,
+    resolveRedirectFn: (title: string) => Promise<string>,
+  ) => Promise<string>
 }
 
 export function useArticle(): UseArticleResult {
@@ -28,5 +32,39 @@ export function useArticle(): UseArticleResult {
     }
   }, [])
 
-  return { article, isLoading, error, loadArticle }
+  // redirect 조회와 R2 fetch를 병렬로 실행해 Supabase RTT를 체감 지연에서 제거한다.
+  // redirect 문서는 R2에 없으므로 rawTitle fetch가 404면 resolved title로 재fetch한다.
+  const loadArticleOptimistic = useCallback(
+    async (
+      rawTitle: string,
+      resolveRedirectFn: (title: string) => Promise<string>,
+    ): Promise<string> => {
+      setIsLoading(true)
+      setError(null)
+      try {
+        const [resolved, optimisticResult] = await Promise.all([
+          resolveRedirectFn(rawTitle),
+          fetchArticle(rawTitle).catch((e: unknown) => e),
+        ])
+
+        if (resolved === rawTitle && !(optimisticResult instanceof Error)) {
+          setArticle(optimisticResult)
+        } else {
+          const result = await fetchArticle(resolved)
+          setArticle(result)
+        }
+
+        return resolved
+      } catch (err) {
+        const e = err instanceof Error ? err : new Error(String(err))
+        setError(e)
+        throw e
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [],
+  )
+
+  return { article, isLoading, error, loadArticle, loadArticleOptimistic }
 }
