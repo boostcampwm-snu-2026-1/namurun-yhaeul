@@ -1,5 +1,4 @@
-import { useMemo } from 'react'
-import { NamuMark } from 'namumark-clone-core'
+import { useState, useEffect, useRef } from 'react'
 import type { Article } from '../lib/r2'
 
 declare global {
@@ -30,15 +29,39 @@ interface Props {
   article: Article
 }
 
+// 모듈 수준 카운터 — 여러 인스턴스가 있어도 요청 ID가 전역적으로 유일함
+let requestCounter = 0
+
 export function ArticleViewer({ article }: Props) {
-  const html = useMemo(() => {
-    const database = { data: [{ data: article.text, title: article.title }] }
-    try {
-      const result = new NamuMark(article.text, { docName: article.title }, database).parse()
-      return result[0]
-    } catch {
-      return '<p>렌더링 실패</p>'
+  const [html, setHtml] = useState('')
+  const workerRef = useRef<Worker | null>(null)
+  const latestIdRef = useRef(0)
+
+  useEffect(() => {
+    const worker = new Worker(
+      new URL('../workers/namumark.worker.ts', import.meta.url),
+      { type: 'module' },
+    )
+    workerRef.current = worker
+
+    worker.onmessage = (e: MessageEvent<{ id: number; html: string }>) => {
+      // 가장 최근 요청의 응답만 반영 — 빠른 연속 클릭 시 이전 결과 무시
+      if (e.data.id === latestIdRef.current) {
+        setHtml(e.data.html)
+      }
     }
+
+    return () => {
+      worker.terminate()
+      workerRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!workerRef.current) return
+    const id = ++requestCounter
+    latestIdRef.current = id
+    workerRef.current.postMessage({ id, text: article.text, title: article.title })
   }, [article.title, article.text])
 
   // namumark 렌더링 결과를 삽입하는 유일한 지점 — 라이브러리 출력만 허용 (XSS 정책)
