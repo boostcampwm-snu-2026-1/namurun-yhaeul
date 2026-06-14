@@ -55,6 +55,8 @@ npm run test:run # 테스트 (vitest)
 - `dangerouslySetInnerHTML` 직접 사용 금지 — 단, `namumark-clone-core` 파싱 결과를 삽입하는 `ArticleViewer` 컴포넌트에서의 사용은 허용 (라이브러리 출력에 한정, XSS)
 - R2는 read-only — 데이터 파이프라인 외 코드에서 R2 write 금지
 - Supabase service role key 클라이언트 노출 금지 — anon key만 프론트엔드에서 사용
+- 디자인 값 하드코딩 금지 — 색/폰트/스페이싱/radius는 `src/index.css`의 `@theme` 토큰으로만 참조 (자세한 내용 `docs/design-system.md`)
+- 디자인 변경 시 토큰 일관성 유지 — Stitch는 참고용이며 소스 오브 트루스가 아님. 새 값이 필요하면 토큰을 먼저 `src/index.css`에 추가한 뒤 사용
 
 ---
 
@@ -102,6 +104,7 @@ npm run test:run # 테스트 (vitest)
 | 문서 | 내용 |
 |------|------|
 | `docs/architecture.md` | 아키텍처, 컴포넌트 구조, 데이터 흐름 |
+| `docs/design-system.md` | 디자인 규칙, 토큰, 화면별 레이아웃 |
 | `docs/db-schema.md` | Supabase 테이블 스키마 + 인덱스 |
 | `docs/data-pipeline.md` | 전처리 스크립트 설계 및 실행 방법 |
 

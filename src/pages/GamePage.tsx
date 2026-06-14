@@ -116,23 +116,23 @@ function GamePage() {
 
   if (!gameStart || !gameEnd) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-500">잘못된 접근입니다.</p>
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <p className="text-on-surface-variant font-body-sm text-body-sm">잘못된 접근입니다.</p>
       </div>
     )
   }
 
   if (!isLoading && !article && articleError) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-red-500">문서를 불러올 수 없습니다.</p>
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <p className="text-error font-body-sm text-body-sm">문서를 불러올 수 없습니다.</p>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col h-screen">
-      <GameHeader targetTitle={gameEnd} elapsedMs={elapsedMs} clickCount={clickCount} />
+    <div className="flex flex-col h-screen bg-background">
+      <GameHeader targetTitle={gameEnd} elapsedMs={elapsedMs} clickCount={clickCount} onQuit={() => navigate('/')} />
 
       <div className="flex flex-1 overflow-hidden">
         <PathSidebar path={path} />
@@ -140,15 +140,15 @@ function GamePage() {
         <div className="flex-1 overflow-y-auto relative" ref={contentRef}>
           {isLoading && !article && (
             <div className="flex items-center justify-center p-8">
-              <p className="text-gray-500">불러오는 중...</p>
+              <p className="text-on-surface-variant font-body-sm text-body-sm">불러오는 중...</p>
             </div>
           )}
 
           {article && (
             <div className="relative" onClick={(e) => void handleClick(e)}>
               {isLoading && (
-                <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center pointer-events-none">
-                  <p className="text-gray-400 text-sm">이동 중...</p>
+                <div className="absolute inset-0 bg-surface/60 z-10 flex items-center justify-center pointer-events-none">
+                  <p className="text-on-surface-variant font-body-sm text-body-sm">이동 중...</p>
                 </div>
               )}
               <ArticleViewer article={article} />
@@ -157,17 +157,8 @@ function GamePage() {
         </div>
       </div>
 
-      <div className="fixed bottom-4 left-4">
-        <button
-          onClick={() => navigate('/')}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm"
-        >
-          게임 포기
-        </button>
-      </div>
-
       {toast !== null && (
-        <div className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg text-sm">
+        <div className="fixed bottom-4 right-4 bg-inverse-surface text-inverse-on-surface px-4 py-2 rounded-lg shadow-lg font-body-sm text-body-sm">
           {toast}
         </div>
       )}

@@ -148,6 +148,7 @@ src/
     ArticleViewer.tsx     ← namumark 렌더링 ✅
     GameHeader.tsx        ← 타이머(MM:SS.s), 클릭 수, 목표 문서명 ✅
     PathSidebar.tsx       ← 이동 경로 사이드바 (현재 문서 하이라이트) ✅
+    NamurunLogo.tsx       ← 나무런 하이브리드 로고 SVG 컴포넌트 ✅
   hooks/
     useGame.ts            ← 게임 상태 (elapsedMs, clickCount, path) ✅
     useMainPage.ts        ← 메인 화면 데이터 (일일 문제 조회, 랜덤 문서 선택) ✅
