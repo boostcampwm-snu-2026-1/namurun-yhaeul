@@ -244,6 +244,32 @@
   color: var(--color-on-surface-variant);
 }
 
+/* 소제목 아래 구분선 (article-content 내부 heading만 대상) */
+.article-viewer .article-content h1,
+.article-viewer .article-content h2,
+.article-viewer .article-content h3,
+.article-viewer .article-content h4,
+.article-viewer .article-content h5,
+.article-viewer .article-content h6 {
+  border-bottom: 1px solid var(--color-outline-variant);
+  padding-bottom: 0.25rem;
+}
+
+/* 접기 토글 버튼 스타일 (∨/∧) */
+.article-viewer .article-content h1 a[onclick*="opennamu_heading_folding"],
+.article-viewer .article-content h2 a[onclick*="opennamu_heading_folding"],
+.article-viewer .article-content h3 a[onclick*="opennamu_heading_folding"],
+.article-viewer .article-content h4 a[onclick*="opennamu_heading_folding"],
+.article-viewer .article-content h5 a[onclick*="opennamu_heading_folding"],
+.article-viewer .article-content h6 a[onclick*="opennamu_heading_folding"] {
+  color: var(--color-on-surface-variant);
+  font-size: 0.7em;
+  font-weight: 400;
+  margin-right: 0.375em;
+  text-decoration: none;
+  vertical-align: middle;
+}
+
 /* 목차(TOC) */
 .article-viewer .opennamu_TOC {
   display: inline-block;
