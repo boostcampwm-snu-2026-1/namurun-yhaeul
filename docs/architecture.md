@@ -77,6 +77,8 @@
 - 표, 이미지, 복잡한 매크로 깨짐 허용
 - `[[문서명]]` / `[[실제명|표시텍스트]]` 링크 렌더링이 최우선
 - `NamuMark().parse()`는 **Web Worker**(`src/workers/namumark.worker.ts`)에서 실행 — 메인 스레드 블로킹으로 타이머 UI가 멈추는 문제 방지. 요청 ID 비교로 빠른 연속 클릭 시 이전 파싱 결과를 무시(race condition 방지)
+- **문서 제목은 namumark 파싱 결과 외부에서 렌더링** — `ArticleViewer`가 `article.title`을 별도 `<h1>` 요소로 표시. XSS 방지: dangerouslySetInnerHTML에 제목을 넣지 않는다
+- **namumark 생성 CSS 클래스명** (js 미사용으로 CSS에서 직접 타깃): `opennamu_TOC`(목차 컨테이너), `opennamu_TOC_title`(목차 헤딩), `opennamu_footnote`(주석 섹션), `opennamu_not_exist_link`(include 틀 자리표시 — DB에 없는 문서), `img[src=""]`(JS 미실행으로 src가 빈 이미지 → 숨김)
 
 ## 훅 설계 결정
 
@@ -147,7 +149,7 @@ src/
     LeaderboardPage.tsx   ← 리더보드 화면 (동일 문제 기준 상위 10개, 현재 행 하이라이트) ✅
     RenderDemoPage.tsx    ← 개발용 렌더링 테스트 (/render-demo, 배포 무관)
   components/
-    ArticleViewer.tsx     ← namumark 렌더링 ✅
+    ArticleViewer.tsx     ← namumark 렌더링 + 문서 제목 표시 ✅
     GameHeader.tsx        ← 타이머(MM:SS.s), 클릭 수, 목표 문서명 ✅
     PathSidebar.tsx       ← 이동 경로 사이드바 (현재 문서 하이라이트) ✅
     NamurunLogo.tsx       ← 나무런 하이브리드 로고 SVG 컴포넌트 ✅

@@ -144,6 +144,20 @@
 | `.glow-green` | primary 글로우 box-shadow (버튼) |
 | `.glow-text` | 텍스트 글로우 (히어로 제목) |
 | `.glow-timer` | 타이머 텍스트 글로우 |
+| `.article-doc-title` | 위키 문서 제목 — `headline-lg` 스타일, `outline-variant` 하단 구분선 |
+
+### `.article-viewer` 내부 스타일
+
+namumark-clone-core가 생성하는 클래스를 `src/index.css`에서 직접 타깃해 스타일링한다.
+
+| 선택자 | 용도 |
+|--------|------|
+| `h1` ~ `h6` | 소제목 크기 계층 (h1: 1.75em / h2: 1.5em / … / h6: 0.9em) |
+| `.opennamu_TOC` | 목차 컨테이너 — `surface-container-low` 배경, `outline-variant` 테두리 |
+| `.opennamu_TOC_title` | 목차 "목차" 헤딩 |
+| `.opennamu_footnote` | 주석 섹션 — `outline-variant` 상단 구분선, `on-surface-variant` 텍스트 |
+| `a.opennamu_not_exist_link` | include 틀 자리표시 링크 — `display: none` (게임 화면에 무관한 노이즈) |
+| `img[src=""]` | JS 미실행으로 src가 채워지지 않은 이미지 — `display: none` |
 
 ---
 
