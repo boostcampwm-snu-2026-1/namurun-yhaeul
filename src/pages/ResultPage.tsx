@@ -69,39 +69,39 @@ function ResultPage() {
   if (!result) return null
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
-      <div className="bg-white rounded-2xl shadow-md w-full max-w-lg p-8 flex flex-col gap-6">
+    <div className="min-h-screen bg-background circuit-bg flex flex-col items-center justify-center p-gutter">
+      <div className="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant w-full max-w-lg p-stack-lg flex flex-col gap-stack-md">
         <div className="text-center">
-          <p className="text-4xl font-bold text-green-600 mb-1">도착!</p>
-          <p className="text-gray-500 text-sm">
+          <p className="font-headline-md text-headline-md text-primary mb-1">도착!</p>
+          <p className="text-on-surface-variant font-body-sm text-body-sm">
             {result.startArticle} → {result.endArticle}
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-gray-50 rounded-xl p-4 text-center">
-            <p className="text-xs text-gray-400 mb-1">소요 시간</p>
-            <p className="text-2xl font-mono font-semibold text-gray-800">
+        <div className="grid grid-cols-2 gap-stack-sm">
+          <div className="bg-surface-container-low rounded-xl p-stack-md text-center">
+            <p className="text-label-mono font-label-mono text-on-surface-variant mb-1 uppercase tracking-wider">소요 시간</p>
+            <p className="font-display-timer text-display-timer text-on-surface glow-timer">
               {formatTime(result.elapsedMs)}
             </p>
           </div>
-          <div className="bg-gray-50 rounded-xl p-4 text-center">
-            <p className="text-xs text-gray-400 mb-1">클릭 수</p>
-            <p className="text-2xl font-semibold text-gray-800">{result.clickCount}번</p>
+          <div className="bg-surface-container-low rounded-xl p-stack-md text-center">
+            <p className="text-label-mono font-label-mono text-on-surface-variant mb-1 uppercase tracking-wider">클릭 수</p>
+            <p className="text-2xl font-semibold text-on-surface">{result.clickCount}번</p>
           </div>
         </div>
 
         <div>
-          <p className="text-xs text-gray-400 mb-2">이동 경로</p>
+          <p className="text-label-mono font-label-mono text-on-surface-variant mb-2 uppercase tracking-wider">이동 경로</p>
           <ol className="flex flex-col gap-1">
             {result.path.map((title, i) => (
-              <li key={i} className="flex items-center gap-2 text-sm">
-                {i > 0 && <span className="text-gray-300 text-xs">↓</span>}
+              <li key={i} className="flex items-center gap-2 font-body-sm text-body-sm">
+                {i > 0 && <span className="text-outline-variant text-xs">↓</span>}
                 <span
                   className={
                     i === result.path.length - 1
-                      ? 'font-semibold text-green-700'
-                      : 'text-gray-600'
+                      ? 'font-semibold text-primary'
+                      : 'text-on-surface-variant'
                   }
                 >
                   {title}
@@ -112,11 +112,11 @@ function ResultPage() {
         </div>
 
         {saveError && (
-          <p className="text-xs text-red-400 text-center">기록 저장에 실패했습니다.</p>
+          <p className="text-xs text-error text-center font-body-sm">기록 저장에 실패했습니다.</p>
         )}
 
-        <div className="border-t pt-4 flex flex-col gap-2">
-          <p className="text-sm font-semibold text-gray-700">닉네임을 입력하고 순위를 확인하세요</p>
+        <div className="border-t border-outline-variant pt-stack-md flex flex-col gap-stack-sm">
+          <p className="font-body-sm text-body-sm font-semibold text-on-surface">닉네임을 입력하고 순위를 확인하세요</p>
           <div className="flex gap-2">
             <input
               type="text"
@@ -127,19 +127,19 @@ function ResultPage() {
               }}
               placeholder="닉네임 입력"
               disabled={isSubmitting}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              className="flex-1 px-3 py-2 border border-outline-variant rounded-lg font-body-sm text-body-sm text-on-surface bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
             />
             <button
               onClick={() => void handleSubmit()}
               disabled={!nickname.trim() || isSubmitting || !isSaved}
-              className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 bg-primary-container text-on-primary-container font-body-sm text-body-sm font-semibold rounded-lg hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed transition-all glow-green"
             >
               {isSubmitting ? '저장 중...' : '확인'}
             </button>
           </div>
-          {submitError && <p className="text-xs text-red-400">{submitError}</p>}
+          {submitError && <p className="text-xs text-error font-body-sm">{submitError}</p>}
           {!isSaved && !saveError && (
-            <p className="text-xs text-gray-400">기록 저장 중...</p>
+            <p className="text-xs text-on-surface-variant font-body-sm">기록 저장 중...</p>
           )}
         </div>
       </div>

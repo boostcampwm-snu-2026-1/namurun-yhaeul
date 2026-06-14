@@ -15,15 +15,17 @@ function formatTime(ms: number): string {
 
 export function GameHeader({ targetTitle, elapsedMs, clickCount }: Props) {
   return (
-    <div className="flex items-center justify-between p-3 border-b bg-white sticky top-0 z-10">
-      <div className="text-sm">
-        <span className="text-gray-500">목표: </span>
-        <span className="font-semibold">{targetTitle}</span>
+    <div className="flex items-center justify-between px-gutter py-3 border-b border-outline-variant bg-surface-container-low sticky top-0 z-10">
+      <div className="font-body-sm text-body-sm">
+        <span className="text-on-surface-variant">목표: </span>
+        <span className="font-semibold text-on-surface">{targetTitle}</span>
       </div>
-      <div className="text-lg font-mono font-bold">{formatTime(elapsedMs)}</div>
-      <div className="text-sm">
-        <span className="text-gray-500">클릭: </span>
-        <span className="font-semibold">{clickCount}</span>
+      <div className="font-display-timer text-display-timer text-primary glow-timer">
+        {formatTime(elapsedMs)}
+      </div>
+      <div className="font-body-sm text-body-sm">
+        <span className="text-on-surface-variant">클릭: </span>
+        <span className="font-semibold text-on-surface">{clickCount}</span>
       </div>
     </div>
   )

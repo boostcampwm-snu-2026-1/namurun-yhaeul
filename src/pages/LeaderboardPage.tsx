@@ -42,34 +42,34 @@ function LeaderboardPage() {
   if (!state) return null
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center py-12 px-4">
-      <div className="w-full max-w-2xl flex flex-col gap-6">
+    <div className="min-h-screen bg-background circuit-bg flex flex-col items-center py-stack-lg px-gutter">
+      <div className="w-full max-w-content-max-width flex flex-col gap-stack-lg">
         <div className="text-center">
-          <p className="text-2xl font-bold text-gray-800 mb-1">리더보드</p>
-          <p className="text-gray-500 text-sm">
+          <p className="font-headline-md text-headline-md text-on-surface mb-1">리더보드</p>
+          <p className="text-on-surface-variant font-body-sm text-body-sm">
             {state.startArticle} → {state.endArticle}
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-md overflow-hidden">
+        <div className="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden shadow-sm">
           {isLoading && (
-            <div className="p-8 text-center text-gray-400 text-sm">불러오는 중...</div>
+            <div className="p-8 text-center text-on-surface-variant font-body-sm text-body-sm">불러오는 중...</div>
           )}
 
           {!isLoading && error && (
-            <div className="p-8 text-center text-red-400 text-sm">
+            <div className="p-8 text-center text-error font-body-sm text-body-sm">
               순위를 불러올 수 없습니다.
             </div>
           )}
 
           {!isLoading && !error && entries.length === 0 && (
-            <div className="p-8 text-center text-gray-400 text-sm">아직 기록이 없습니다.</div>
+            <div className="p-8 text-center text-on-surface-variant font-body-sm text-body-sm">아직 기록이 없습니다.</div>
           )}
 
           {!isLoading && !error && entries.length > 0 && (
-            <table className="w-full text-sm">
+            <table className="w-full font-body-sm text-body-sm">
               <thead>
-                <tr className="bg-gray-50 text-gray-400 text-xs uppercase">
+                <tr className="bg-surface-container-highest text-on-surface-variant font-label-mono text-label-mono uppercase tracking-wider">
                   <th className="px-4 py-3 text-center w-10">순위</th>
                   <th className="px-4 py-3 text-left">닉네임</th>
                   <th className="px-4 py-3 text-center">클릭 수</th>
@@ -84,27 +84,35 @@ function LeaderboardPage() {
                   return (
                     <tr
                       key={entry.id}
-                      className={`border-t ${isCurrentUser ? 'bg-yellow-50' : 'hover:bg-gray-50'}`}
+                      className={`border-t border-outline-variant ${isCurrentUser ? 'bg-primary/10' : 'hover:bg-surface-container-low'}`}
                     >
-                      <td className="px-4 py-3 text-center font-bold text-gray-500">
-                        {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}
+                      <td className="px-4 py-3 text-center font-semibold">
+                        {i === 0 ? (
+                          <span className="text-tertiary-fixed-dim">1</span>
+                        ) : i === 1 ? (
+                          <span className="text-secondary-fixed-dim">2</span>
+                        ) : i === 2 ? (
+                          <span className="text-tertiary">3</span>
+                        ) : (
+                          <span className="text-on-surface-variant">{i + 1}</span>
+                        )}
                       </td>
                       <td className="px-4 py-3">
-                        <span className={isCurrentUser ? 'font-bold text-yellow-700' : 'text-gray-700'}>
+                        <span className={isCurrentUser ? 'font-bold text-primary' : 'text-on-surface'}>
                           {entry.user_name}
                         </span>
                         {isCurrentUser && (
-                          <span className="ml-1 text-xs text-yellow-500">← 나</span>
+                          <span className="ml-1 text-xs text-primary font-label-mono">← 나</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-center text-gray-700">{entry.click_count}번</td>
-                      <td className="px-4 py-3 text-center font-mono text-gray-700">
+                      <td className="px-4 py-3 text-center text-on-surface">{entry.click_count}번</td>
+                      <td className="px-4 py-3 text-center font-display-timer text-on-surface">
                         {formatTime(entry.elapsed_ms)}
                       </td>
-                      <td className="px-4 py-3 text-gray-500 truncate max-w-[120px]">
+                      <td className="px-4 py-3 text-on-surface-variant truncate max-w-[120px]">
                         {entry.start_article}
                       </td>
-                      <td className="px-4 py-3 text-gray-500 truncate max-w-[120px]">
+                      <td className="px-4 py-3 text-on-surface-variant truncate max-w-[120px]">
                         {entry.end_article}
                       </td>
                     </tr>
@@ -117,7 +125,7 @@ function LeaderboardPage() {
 
         <button
           onClick={() => navigate('/')}
-          className="w-full py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors"
+          className="w-full py-3 bg-primary text-on-primary font-body-sm font-semibold rounded-xl hover:brightness-110 transition-all"
         >
           다시 하기
         </button>
