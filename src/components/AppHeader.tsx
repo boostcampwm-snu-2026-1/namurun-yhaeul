@@ -1,5 +1,4 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { NamurunLogo } from './NamurunLogo'
 
 export function AppHeader() {
   const navigate = useNavigate()
@@ -11,7 +10,7 @@ export function AppHeader() {
         className="flex items-center gap-4 cursor-pointer"
         onClick={() => navigate('/')}
       >
-        <NamurunLogo size={40} />
+        <img src="/logo.png" alt="나무런 로고" className="h-10 w-10 object-contain" />
         <span className="font-headline-lg font-extrabold text-[24px] tracking-tighter text-primary">나무런</span>
       </div>
       <nav className="hidden md:flex items-center h-full">

@@ -1,5 +1,4 @@
 import { useMainPage } from '../hooks/useMainPage'
-import { NamurunLogo } from '../components/NamurunLogo'
 import { AppHeader } from '../components/AppHeader'
 
 function MainPage() {
@@ -31,7 +30,7 @@ function MainPage() {
           <section className="mb-stack-lg flex flex-col items-center justify-center text-center py-stack-lg">
             <div className="relative mb-stack-md">
               <div className="absolute -inset-4 border border-primary/20 animate-pulse" />
-              <NamurunLogo size={128} className="relative z-10" />
+              <img src="/logo.png" alt="나무런 로고" className="h-32 w-32 object-contain relative z-10" />
             </div>
             <h1 className="font-headline-lg text-headline-lg text-primary glow-text mb-4 uppercase tracking-tight">
               나무런
