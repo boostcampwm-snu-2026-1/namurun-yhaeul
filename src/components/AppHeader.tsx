@@ -12,7 +12,7 @@ export function AppHeader() {
         onClick={() => navigate('/')}
       >
         <NamurunLogo size={40} />
-        <span className="font-headline-lg text-[24px] tracking-tighter text-primary">나무런</span>
+        <span className="font-headline-lg font-extrabold text-[24px] tracking-tighter text-primary">나무런</span>
       </div>
       <nav className="hidden md:flex items-center h-full">
         <button
