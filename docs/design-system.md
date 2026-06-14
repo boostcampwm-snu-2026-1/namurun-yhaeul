@@ -127,9 +127,9 @@
 
 ## 화면별 레이아웃 구조
 
-Stitch HTML 기준 핵심 골격. 1280px 기준.
+Stitch HTML 기준 핵심 골격. 1280px 기준. 각 화면 제목 옆 `( )`는 구현 파일 — 디자인 동기화 시 이 매핑을 기준으로 화면과 코드를 대조한다.
 
-### 메인 로비
+### 메인 로비 (`src/pages/MainPage.tsx`)
 
 - `<body class="circuit-bg">`, `h-16` fixed 헤더(glow 그림자), `w-sidebar-width` fixed 사이드바
 - `<main class="pt-24 lg:pl-[344px] px-gutter">`
@@ -137,14 +137,14 @@ Stitch HTML 기준 핵심 골격. 1280px 기준.
 - 벤토 그리드(`md:grid-cols-12`): 오늘의 문제 8칸 + 순위 4칸
 - 하단 progress bar (`fixed bottom-0 h-1 bg-primary/20`)
 
-### 게임 플레이
+### 게임 플레이 (`src/pages/GamePage.tsx`, `src/components/GameHeader.tsx`, `src/components/PathSidebar.tsx`)
 
 - `<body class="overflow-hidden">` — window 스크롤 없음
 - `h-20` HUD 헤더: 로고 + 미션 상태(`font-label-mono` UPPERCASE + `font-headline-md`) | 타이머(`font-display-timer glow-timer`) + 클릭 | 히스토리/설정 + 포기하기(`border-2 border-error text-error`)
 - `h-[calc(100vh-80px)]` fixed 사이드바: 번호 매긴 경로, active `border-l-4 border-primary bg-surface-container-highest translate-x-1`
 - `<section class="ml-sidebar-width">` → `max-w-content-max-width` 위키 본문
 
-### 결과 화면
+### 결과 화면 (`src/pages/ResultPage.tsx`)
 
 - `h-16` fixed 헤더, `max-w-content-max-width mx-auto` 중앙 정렬 메인
 - "미션 완료" 배지(`font-label-mono text-primary uppercase tracking-[0.2em]`)
@@ -152,7 +152,7 @@ Stitch HTML 기준 핵심 골격. 1280px 기준.
 - 3열 스탯 그리드(`grid-cols-3 gap-stack-md`), 타이머 `font-display-timer`
 - 수평 경로 시각화 (dashed connector)
 
-### 전체 순위
+### 전체 순위 (`src/pages/LeaderboardPage.tsx`)
 
 - `h-16` fixed 헤더, `h-[calc(100vh-64px)]` fixed 사이드바, `md:ml-sidebar-width` 메인
 - 테이블: `thead`는 `bg-surface-container-highest`, `font-label-mono uppercase tracking-wider`
