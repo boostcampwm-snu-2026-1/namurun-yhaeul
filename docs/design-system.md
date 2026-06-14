@@ -1,171 +1,176 @@
-# 디자인 시스템 — Wiki Speedrun System
+# 디자인 시스템 — 나무런
 
-나무런의 디자인 스펙. **Google Stitch 프로젝트 `나무위키 레이스`(ID `523199435923899364`)가 디자인 소스 오브 트루스다.** 코드의 색·타이포그래피·스페이싱·레이아웃은 Stitch HTML 출력물과 항상 일치해야 한다.
+나무런의 디자인 스펙. **`src/index.css`의 `@theme` 토큰이 단일 소스 오브 트루스다.** 색·타이포그래피·스페이싱·레이아웃은 모두 이 토큰을 통해 참조한다.
 
 이 문서는 `docs/architecture.md`(아키텍처)와 한 쌍으로, 아키텍처가 "무엇을 그리는가"라면 이 문서는 "어떻게 보이는가"를 규정한다.
+
+> Google Stitch는 초기 디자인 참고용으로 사용했으며, 소스 오브 트루스가 아니다. 이후 디자인 결정은 이 문서와 코드를 기준으로 한다.
 
 ---
 
 ## 작업 규칙
 
-### 1. Stitch가 스펙이다
+### 1. 토큰이 스펙이다
 
-- 코드의 디자인은 Stitch HTML과 **항상 일치**해야 한다.
-- **디자인 변경은 반드시 Stitch에서 먼저** 수정한다 (MCP `edit_screens` 또는 Stitch UI). 그 뒤 화면을 다시 읽어와 코드에 반영한다.
-- **코드에서 임의로 디자인을 바꾸지 않는다.** 이는 CLAUDE.md의 "구현이 docs 설계와 다르면 docs를 먼저 고친다" 절차와 동일한 원칙이다.
-- 불일치 발견 시 **코드를 Stitch에 맞춘다.** Stitch 쪽이 틀렸다고 판단되면 Stitch부터 고친 뒤 코드에 반영한다.
-
-### 2. 하드코딩 금지 — 토큰으로만 참조
-
-- 색상·폰트·radius·반복 스페이싱은 **반드시 디자인 토큰**(`@theme` 기반 Tailwind 유틸리티)으로 참조한다. `#5ddac9`, `320px` 같은 값을 컴포넌트에 직접 작성하지 않는다.
+- 색상·폰트·radius·스페이싱은 **반드시 `@theme` 토큰**으로 참조한다. 컴포넌트에 `#006a60`, `320px` 같은 값을 직접 쓰지 않는다.
 - 새 값이 필요하면 **토큰을 먼저 `src/index.css`에 정의**한 뒤 사용한다.
-- **토큰 이름은 Stitch 네이밍을 그대로** 따른다 (`font-display-timer`, `sidebar-width`, `gutter` 등). 이름이 같아야 양쪽 대조가 쉽다.
 - 인라인 `style`로 색상·그림자를 하드코딩하지 않는다 — 토큰 또는 커스텀 클래스를 쓴다.
 
-### 3. 토큰 정의는 한 곳에
+### 2. 토큰 정의는 한 곳에
 
-- 모든 디자인 토큰과 커스텀 클래스(`.circuit-bg`, `.glow-*`, `.neon-glow`, 커스텀 스크롤바)는 **`src/index.css` 단일 정의**로 둔다. 컴포넌트에 흩뿌리지 않는다.
+- 모든 디자인 토큰과 커스텀 클래스(`.circuit-bg`, `.glow-*`, 커스텀 스크롤바)는 **`src/index.css` 단일 정의**로 둔다.
 - 이 프로젝트는 `tailwind.config.ts` 없이 Tailwind v4의 `@theme` 블록으로 토큰을 등록한다.
 
-### 4. 임의값(arbitrary value) 예외
+### 3. 임의값(arbitrary value) 사용 기준
 
-- Stitch HTML 자체가 일회성 임의값을 쓰는 경우(`pl-[344px]`, `shadow-[0_0_12px_rgba(93,218,201,0.3)]`)는 **그대로 반영한다** — 그게 소스이기 때문이다.
-- 단, **같은 임의값이 2회 이상 반복되면 토큰화**하여 `@theme`로 승격한다.
+- 일회성 레이아웃 조정(`pl-[344px]`, `h-[calc(100vh-80px)]`)은 허용한다.
+- 같은 임의값이 2회 이상 반복되면 토큰으로 승격한다.
 
-### 5. 레이아웃 구조도 스펙이다
+### 4. 반응형 기준
 
-- fixed 헤더/사이드바, `ml-sidebar-width`, `px-gutter`, `max-w-content-max-width` 등 **Stitch의 구조·스페이싱 클래스를 그대로** 쓴다. 시각만 비슷하게 맞추고 DOM 구조를 바꾸지 않는다.
-- 시맨틱 태그(`header`/`nav`/`main`/`aside`)와 Stitch의 계층 구조를 유지한다.
+- **1280px가 기준 뷰포트다.** 반응형 breakpoint(`md:`, `lg:`)는 필요한 경우에만 최소한으로 추가한다.
 
-### 6. 반응형 기준
+### 5. 일관성 유지
 
-- **1280px가 기준 뷰포트다.** 반응형은 Stitch가 제공하는 breakpoint(`md:`, `lg:`)만 반영하고 임의로 추가하지 않는다.
-
-### 7. 검증 절차
-
-- 화면 작업 후 해당 Stitch 스크린을 다시 받아 **클래스 단위로 대조**한다.
-- 토큰 변경은 영향 범위가 전역이므로, 변경 시 5개 화면(메인/게임/결과/순위/로고)을 모두 확인한다.
+- 디자인을 변경할 때는 이 문서와 `src/index.css`를 함께 업데이트한다.
+- 변경이 여러 화면에 영향을 주는 경우(토큰 수정 등) 모든 페이지를 확인한다.
 
 ---
 
 ## 디자인 토큰
 
-모든 토큰은 `src/index.css`의 `@theme` 블록에 등록한다. 정확한 값은 Stitch HTML이 기준이며, 아래는 등록되어야 할 토큰의 목록이다.
+모든 토큰은 `src/index.css`의 `@theme` 블록에 등록한다. 아래 표가 현재 등록된 값의 기준이다.
 
 ### 색상 (`--color-*`)
 
+라이트 모드 기반. Material Design 3 Tonal Palette 계열.
+
+#### Surface / Background
+
 | 토큰 | 값 | 용도 |
 |------|-----|------|
-| `surface` / `background` | `#0f1513` | 기본 배경 (다크) |
-| `surface-container-lowest` | `#090f0e` | 가장 어두운 컨테이너 |
-| `surface-container-low` | `#171d1c` | 헤더 배경 |
-| `surface-container` | `#1b2120` | 카드·사이드바 배경 |
-| `surface-container-high` | `#252b2a` | 강조 컨테이너 |
-| `surface-container-highest` | `#303635` | active 항목·테이블 헤더 |
-| `on-surface` | `#dee4e1` | 기본 텍스트 |
-| `on-surface-variant` | `#bcc9c6` | 보조 텍스트 |
-| `outline` | `#869490` | 테두리 |
-| `outline-variant` | `#3d4947` | 약한 구분선 |
-| `primary` | `#5ddac9` | 핵심 강조 (네온 그린) |
-| `primary-container` | `#00a495` | 강조 컨테이너 |
-| `on-primary` | `#003731` | primary 위 텍스트 |
+| `background` / `surface` / `surface-bright` | `#f5fbf8` | 기본 배경 |
+| `surface-dim` | `#d5dbd9` | 어두운 배경 변형 |
+| `surface-container-lowest` | `#ffffff` | 가장 밝은 컨테이너 |
+| `surface-container-low` | `#eff5f2` | 헤더 배경 |
+| `surface-container` | `#e9efed` | 사이드바·카드 배경 |
+| `surface-container-high` | `#e4e9e7` | 강조 컨테이너 |
+| `surface-container-highest` | `#dee4e1` | active 항목·테이블 헤더 |
+| `surface-variant` | `#dee4e1` | 구분선·배지 배경 |
+| `inverse-surface` | `#2b3230` | 다크 반전 배경 (토스트 등) |
+| `inverse-on-surface` | `#ecf2ef` | 다크 반전 위 텍스트 |
+
+#### Text
+
+| 토큰 | 값 | 용도 |
+|------|-----|------|
+| `on-surface` / `on-background` | `#171d1c` | 기본 텍스트 |
+| `on-surface-variant` | `#3d4947` | 보조 텍스트 |
+
+#### Primary (Teal)
+
+| 토큰 | 값 | 용도 |
+|------|-----|------|
+| `primary` | `#006a60` | 핵심 강조색 |
+| `primary-container` | `#00a495` | 강조 버튼 배경 |
+| `primary-fixed` | `#7cf7e5` | 고정 강조 |
+| `primary-fixed-dim` | `#5ddac9` | 고정 강조 dim |
+| `on-primary` | `#ffffff` | primary 위 텍스트 |
 | `on-primary-container` | `#00312c` | primary-container 위 텍스트 |
-| `secondary` | `#c8c6c5` | 은색(2위) |
-| `tertiary` | `#ffb59b` | 타이머/금색 계열 강조 |
-| `error` | `#ffb4ab` | 포기/위험 |
+| `inverse-primary` | `#5ddac9` | 다크 배경 위 primary |
+| `surface-tint` | `#006a60` | 표면 tint |
+
+#### Secondary / Tertiary / Error / Outline
+
+| 토큰 | 값 | 용도 |
+|------|-----|------|
+| `secondary` | `#5f5e5e` | 보조 강조 |
+| `secondary-container` | `#e2dfde` | 보조 컨테이너 |
+| `on-secondary` | `#ffffff` | secondary 위 텍스트 |
+| `tertiary` | `#984626` | 3위·동색 강조 |
+| `tertiary-container` | `#d97854` | 순위 컨테이너 (1위 등) |
+| `tertiary-fixed-dim` | `#ffb59b` | 금색 계열 (1위) |
+| `on-tertiary` | `#ffffff` | tertiary 위 텍스트 |
+| `on-tertiary-container` | `#531700` | tertiary-container 위 텍스트 |
+| `error` | `#ba1a1a` | 오류·포기 버튼 |
+| `error-container` | `#ffdad6` | 오류 컨테이너 |
+| `on-error` | `#ffffff` | error 위 텍스트 |
+| `on-error-container` | `#93000a` | error-container 위 텍스트 |
+| `outline` | `#6c7a77` | 테두리 |
+| `outline-variant` | `#bcc9c6` | 약한 구분선 |
 
 ### 타이포그래피
 
-폰트: **Hanken Grotesk**(헤드라인/본문), **JetBrains Mono**(타이머/라벨/코드). Google Fonts로 로드.
+폰트: **Hanken Grotesk**(헤드라인), **Inter**(본문), **JetBrains Mono**(타이머/라벨). Google Fonts로 로드.
 
-| 토큰 | 역할 |
-|------|------|
-| `font-display-timer` | 타이머 대형 표시 (JetBrains Mono) |
-| `font-headline-lg` | 페이지 대제목 |
-| `font-headline-md` | 섹션·미션 제목 |
-| `font-label-mono` | 모노 라벨 (UPPERCASE, tracking) |
-| `font-body-sm` | 기본 본문 |
-| `font-body-article` | 위키 본문 |
-
-> 각 토큰의 정확한 size·weight·tracking·line-height는 Stitch HTML 기준값을 `index.css`에 등록한다.
+| 토큰 | 폰트 | 크기 | 굵기 | line-height | 용도 |
+|------|------|------|------|-------------|------|
+| `headline-lg` | Hanken Grotesk | 32px | 800 | 40px | 페이지 대제목 |
+| `headline-md` | Hanken Grotesk | 24px | 700 | 32px | 섹션·미션 제목 |
+| `body-sm` | Inter | 14px | 400 | 20px | 기본 본문 |
+| `body-article` | Inter | 17px | 400 | 28px | 위키 본문 |
+| `label-mono` | JetBrains Mono | 12px | 500 | 16px | 모노 라벨 (UPPERCASE) |
+| `display-timer` | JetBrains Mono | 48px | 700 | 48px | 타이머 대형 표시 |
 
 ### 스페이싱
 
+| 토큰 | 값 | 용도 |
+|------|-----|------|
+| `sidebar-width` | `320px` | 사이드바 너비 |
+| `content-max-width` | `800px` | 본문 최대 너비 |
+| `gutter` | `24px` | 기본 좌우 패딩 |
+| `stack-lg` | `32px` | 섹션 간 세로 간격 |
+| `stack-md` | `16px` | 요소 간 세로 간격 |
+| `stack-sm` | `8px` | 밀접 요소 간격 |
+| `unit` | `4px` | 기본 단위 |
+
+### Border Radius (각진 미감)
+
 | 토큰 | 값 |
 |------|-----|
-| `sidebar-width` | `320px` |
-| `content-max-width` | `800px` |
-| `gutter` | `24px` |
-| `stack-lg` | `32px` |
-| `stack-md` | `16px` |
-| `stack-sm` | `8px` |
-| `unit` | `4px` |
-
-### Border radius (각진 미감)
-
-| 토큰 | 값 |
-|------|-----|
-| `DEFAULT` | `0.125rem` |
-| `lg` | `0.25rem` |
-| `xl` | `0.5rem` |
-| `full` | `0.75rem` |
+| `DEFAULT` | `0.125rem` (2px) |
+| `lg` | `0.25rem` (4px) |
+| `xl` | `0.5rem` (8px) |
+| `full` | `0.75rem` (12px) |
 
 ### 커스텀 클래스
 
-`src/index.css`에 정의. Stitch와 동일한 CSS 값을 사용한다.
+`src/index.css`에 정의.
 
 | 클래스 | 용도 |
 |--------|------|
-| `.circuit-bg` | 메인 배경의 회로 패턴 |
-| `.glow-green` | primary 네온 글로우 (버튼) |
+| `.circuit-bg` | 배경의 회로 패턴 (teal 도트, 24px 간격) |
+| `.glow-green` | primary 글로우 box-shadow (버튼) |
 | `.glow-text` | 텍스트 글로우 (히어로 제목) |
-| `.glow-timer` | 타이머 네온 글로우 |
-| `.neon-glow` | 결과 화면 대제목 강한 글로우 |
-| 커스텀 스크롤바 | 다크 테마 스크롤바 |
+| `.glow-timer` | 타이머 텍스트 글로우 |
 
 ---
 
 ## 화면별 레이아웃 구조
 
-Stitch HTML 기준 핵심 골격. 1280px 기준. 각 화면 제목 옆 `( )`는 구현 파일 — 디자인 동기화 시 이 매핑을 기준으로 화면과 코드를 대조한다.
+1280px 기준. 각 화면 제목 옆 `( )`는 구현 파일이다.
 
 ### 메인 로비 (`src/pages/MainPage.tsx`)
 
-- `<body class="circuit-bg">`, `h-16` fixed 헤더(glow 그림자), `w-sidebar-width` fixed 사이드바
-- `<main class="pt-24 lg:pl-[344px] px-gutter">`
-- 히어로: 128px 로고 + `font-headline-lg glow-text` 대제목
-- 벤토 그리드(`md:grid-cols-12`): 오늘의 문제 8칸 + 순위 4칸
-- 하단 progress bar (`fixed bottom-0 h-1 bg-primary/20`)
+- `<body class="circuit-bg">`, `h-16` fixed 헤더, `w-sidebar-width` fixed 사이드바 (lg 이상)
+- `<main>`: 오늘의 문제 카드 + 랜덤 도전 버튼
+- 헤더: 로고 + 서비스명, 네비게이션 링크
 
 ### 게임 플레이 (`src/pages/GamePage.tsx`, `src/components/GameHeader.tsx`, `src/components/PathSidebar.tsx`)
 
-- `<body class="overflow-hidden">` — window 스크롤 없음
-- `h-20` HUD 헤더: 로고 + 미션 상태(`font-label-mono` UPPERCASE + `font-headline-md`) | 타이머(`font-display-timer glow-timer`) + 클릭 | 히스토리/설정 + 포기하기(`border-2 border-error text-error`)
-- `h-[calc(100vh-80px)]` fixed 사이드바: 번호 매긴 경로, active `border-l-4 border-primary bg-surface-container-highest translate-x-1`
+- `h-20` HUD 헤더: 로고 + 목표 문서 | 타이머(`font-display-timer glow-timer`) + 클릭 수 | 포기하기 버튼
+- `w-sidebar-width` fixed 사이드바: 번호 매긴 경로, active `border-l-4 border-primary bg-surface-container-highest`
 - `<section class="ml-sidebar-width">` → `max-w-content-max-width` 위키 본문
 
 ### 결과 화면 (`src/pages/ResultPage.tsx`)
 
-- `h-16` fixed 헤더, `max-w-content-max-width mx-auto` 중앙 정렬 메인
-- "미션 완료" 배지(`font-label-mono text-primary uppercase tracking-[0.2em]`)
-- 64px italic `neon-glow` 대제목
-- 3열 스탯 그리드(`grid-cols-3 gap-stack-md`), 타이머 `font-display-timer`
-- 수평 경로 시각화 (dashed connector)
+- `max-w-content-max-width mx-auto` 중앙 정렬
+- 도착 메시지, 소요 시간(`font-display-timer`) + 클릭 수 스탯
+- 이동 경로 목록, 닉네임 입력 + 제출
 
 ### 전체 순위 (`src/pages/LeaderboardPage.tsx`)
 
-- `h-16` fixed 헤더, `h-[calc(100vh-64px)]` fixed 사이드바, `md:ml-sidebar-width` 메인
-- 테이블: `thead`는 `bg-surface-container-highest`, `font-label-mono uppercase tracking-wider`
-- 순위 색: 1위 `text-tertiary-container`(금) / 2위 `text-secondary`(은) / 3위 `text-[#CD7F32]`(동)
-- "나의 순위" 행: `bg-primary/10 border-2 border-primary` 하이라이트
-
----
-
-## Stitch 워크플로우
-
-1. **읽기**: MCP `list_screens` → `get_screen`으로 대상 화면 HTML 확인
-2. **수정**: 디자인 변경이 필요하면 MCP `edit_screens` 또는 Stitch UI에서 수정
-3. **반영**: 수정된 화면을 다시 읽어 코드에 토큰·구조 반영
-4. **대조**: 작업 후 클래스 단위로 Stitch와 코드를 비교
-
-MCP 프로젝트 ID: `523199435923899364`
+- `max-w-content-max-width mx-auto` 중앙 정렬
+- 테이블: 헤더 `bg-surface-container-highest`, `font-label-mono uppercase`
+- 순위 색: 1위 `text-tertiary-fixed-dim`(금) / 2위 `text-secondary-fixed-dim`(은) / 3위 `text-tertiary`(동)
+- 나의 순위 행: `bg-primary/10 border border-primary` 하이라이트
