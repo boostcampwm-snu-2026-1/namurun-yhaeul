@@ -32,7 +32,7 @@ function GamePage() {
   const [gameEnd] = useState<string>(() => locationState?.end ?? '')
 
   const { elapsedMs, clickCount, path, startGame, recordVisit, stopGame } = useGame()
-  const { article, isLoading, error: articleError, loadArticle } = useArticle()
+  const { article, isLoading, error: articleError, loadArticle, loadArticleOptimistic } = useArticle()
   const { resolveRedirect } = useRedirect()
 
   const [toast, setToast] = useState<string | null>(null)
@@ -88,8 +88,7 @@ function GamePage() {
 
       try {
         const rawTitle = decodeURIComponent(href.slice(3).split('#')[0])
-        const resolved = await resolveRedirect(rawTitle)
-        await loadArticle(resolved)
+        const resolved = await loadArticleOptimistic(rawTitle, resolveRedirect)
         recordVisit(resolved)
         if (contentRef.current) contentRef.current.scrollTop = 0
 
@@ -111,7 +110,7 @@ function GamePage() {
         isNavigatingRef.current = false
       }
     },
-    [resolveRedirect, loadArticle, recordVisit, showToast, gameEnd, gameStart, path, clickCount, stopGame, navigate],
+    [resolveRedirect, loadArticleOptimistic, recordVisit, showToast, gameEnd, gameStart, path, clickCount, stopGame, navigate],
   )
 
   if (!gameStart || !gameEnd) {
