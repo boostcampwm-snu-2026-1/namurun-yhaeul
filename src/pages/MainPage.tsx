@@ -1,4 +1,5 @@
 import { useMainPage } from '../hooks/useMainPage'
+import { NamurunLogo } from '../components/NamurunLogo'
 
 function MainPage() {
   const { isLoading, error, dailyPrompt, startDaily, startRandom } = useMainPage()
@@ -21,7 +22,8 @@ function MainPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background gap-10 p-6">
-      <div className="flex flex-col items-center gap-3">
+      <div className="flex flex-col items-center gap-4">
+        <NamurunLogo size={72} />
         <h1 className="font-headline text-4xl font-extrabold text-on-surface tracking-tight">나무런</h1>
         <p className="text-on-surface-variant text-sm text-center max-w-xs">
           나무위키 내부 링크만으로 목표 문서에 가장 빨리 도달하세요
