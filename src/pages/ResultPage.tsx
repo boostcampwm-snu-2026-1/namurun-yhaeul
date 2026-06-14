@@ -72,7 +72,7 @@ function ResultPage() {
     <div className="min-h-screen bg-background circuit-bg flex flex-col items-center justify-center p-gutter">
       <div className="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant w-full max-w-lg p-stack-lg flex flex-col gap-stack-md">
         <div className="text-center">
-          <p className="font-headline-md text-headline-md text-primary mb-1">도착!</p>
+          <p className="font-headline-md text-headline-md text-primary mb-1">목표 도달!</p>
           <p className="text-on-surface-variant font-body-sm text-body-sm">
             {result.startArticle} → {result.endArticle}
           </p>
@@ -87,7 +87,7 @@ function ResultPage() {
           </div>
           <div className="bg-surface-container-low rounded-xl p-stack-md text-center">
             <p className="text-label-mono font-label-mono text-on-surface-variant mb-1 uppercase tracking-wider">클릭 수</p>
-            <p className="text-2xl font-semibold text-on-surface">{result.clickCount}번</p>
+            <p className="text-2xl font-semibold text-on-surface">{result.clickCount}</p>
           </div>
         </div>
 

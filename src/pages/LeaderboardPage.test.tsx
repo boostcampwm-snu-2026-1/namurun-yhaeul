@@ -53,9 +53,9 @@ describe('LeaderboardPage', () => {
   it('유효한 state로 접근하면 리더보드가 표시된다', () => {
     mockLocationState = validState
     render(<LeaderboardPage />)
-    expect(screen.getByText('리더보드')).toBeTruthy()
+    expect(screen.getByText('전체 순위')).toBeTruthy()
     expect(screen.getByText('테스터')).toBeTruthy()
-    expect(screen.getByText('3번')).toBeTruthy()
+    expect(screen.getByText('3')).toBeTruthy()
   })
 
   it('현재 사용자 행에 "← 나" 표시가 붙는다', () => {

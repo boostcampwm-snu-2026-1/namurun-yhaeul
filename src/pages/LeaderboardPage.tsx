@@ -45,7 +45,7 @@ function LeaderboardPage() {
     <div className="min-h-screen bg-background circuit-bg flex flex-col items-center py-stack-lg px-gutter">
       <div className="w-full max-w-content-max-width flex flex-col gap-stack-lg">
         <div className="text-center">
-          <p className="font-headline-md text-headline-md text-on-surface mb-1">리더보드</p>
+          <p className="font-headline-md text-headline-md text-on-surface mb-1">전체 순위</p>
           <p className="text-on-surface-variant font-body-sm text-body-sm">
             {state.startArticle} → {state.endArticle}
           </p>
@@ -105,7 +105,7 @@ function LeaderboardPage() {
                           <span className="ml-1 text-xs text-primary font-label-mono">← 나</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-center text-on-surface">{entry.click_count}번</td>
+                      <td className="px-4 py-3 text-center text-on-surface">{entry.click_count}</td>
                       <td className="px-4 py-3 text-center font-display-timer text-on-surface">
                         {formatTime(entry.elapsed_ms)}
                       </td>

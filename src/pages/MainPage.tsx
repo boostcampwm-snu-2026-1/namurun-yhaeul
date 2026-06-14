@@ -1,4 +1,5 @@
 import { useMainPage } from '../hooks/useMainPage'
+import { NamurunLogo } from '../components/NamurunLogo'
 
 function MainPage() {
   const { isLoading, error, dailyPrompt, startDaily, startRandom } = useMainPage()
@@ -21,6 +22,7 @@ function MainPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-stack-lg p-gutter bg-background circuit-bg">
+      <NamurunLogo size={72} />
       <h1 className="font-headline-lg text-headline-lg text-primary glow-text">나무런</h1>
 
       {dailyPrompt ? (
