@@ -76,6 +76,7 @@
 - 완벽한 렌더링 불필요 — 게임 목적이므로 **링크 동작**이 핵심
 - 표, 이미지, 복잡한 매크로 깨짐 허용
 - `[[문서명]]` / `[[실제명|표시텍스트]]` 링크 렌더링이 최우선
+- `NamuMark().parse()`는 **Web Worker**(`src/workers/namumark.worker.ts`)에서 실행 — 메인 스레드 블로킹으로 타이머 UI가 멈추는 문제 방지. 요청 ID 비교로 빠른 연속 클릭 시 이전 파싱 결과를 무시(race condition 방지)
 
 ## 훅 설계 결정
 
@@ -160,6 +161,8 @@ src/
   lib/
     supabase.ts           ← Supabase 클라이언트 싱글톤 ✅
     r2.ts                 ← R2 fetch 유틸 ✅
+  workers/
+    namumark.worker.ts    ← NamuMark().parse() 전담 Web Worker ✅
   shims/
     crypto.ts             ← namumark-clone-core가 요구하는 crypto mock ✅
   types/
