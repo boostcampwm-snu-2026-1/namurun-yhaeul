@@ -278,6 +278,11 @@
   color: var(--color-on-surface-variant);
 }
 
+/* 카테고리 섹션 숨김 */
+.article-viewer .opennamu_category {
+  display: none;
+}
+
 /* 깨진 이미지(src 미설정) 및 틀 자리표시 링크 숨김 */
 .article-viewer img[src=""] {
   display: none;
