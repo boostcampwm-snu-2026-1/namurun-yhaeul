@@ -99,6 +99,7 @@
 | `outline` | `#6c7a77` | 테두리 |
 | `outline-variant` | `#bcc9c6` | 약한 구분선 |
 | `link` | `#1558d6` | 위키 본문 하이퍼링크 |
+| `link-external` | `#c96a00` | 외부 링크 (게임에서 클릭 차단) |
 
 ### 타이포그래피
 
@@ -144,6 +145,37 @@
 | `.glow-green` | primary 글로우 box-shadow (버튼) |
 | `.glow-text` | 텍스트 글로우 (히어로 제목) |
 | `.glow-timer` | 타이머 텍스트 글로우 |
+| `.article-doc-title` | 위키 문서 제목 — `headline-lg` 스타일, `outline-variant` 하단 구분선 |
+
+### `.article-viewer` 내부 스타일
+
+namumark-clone-core가 생성하는 클래스를 `src/index.css`에서 직접 타깃해 스타일링한다.
+
+| 선택자 | 용도 |
+|--------|------|
+| `a.opennamu_link_out` | 외부 링크 — `link-external`(주황색), 클릭 시 "외부 링크입니다!" 토스트 후 차단 |
+| `ul`, `ol`, `li` | 목록 bullet 복원 — Tailwind preflight이 `list-style` 초기화하므로 disc/decimal 재적용 |
+| `li.opennamu_list_2`, `li.opennamu_list_4` | 2·4레벨 중첩 bullet: circle |
+| `li.opennamu_list_3`, `li.opennamu_list_5` | 3·5레벨 중첩 bullet: square |
+| `li.opennamu_list_none` | 번호 목록 항목 — bullet 제거 (번호가 텍스트로 이미 포함됨) |
+| `blockquote` | 인용문 — 좌측 4px `primary` 선, `surface-container-low` 배경 |
+| `blockquote hr` | 인용문 내 구분선 — `outline-variant` 1px 선 |
+| `pre` | 코드 블록 — `surface-container` 배경, `outline-variant` 테두리, `label-mono` 폰트 |
+| `code` | 인라인 코드 — `surface-container` 배경, `label-mono` 폰트 |
+| `pre code` | 코드 블록 내부 — 배경·패딩 초기화 (highlight.js 테마 우선) |
+| `h1` ~ `h6` | 소제목 크기 계층 (h1: 2em / h2: 1.75em / h3: 1.5em / h4: 1.25em / h5: 1.1em / h6: 1em) |
+| `.article-content h1` ~ `h6` | 소제목 구분선 — `outline-variant` 하단 1px 선 (`.article-doc-title`과 분리를 위해 `.article-content` 범위만 타깃) |
+| `a[onclick*="opennamu_heading_folding"]` | 소제목 접기 버튼 — `on-surface-variant` 색, SVG chevron (JS가 ⊖/⊕ 텍스트를 교체) |
+| `.opennamu_TOC` | 목차 컨테이너 — `surface-container-low` 배경, `outline-variant` 테두리 |
+| `.opennamu_TOC_title` | 목차 헤딩 — 클릭으로 접기 토글 |
+| `.opennamu_TOC.toc-collapsed .toc-content` | TOC 접힘 상태 — `.toc-content`는 JS가 `opennamu_TOC_title` 이후 노드를 래핑해 동적 생성 |
+| `.opennamu_footnote` | 주석 섹션 — `outline-variant` 상단 구분선, `on-surface-variant` 텍스트 |
+| `hr.main_hr` | 본문 첫 줄 구분선 숨김 (`.article-doc-title` 하단 선과 중복) |
+| `.opennamu_category` | 카테고리 섹션 숨김 |
+| `a[href^="/w/%ED%8B%80%3A"]`, `a[href^="/upload"]` | 틀: 링크는 `/w/%ED%8B%80%3A` prefix로 숨김. 파일: 링크는 namumark가 `/upload?name=...`으로 렌더링하므로 `/upload` prefix로 타깃 |
+| `img[src=""]` | JS 미실행으로 src가 채워지지 않은 이미지 — `display: none` |
+| `th`, `td` | 테두리·패딩·좌측 정렬 — namumark가 td에 인라인 `style="text-align: right"` 를 삽입하므로 `text-align: left !important` 사용 |
+| `td:has(.katex)` | 수식 셀 — 테두리 제거, `text-align: center !important` (인라인 `text-align: right` 덮어쓰기) |
 
 ---
 

@@ -36,7 +36,7 @@
   ├─ 좌측 사이드바: 이동 경로 (시작 문서부터 현재 문서까지 순서대로 표시)
   ├─ 문서 영역: R2 fetch → namumark-clone-core 렌더링
   ├─ 링크 클릭 → href 형식 판별 → redirects 확인 → R2 fetch → 이동
-  ├─ 외부 링크: 클릭 차단
+  ├─ 외부 링크(`opennamu_link_out`): 클릭 차단 + 토스트 "외부 링크입니다!"
   ├─ R2 fetch 실패 시: 우측 하단 토스트 "이동이 불가능합니다", 현재 문서 유지
   │    ArticleNetworkError  — 연결 실패 (오프라인, CORS 등)
   │    ArticleNotFoundError — 404, R2에 파일 없음
@@ -77,6 +77,10 @@
 - 표, 이미지, 복잡한 매크로 깨짐 허용
 - `[[문서명]]` / `[[실제명|표시텍스트]]` 링크 렌더링이 최우선
 - `NamuMark().parse()`는 **Web Worker**(`src/workers/namumark.worker.ts`)에서 실행 — 메인 스레드 블로킹으로 타이머 UI가 멈추는 문제 방지. 요청 ID 비교로 빠른 연속 클릭 시 이전 파싱 결과를 무시(race condition 방지)
+- **`$` 에스케이프 workaround**: namumark 내부 `String.replace(regex, string)` 호출에서 교체 문자열 안의 `$1`, `$2` 등이 캡처 그룹 참조로 해석됨. 각주에 달러 금액(`$1.30` 등)이 있는 문서에서 RangeError 발생. 파싱 전 `$`를 PUA 문자(U+E024)로 치환하고 파싱 후 HTML에서 복원하는 방식으로 우회. `split/join` 사용(`replace`도 동일 문제 있으므로)
+- **문서 제목은 namumark 파싱 결과 외부에서 렌더링** — `ArticleViewer`가 `article.title`을 별도 `<h1>` 요소로 표시. XSS 방지: dangerouslySetInnerHTML에 제목을 넣지 않는다
+- **namumark 생성 클래스 · 엘리먼트 (CSS 타깃)**: `opennamu_TOC`(목차 컨테이너), `opennamu_TOC_title`(목차 헤딩), `opennamu_footnote`(주석 섹션), `opennamu_category`(카테고리 섹션 숨김), `opennamu_list_N`(중첩 레벨별 bullet — 1·3·5: disc/square, 2·4: circle), `hr.main_hr`(본문 첫 줄 구분선 숨김), `img[src=""]`(JS 미실행으로 src가 빈 이미지 숨김). 틀:/파일: 링크는 `opennamu_not_exist_link` 클래스로 타깃하지 않음(DB에 없는 내부 링크 전체에 붙으므로 게임 링크까지 숨겨짐) — URL prefix(`a[href^="/w/%ED%8B%80%3A"]`, `a[href^="/upload"]`)로 대신 타깃
+- **HTML 주입 후 JS post-processing** (`useEffect([html])`): ① `hljs.highlightElement` — `pre code[class]` 구문 강조, ② ul 연속 문단 들여쓰기 — 블록 요소 또는 `<br><br>` 직전까지 인라인 노드를 수집해 `div`로 래핑 + 최하위 `li`의 `marginLeft`만큼 추가 패딩, ③ KaTeX 수식 렌더링 — namumark가 `[math(LaTeX)]`를 `<span id="*opennamu_math_N">JS_escaped_LaTeX</span>` 플레이스홀더로만 출력하고 실제 `katex.render()` 호출은 버려지는 JS에 담으므로, 파싱 후 DOM에서 `span[id*="opennamu_math_"]`를 찾아 직접 렌더링. `getToolJSSafe` 이스케이프 역변환: `\'` 처리 후 `JSON.parse`로 unescape, ④ footnote rescue — namumark가 footnote를 마지막 소제목 content div 안에 배치하므로 소제목 접기 시 주석이 함께 사라지는 버그 발생. `.opennamu_footnote`를 `article-content` 직계 자식으로 이동해 해결, ⑤ 접기 버튼 SVG 교체 — ⊖/⊕ 텍스트 → chevron SVG, `<sub>` 내 첫 자식 앞으로 DOM 이동, ⑥ TOC `.toc-content` wrapper 생성 — `opennamu_TOC_title` 이후 노드를 `div.toc-content`로 묶어 접기 토글 대상 단일화
 
 ## 훅 설계 결정
 
@@ -147,7 +151,7 @@ src/
     LeaderboardPage.tsx   ← 리더보드 화면 (동일 문제 기준 상위 10개, 현재 행 하이라이트) ✅
     RenderDemoPage.tsx    ← 개발용 렌더링 테스트 (/render-demo, 배포 무관)
   components/
-    ArticleViewer.tsx     ← namumark 렌더링 ✅
+    ArticleViewer.tsx     ← namumark 렌더링 + 문서 제목 표시 ✅
     GameHeader.tsx        ← 타이머(MM:SS.s), 클릭 수, 목표 문서명 ✅
     PathSidebar.tsx       ← 이동 경로 사이드바 (현재 문서 하이라이트) ✅
     NamurunLogo.tsx       ← 나무런 하이브리드 로고 SVG 컴포넌트 ✅

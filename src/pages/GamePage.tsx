@@ -68,7 +68,14 @@ function GamePage() {
       // 섹션 앵커(#s-1.1, #fn-1 등): 브라우저 기본 스크롤에 맡김
       if (href.startsWith('#')) return
 
-      // 외부 링크 차단
+      // 외부 링크 — 토스트 후 차단
+      if (anchor.classList.contains('opennamu_link_out')) {
+        e.preventDefault()
+        showToast('외부 링크입니다!')
+        return
+      }
+
+      // 그 외 비내부 링크 차단 (/edit_section/, /upload 등)
       if (!href.startsWith('/w/')) {
         e.preventDefault()
         return
