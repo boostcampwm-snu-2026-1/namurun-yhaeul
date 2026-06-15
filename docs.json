@@ -22,6 +22,12 @@
           "docs/data-pipeline",
           "docs/design-system"
         ]
+      },
+      {
+        "group": "개발 가이드",
+        "pages": [
+          "docs/agent-workflow"
+        ]
       }
     ]
   },
