@@ -21,7 +21,9 @@ self.onmessage = (e: MessageEvent<ParseRequest>) => {
   const { id, text, title } = e.data
   try {
     const safeText = text.split('$').join(DOLLAR_PUA)
-    const { text: processedText, tokens } = preprocessIncludes(safeText, title)
+    // <table bgcolor=...> → <tablebgcolor=...> 형태의 비표준 나무마크 테이블 속성 정규화
+    const normalizedText = safeText.replace(/<table[\s\n]+([a-z])/gi, '<table$1')
+    const { text: processedText, tokens } = preprocessIncludes(normalizedText, title)
     const database = { data: [{ data: processedText, title }] }
     const result = new NamuMark(processedText, { docName: title }, database).parse()
     let html = (result[0] as string).split(DOLLAR_PUA).join('$')

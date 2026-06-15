@@ -279,19 +279,40 @@ export function preprocessIncludes(
   text: string,
   docTitle: string,
 ): { text: string; tokens: Map<string, string> } {
-  const PREFIX = '[include('
+  const INCLUDE_PREFIX = '[include('
+  const HTML_PREFIX = '{{{#!html '
+  const HTML_SUFFIX = '}}}'
   const tokens = new Map<string, string>()
   let idx = 0
   let result = ''
   let i = 0
 
   while (i < text.length) {
-    const pi = text.indexOf(PREFIX, i)
-    if (pi === -1) { result += text.slice(i); break }
+    const pi = text.indexOf(INCLUDE_PREFIX, i)
+    const hi = text.indexOf(HTML_PREFIX, i)
 
+    if (pi === -1 && hi === -1) { result += text.slice(i); break }
+
+    // {{{#!html}}} 가 먼저 나오면 처리
+    if (hi !== -1 && (pi === -1 || hi < pi)) {
+      result += text.slice(i, hi)
+      const contentStart = hi + HTML_PREFIX.length
+      const closeIdx = text.indexOf(HTML_SUFFIX, contentStart)
+      if (closeIdx === -1) { result += text[hi]; i = hi + 1; continue }
+      const rawHtml = text.slice(contentStart, closeIdx)
+      if (rawHtml.trim()) {
+        const token = `${TOKEN_START}${idx++}${TOKEN_END}`
+        tokens.set(token, rawHtml)
+        result += token
+      }
+      i = closeIdx + HTML_SUFFIX.length
+      continue
+    }
+
+    // [include(...)] 처리
     result += text.slice(i, pi)
 
-    const bodyStart = pi + PREFIX.length
+    const bodyStart = pi + INCLUDE_PREFIX.length
     const end = findIncludeEnd(text, bodyStart)
     if (end === -1) { result += text[pi]; i = pi + 1; continue }
 
