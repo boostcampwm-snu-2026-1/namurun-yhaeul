@@ -147,3 +147,4 @@ scripts/__pycache__/
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+.vercel
