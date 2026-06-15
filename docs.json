@@ -1,0 +1,37 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "나무런",
+  "theme": "mint",
+  "favicon": "/public/favicon.ico",
+  "colors": {
+    "primary": "#2D9B4E",
+    "light": "#4CAF70",
+    "dark": "#1A6B34"
+  },
+  "navigation": {
+    "groups": [
+      {
+        "group": "소개",
+        "pages": ["index"]
+      },
+      {
+        "group": "설계 문서",
+        "pages": [
+          "docs/architecture",
+          "docs/db-schema",
+          "docs/data-pipeline",
+          "docs/design-system"
+        ]
+      },
+      {
+        "group": "개발 가이드",
+        "pages": [
+          "docs/agent-workflow"
+        ]
+      }
+    ]
+  },
+  "feedback": {
+    "thumbsRating": false
+  }
+}

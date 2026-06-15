@@ -1,0 +1,6 @@
+pandas
+pyarrow
+boto3
+supabase==2.5.3
+python-dotenv
+tqdm

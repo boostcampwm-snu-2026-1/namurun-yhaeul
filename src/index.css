@@ -1,0 +1,512 @@
+@import "tailwindcss";
+
+@theme {
+  /* ── 색상: Surface / Background ── */
+  --color-background:                #f5fbf8;
+  --color-surface:                   #f5fbf8;
+  --color-surface-bright:            #f5fbf8;
+  --color-surface-dim:               #d5dbd9;
+  --color-surface-container-lowest:  #ffffff;
+  --color-surface-container-low:     #eff5f2;
+  --color-surface-container:         #e9efed;
+  --color-surface-container-high:    #e4e9e7;
+  --color-surface-container-highest: #dee4e1;
+  --color-surface-variant:           #dee4e1;
+  --color-inverse-surface:           #2b3230;
+  --color-inverse-on-surface:        #ecf2ef;
+
+  /* ── 색상: Text ── */
+  --color-on-surface:                #171d1c;
+  --color-on-background:             #171d1c;
+  --color-on-surface-variant:        #3d4947;
+
+  /* ── 색상: Primary (Teal) ── */
+  --color-primary:                   #006a60;
+  --color-primary-container:         #00a495;
+  --color-primary-fixed:             #7cf7e5;
+  --color-primary-fixed-dim:         #5ddac9;
+  --color-on-primary:                #ffffff;
+  --color-on-primary-container:      #00312c;
+  --color-on-primary-fixed:          #00201c;
+  --color-on-primary-fixed-variant:  #005048;
+  --color-inverse-primary:           #5ddac9;
+  --color-surface-tint:              #006a60;
+
+  /* ── 색상: Secondary ── */
+  --color-secondary:                 #5f5e5e;
+  --color-secondary-container:       #e2dfde;
+  --color-secondary-fixed:           #e5e2e1;
+  --color-secondary-fixed-dim:       #c8c6c5;
+  --color-on-secondary:              #ffffff;
+  --color-on-secondary-container:    #636262;
+  --color-on-secondary-fixed:        #1c1b1b;
+  --color-on-secondary-fixed-variant: #474746;
+
+  /* ── 색상: Tertiary (순위·강조) ── */
+  --color-tertiary:                  #984626;
+  --color-tertiary-container:        #d97854;
+  --color-tertiary-fixed:            #ffdbcf;
+  --color-tertiary-fixed-dim:        #ffb59b;
+  --color-on-tertiary:               #ffffff;
+  --color-on-tertiary-container:     #531700;
+  --color-on-tertiary-fixed:         #380d00;
+  --color-on-tertiary-fixed-variant: #7a2f11;
+
+  /* ── 색상: Error ── */
+  --color-error:                     #ba1a1a;
+  --color-error-container:           #ffdad6;
+  --color-on-error:                  #ffffff;
+  --color-on-error-container:        #93000a;
+
+  /* ── 색상: Outline ── */
+  --color-outline:                   #6c7a77;
+  --color-outline-variant:           #bcc9c6;
+
+  /* ── 색상: Link ── */
+  --color-link:                      #1558d6;
+  --color-link-external:             #c96a00;
+
+  /* ── 스페이싱 ── */
+  --spacing-sidebar-width:           320px;
+  --spacing-content-max-width:       800px;
+  --spacing-gutter:                  24px;
+  --spacing-stack-lg:                32px;
+  --spacing-stack-md:                16px;
+  --spacing-stack-sm:                8px;
+  --spacing-unit:                    4px;
+
+  /* ── Border radius (각진 미감) ── */
+  --radius:                          0.125rem;
+  --radius-lg:                       0.25rem;
+  --radius-xl:                       0.5rem;
+  --radius-full:                     0.75rem;
+
+  /* ── 폰트 패밀리 ── */
+  --font-headline-lg:                "Hanken Grotesk", sans-serif;
+  --font-headline-md:                "Hanken Grotesk", sans-serif;
+  --font-body-sm:                    "Inter", sans-serif;
+  --font-body-article:               "Inter", sans-serif;
+  --font-label-mono:                 "JetBrains Mono", monospace;
+  --font-display-timer:              "JetBrains Mono", monospace;
+}
+
+/* ── 폰트 사이즈 + 굵기 + 행간 복합 유틸리티 ── */
+@layer utilities {
+  .text-headline-lg {
+    font-size: 32px;
+    line-height: 40px;
+    font-weight: 800;
+  }
+  .text-headline-md {
+    font-size: 24px;
+    line-height: 32px;
+    font-weight: 700;
+  }
+  .text-body-sm {
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 400;
+  }
+  .text-body-article {
+    font-size: 17px;
+    line-height: 28px;
+    font-weight: 400;
+  }
+  .text-label-mono {
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+  }
+  .text-display-timer {
+    font-size: 48px;
+    line-height: 48px;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+}
+
+/* ── 커스텀 클래스 ── */
+.circuit-bg {
+  background-image:
+    radial-gradient(circle at 2px 2px, rgba(0, 164, 149, 0.05) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+.glow-green {
+  box-shadow: 0 0 15px rgba(0, 164, 149, 0.2);
+}
+
+.glow-text {
+  text-shadow: 0 0 8px rgba(0, 164, 149, 0.3);
+}
+
+.glow-timer {
+  text-shadow: 0 0 12px rgba(0, 164, 149, 0.4);
+}
+
+/* ── 기본 폰트·색상 ── */
+@layer base {
+  body {
+    font-family: var(--font-body-sm);
+    color: var(--color-on-surface);
+    background-color: var(--color-background);
+  }
+}
+
+/* ── 위키 본문 스타일 ── */
+.article-viewer table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.5rem 0;
+}
+
+.article-viewer th,
+.article-viewer td {
+  border: 1px solid var(--color-outline-variant);
+  padding: 4px 8px;
+  /* namumark가 td에 인라인 style="text-align: right/center" 를 삽입하므로
+     !important 없이는 CSS가 무시됨 */
+  text-align: left !important;
+}
+
+/* 수식만 담은 표 셀 — td:has(.katex)는 일반 td 규칙보다 명시도가 높아
+   !important 충돌 시 이 쪽이 이김 */
+.article-viewer td:has(.katex) {
+  text-align: center !important;
+  border: none;
+  padding: 0.25rem 0;
+}
+
+.article-viewer th {
+  background-color: var(--color-surface-container-low);
+  font-weight: 600;
+}
+
+.article-viewer {
+  padding-left: var(--spacing-gutter);
+  padding-right: var(--spacing-gutter);
+  font-family: var(--font-body-article);
+  font-size: 17px;
+  line-height: 28px;
+  font-weight: 400;
+}
+
+/* 내부 링크 */
+.article-viewer a {
+  color: var(--color-link);
+  text-decoration: none;
+}
+
+/* 외부 링크 — 게임에서 클릭 차단, 주황색으로 구분 */
+.article-viewer a.opennamu_link_out {
+  color: var(--color-link-external);
+}
+
+/* 목록 — Tailwind preflight이 list-style 초기화하므로 복원 */
+.article-viewer ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin: 0.25rem 0;
+}
+.article-viewer ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin: 0.25rem 0;
+}
+.article-viewer li {
+  margin: 0.125rem 0;
+}
+.article-viewer li.opennamu_list_2,
+.article-viewer li.opennamu_list_4 {
+  list-style-type: circle;
+}
+.article-viewer li.opennamu_list_3,
+.article-viewer li.opennamu_list_5 {
+  list-style-type: square;
+}
+.article-viewer li.opennamu_list_none {
+  list-style: none;
+}
+
+/* 인용문 */
+.article-viewer blockquote {
+  border-left: 4px solid var(--color-primary);
+  background-color: var(--color-surface-container-low);
+  margin: 0.5rem 0;
+  padding: 0.75rem 1rem;
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+}
+.article-viewer blockquote hr {
+  border: none;
+  border-top: 1px solid var(--color-outline-variant);
+  margin: 0.5rem 0;
+}
+
+/* 코드 블록 */
+.article-viewer pre {
+  background-color: var(--color-surface-container);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-lg);
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+  font-family: var(--font-label-mono);
+  font-size: 0.875em;
+  line-height: 1.6;
+  margin: 0.5rem 0;
+}
+.article-viewer code {
+  font-family: var(--font-label-mono);
+  font-size: 0.875em;
+  background-color: var(--color-surface-container);
+  border-radius: var(--radius);
+  padding: 0.1em 0.3em;
+}
+.article-viewer pre code {
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+/* heading 편집(✎) 링크만 숨김 — 같은 <sub> 안에 접기 버튼도 있으므로 <sub> 전체 숨기면 안 됨 */
+.article-viewer sub a[href^="/edit_section/"] {
+  display: none;
+}
+
+/* 문서 제목 */
+.article-viewer .article-doc-title {
+  font-family: var(--font-headline-lg);
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 800;
+  color: var(--color-on-surface);
+  margin: var(--spacing-stack-lg) 0 var(--spacing-stack-md);
+  padding-bottom: var(--spacing-stack-sm);
+  border-bottom: 2px solid var(--color-outline-variant);
+}
+
+/* 소제목(heading) 크기 계층 */
+.article-viewer h1 {
+  font-size: 2em;
+  font-weight: 700;
+  margin: 1.25rem 0 0.5rem;
+  line-height: 1.3;
+  color: var(--color-on-surface);
+}
+.article-viewer h2 {
+  font-size: 1.75em;
+  font-weight: 700;
+  margin: 1.25rem 0 0.5rem;
+  line-height: 1.3;
+  color: var(--color-on-surface);
+}
+.article-viewer h3 {
+  font-size: 1.5em;
+  font-weight: 600;
+  margin: 1rem 0 0.375rem;
+  line-height: 1.35;
+  color: var(--color-on-surface);
+}
+.article-viewer h4 {
+  font-size: 1.25em;
+  font-weight: 600;
+  margin: 0.875rem 0 0.25rem;
+  color: var(--color-on-surface);
+}
+.article-viewer h5 {
+  font-size: 1.1em;
+  font-weight: 600;
+  margin: 0.75rem 0 0.25rem;
+  color: var(--color-on-surface);
+}
+.article-viewer h6 {
+  font-size: 1em;
+  font-weight: 600;
+  margin: 0.5rem 0 0.25rem;
+  color: var(--color-on-surface-variant);
+}
+
+/* 소제목 아래 구분선 (article-content 내부 heading만 대상) */
+.article-viewer .article-content h1,
+.article-viewer .article-content h2,
+.article-viewer .article-content h3,
+.article-viewer .article-content h4,
+.article-viewer .article-content h5,
+.article-viewer .article-content h6 {
+  border-bottom: 1px solid var(--color-outline-variant);
+  padding-bottom: 0.25rem;
+}
+
+/* 접기 토글 버튼 — SVG 셰브론 (sub 안에 위치) */
+.article-viewer a[onclick*="opennamu_heading_folding"] {
+  display: inline-block;
+  color: var(--color-on-surface-variant);
+  margin-right: 0.25em;
+  text-decoration: none;
+  cursor: pointer;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+/* 목차(TOC) */
+.article-viewer .opennamu_TOC {
+  display: inline-block;
+  background-color: var(--color-surface-container-low);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-stack-md) var(--spacing-stack-lg);
+  margin: var(--spacing-stack-md) 0;
+  font-size: 0.9em;
+  line-height: 1.8;
+}
+.article-viewer .opennamu_TOC_title {
+  font-weight: 700;
+  display: block;
+  margin-bottom: 0;
+  color: var(--color-on-surface);
+  cursor: pointer;
+  user-select: none;
+}
+.article-viewer .opennamu_TOC_title::after {
+  content: ' ▼';
+  font-size: 0.7em;
+  opacity: 0.5;
+}
+.article-viewer .opennamu_TOC.toc-collapsed .opennamu_TOC_title::after {
+  content: ' ▶';
+}
+/* 접힌 상태: wrapper 전체 숨김 */
+.article-viewer .opennamu_TOC.toc-collapsed .toc-content {
+  display: none;
+}
+.article-viewer .opennamu_TOC a {
+  color: var(--color-link);
+}
+.article-viewer .opennamu_TOC a:hover {
+  text-decoration: underline;
+}
+
+/* 주석(footnote) */
+.article-viewer .opennamu_footnote {
+  border-top: 1px solid var(--color-outline-variant);
+  margin-top: var(--spacing-stack-lg);
+  padding-top: var(--spacing-stack-md);
+  font-size: 0.85em;
+  line-height: 1.6;
+  color: var(--color-on-surface-variant);
+}
+
+/* 본문 첫 줄 구분선 숨김 (제목 border-bottom과 중복) */
+.article-viewer hr.main_hr {
+  display: none;
+}
+
+/* 카테고리 섹션 숨김 */
+.article-viewer .opennamu_category {
+  display: none;
+}
+
+/* 깨진 이미지(src 미설정) 숨김 */
+.article-viewer img[src=""] {
+  display: none;
+}
+
+/* 틀:/파일: 링크 숨김 — opennamu_not_exist_link는 DB에 없는 모든 링크에 붙으므로 클래스만으로 숨기면 게임 링크 전체가 사라짐.
+   - 틀: → /w/%ED%8B%80%3A (URL-encoded 틀:)
+   - 파일: → /upload?name=... (namumark가 파일 참조를 /upload 경로로 렌더링) */
+.article-viewer a[href^="/w/%ED%8B%80%3A"],
+.article-viewer a[href^="/upload"] {
+  display: none;
+}
+
+/* ── include 틀 박스 ────────────────────────────────────────────────────── */
+.article-viewer .namu-include {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.375rem 0.625rem;
+  margin: 0.375rem 0;
+  background: var(--color-surface-container-low);
+  border-left: 3px solid var(--color-primary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.article-viewer .namu-include__icon {
+  flex-shrink: 0;
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  margin-top: 2px;
+}
+.article-viewer .namu-include__body {
+  flex: 1;
+  min-width: 0;
+}
+.article-viewer .namu-include__body a {
+  color: var(--color-link);
+}
+.article-viewer .namu-include__body a:hover {
+  text-decoration: underline;
+}
+.article-viewer .namu-include--other-meaning {
+  border-left-color: var(--color-outline);
+}
+.article-viewer .namu-include--other-meaning .namu-include__icon {
+  color: var(--color-on-surface-variant);
+}
+
+/* ── 네모틀 (인라인 박스) ────────────────────────────────────────────────── */
+.article-viewer .namu-box {
+  display: inline;
+  border: 1px solid currentColor;
+  padding: 0 0.2em;
+}
+
+/* ── 글배경 (인라인 배경색) ─────────────────────────────────────────────── */
+.article-viewer .namu-bg {
+  display: inline;
+}
+
+/* ── 날짜 이동 (날짜 문서 네비게이션 테이블) ───────────────────────────── */
+.article-viewer .namu-date-nav {
+  width: fit-content !important;
+  margin: 0.5rem auto;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  text-align: center;
+}
+.article-viewer .namu-date-nav th {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  padding: 0.25rem 1.5rem;
+  font-weight: 600;
+}
+.article-viewer .namu-date-nav td {
+  border: 1px solid var(--color-outline);
+  padding: 0.2rem 0.5rem;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.article-viewer .namu-date-nav__side--prev {
+  text-align: right;
+}
+.article-viewer .namu-date-nav__side--next {
+  text-align: left;
+}
+.article-viewer td.namu-date-nav__label {
+  font-size: 0.75rem;
+  color: var(--color-on-surface-variant);
+  padding: 0.15rem 0.4rem;
+  line-height: 1.4;
+  text-align: center !important;
+}
+.article-viewer .namu-date-nav__today {
+  font-weight: 600;
+  padding: 0 1rem;
+  white-space: nowrap;
+}
+.article-viewer .namu-date-nav a {
+  color: var(--color-link);
+}
+.article-viewer .namu-date-nav a:hover {
+  text-decoration: underline;
+}

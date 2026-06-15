@@ -137,6 +137,12 @@ dist
 !.yarn/sdks
 !.yarn/versions
 
+# Pipeline data
+scripts/*.parquet
+scripts/.env
+scripts/.cache/
+scripts/__pycache__/
+
 # Vite files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
