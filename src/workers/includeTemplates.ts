@@ -116,6 +116,72 @@ function renderRelated(p: Record<string, string>): string {
   return box('nav', ICON_RELATE, `관련 문서: ${docs.map(docLink).join(', ')}`)
 }
 
+function sanitizeCSSValue(val: string): string {
+  const c = val.trim()
+  // ; < > " ' 등 탈출 문자 제외, CSS 값에 등장하는 문자만 허용
+  if (/^[a-zA-Z0-9#().,% ]+$/.test(c)) return c
+  return ''
+}
+
+function sanitizeColor(val: string): string {
+  const c = val.trim()
+  if (/^[0-9a-fA-F]{3}$|^[0-9a-fA-F]{6}$/.test(c)) return `#${c}`
+  if (/^#[0-9a-fA-F]{3}$|^#[0-9a-fA-F]{6}$/.test(c)) return c
+  if (/^[a-zA-Z]+$/.test(c)) return c
+  return ''
+}
+
+function renderBgText(p: Record<string, string>, bold: boolean, rounded: boolean): string {
+  const content = p['내용']
+  if (!content) return ''
+
+  const styles: string[] = []
+  const bgColor = sanitizeColor(p['배경색'] ?? '')
+  const textColor = sanitizeColor(p['글자색'] ?? '')
+
+  if (bgColor) styles.push(`background-color: ${bgColor}`)
+  if (textColor) styles.push(`color: ${textColor}`)
+  if (bold) styles.push('font-weight: bold')
+
+  if (rounded) {
+    const padding = sanitizeCSSValue(p['여백'] ?? '')
+    const radius = sanitizeCSSValue(p['곡률'] ?? '')
+    const size = sanitizeCSSValue(p['사이즈'] ?? '')
+    if (padding) styles.push(`padding: ${padding}`)
+    if (radius) styles.push(`border-radius: ${radius}`)
+    if (size) styles.push(`font-size: ${size}`)
+  }
+
+  const styleAttr = styles.length > 0 ? ` style="${styles.join('; ')}"` : ''
+  return `<span class="namu-bg"${styleAttr}>${esc(content)}</span>`
+}
+
+function renderBoxTemplate(p: Record<string, string>): string {
+  const content = p['내용']
+  if (!content) return ''
+  return `<span class="namu-box">${esc(content)}</span>`
+}
+
+function renderBoxTemplateB(p: Record<string, string>): string {
+  const content = p['내용']
+  if (!content) return ''
+
+  const styles: string[] = []
+  const rawSize = p['선크기']
+  const borderColor = sanitizeColor(p['선색'] ?? '')
+  const bgColor = sanitizeColor(p['배경색'] ?? '')
+  const textColor = sanitizeColor(p['글색'] ?? '')
+
+  const borderSize = rawSize !== undefined ? parseFloat(rawSize) : NaN
+  const bSize = !isNaN(borderSize) && borderSize > 0 ? `${borderSize}px` : '1px'
+  if (borderColor) styles.push(`border: ${bSize} solid ${borderColor}`)
+  if (bgColor) styles.push(`background-color: ${bgColor}`)
+  if (textColor) styles.push(`color: ${textColor}`)
+
+  const styleAttr = styles.length > 0 ? ` style="${styles.join('; ')}"` : ''
+  return `<span class="namu-box"${styleAttr}>${esc(content)}</span>`
+}
+
 function renderOtherMeaning(p: Record<string, string>): string {
   // 설명만 있는 단순 모드
   if (p['설명'] && !p['설명1'] && !p['other1']) {
@@ -168,6 +234,12 @@ const RENDERERS: Record<string, Renderer> = {
   '틀:다른 뜻':   (p)    => renderOtherMeaning(p),
   '틀:다른 뜻1':  (p)    => renderOtherMeaning(p),
   '틀: 다른 뜻':  (p)    => renderOtherMeaning(p),
+  '틀:네모틀':    (p)    => renderBoxTemplate(p),
+  '틀:네모틀b':   (p)    => renderBoxTemplateB(p),
+  '틀:글배경':    (p)    => renderBgText(p, false, false),
+  '틀:글배경b':   (p)    => renderBgText(p, true, false),
+  '틀:글배경r':   (p)    => renderBgText(p, false, true),
+  '틀:글배경br':  (p)    => renderBgText(p, true, true),
 }
 
 // ── public API ───────────────────────────────────────────────────────────────

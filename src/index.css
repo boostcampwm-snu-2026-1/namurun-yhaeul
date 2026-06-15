@@ -453,3 +453,15 @@
 .article-viewer .namu-include--other-meaning .namu-include__icon {
   color: var(--color-on-surface-variant);
 }
+
+/* ── 네모틀 (인라인 박스) ────────────────────────────────────────────────── */
+.article-viewer .namu-box {
+  display: inline;
+  border: 1px solid currentColor;
+  padding: 0 0.2em;
+}
+
+/* ── 글배경 (인라인 배경색) ─────────────────────────────────────────────── */
+.article-viewer .namu-bg {
+  display: inline;
+}
