@@ -186,8 +186,8 @@
   text-decoration: none;
 }
 
-/* heading 옆 편집(✎) <sub> 통째로 숨김 — 내부 링크만 숨기면 빈 <sub>가 잔류해 버튼 위치 틀어짐 */
-.article-viewer sub:has(a[href^="/edit_section/"]) {
+/* heading 편집(✎) 링크만 숨김 — 같은 <sub> 안에 접기 버튼도 있으므로 <sub> 전체 숨기면 안 됨 */
+.article-viewer sub a[href^="/edit_section/"] {
   display: none;
 }
 
@@ -255,16 +255,11 @@
   padding-bottom: 0.25rem;
 }
 
-/* 접기 토글 버튼 — SVG 셰브론, 숫자 왼쪽에 위치 */
-.article-viewer .article-content h1 a[onclick*="opennamu_heading_folding"],
-.article-viewer .article-content h2 a[onclick*="opennamu_heading_folding"],
-.article-viewer .article-content h3 a[onclick*="opennamu_heading_folding"],
-.article-viewer .article-content h4 a[onclick*="opennamu_heading_folding"],
-.article-viewer .article-content h5 a[onclick*="opennamu_heading_folding"],
-.article-viewer .article-content h6 a[onclick*="opennamu_heading_folding"] {
+/* 접기 토글 버튼 — SVG 셰브론 (sub 안에 위치) */
+.article-viewer a[onclick*="opennamu_heading_folding"] {
   display: inline-block;
   color: var(--color-on-surface-variant);
-  margin-right: 0.35em;
+  margin-right: 0.25em;
   text-decoration: none;
   cursor: pointer;
   vertical-align: middle;
