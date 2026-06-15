@@ -36,7 +36,7 @@
   ├─ 좌측 사이드바: 이동 경로 (시작 문서부터 현재 문서까지 순서대로 표시)
   ├─ 문서 영역: R2 fetch → namumark-clone-core 렌더링
   ├─ 링크 클릭 → href 형식 판별 → redirects 확인 → R2 fetch → 이동
-  ├─ 외부 링크: 클릭 차단
+  ├─ 외부 링크(`opennamu_link_out`): 클릭 차단 + 토스트 "외부 링크입니다!"
   ├─ R2 fetch 실패 시: 우측 하단 토스트 "이동이 불가능합니다", 현재 문서 유지
   │    ArticleNetworkError  — 연결 실패 (오프라인, CORS 등)
   │    ArticleNotFoundError — 404, R2에 파일 없음
