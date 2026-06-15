@@ -182,6 +182,36 @@ function renderBoxTemplateB(p: Record<string, string>): string {
   return `<span class="namu-box"${styleAttr}>${esc(content)}</span>`
 }
 
+function renderDateNav(p: Record<string, string>): string {
+  const back = p['back']
+  const next = p['next']
+  const back2 = p['back2']
+  const next2 = p['next2']
+  const today = p['today'] ?? ''
+  if (!back && !next && !back2 && !next2) return ''
+
+  const a = (title: string | undefined, text: string) =>
+    title ? `<a href="/w/${encodeURIComponent(title)}">${esc(text)}</a>` : esc(text)
+
+  // Row 1: [back] [전날 / ←] [today rowspan=2] [다음날 / →] [next]
+  // Row 2: [back2] [전달]    (spanned)          [다음달]     [next2]
+  const r1 = `<tr>
+    <td class="namu-date-nav__side namu-date-nav__side--prev">${a(back, back ?? '')}</td>
+    <td class="namu-date-nav__label"><small>전날</small><br>${a(back, '←')}</td>
+    <td class="namu-date-nav__today" rowspan="2">${esc(today)}</td>
+    <td class="namu-date-nav__label"><small>다음날</small><br>${a(next, '→')}</td>
+    <td class="namu-date-nav__side namu-date-nav__side--next">${a(next, next ?? '')}</td>
+  </tr>`
+  const r2 = `<tr>
+    <td class="namu-date-nav__side namu-date-nav__side--prev">${a(back2, back2 ?? '')}</td>
+    <td class="namu-date-nav__label"><small>전달</small></td>
+    <td class="namu-date-nav__label"><small>다음달</small></td>
+    <td class="namu-date-nav__side namu-date-nav__side--next">${a(next2, next2 ?? '')}</td>
+  </tr>`
+
+  return `<table class="namu-date-nav"><thead><tr><th colspan="5">날짜 이동란</th></tr></thead><tbody>${r1}${r2}</tbody></table>`
+}
+
 function renderOtherMeaning(p: Record<string, string>): string {
   // 설명만 있는 단순 모드
   if (p['설명'] && !p['설명1'] && !p['other1']) {
@@ -240,6 +270,7 @@ const RENDERERS: Record<string, Renderer> = {
   '틀:글배경b':   (p)    => renderBgText(p, true, false),
   '틀:글배경r':   (p)    => renderBgText(p, false, true),
   '틀:글배경br':  (p)    => renderBgText(p, true, true),
+  '틀:날짜 이동': (p)    => renderDateNav(p),
 }
 
 // ── public API ───────────────────────────────────────────────────────────────

@@ -465,3 +465,48 @@
 .article-viewer .namu-bg {
   display: inline;
 }
+
+/* ── 날짜 이동 (날짜 문서 네비게이션 테이블) ───────────────────────────── */
+.article-viewer .namu-date-nav {
+  width: fit-content !important;
+  margin: 0.5rem auto;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  text-align: center;
+}
+.article-viewer .namu-date-nav th {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  padding: 0.25rem 1.5rem;
+  font-weight: 600;
+}
+.article-viewer .namu-date-nav td {
+  border: 1px solid var(--color-outline);
+  padding: 0.2rem 0.5rem;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.article-viewer .namu-date-nav__side--prev {
+  text-align: right;
+}
+.article-viewer .namu-date-nav__side--next {
+  text-align: left;
+}
+.article-viewer td.namu-date-nav__label {
+  font-size: 0.75rem;
+  color: var(--color-on-surface-variant);
+  padding: 0.15rem 0.4rem;
+  line-height: 1.4;
+  text-align: center !important;
+}
+.article-viewer .namu-date-nav__today {
+  font-weight: 600;
+  padding: 0 1rem;
+  white-space: nowrap;
+}
+.article-viewer .namu-date-nav a {
+  color: var(--color-link);
+}
+.article-viewer .namu-date-nav a:hover {
+  text-decoration: underline;
+}
