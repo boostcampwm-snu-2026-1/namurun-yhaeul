@@ -28,23 +28,30 @@ Always run `git pull`. Stop and report the error if it fails.
 
 ### 2. Open PR check
 
-Run `gh pr list --state open --json number,title,headRefName` to list open PRs.
+Run `gh pr list --state open --json number,title,headRefName,body` to list open PRs.
 
 If no open PRs exist, proceed to the pipeline immediately.
 
-If open PRs exist, extract the file list mentioned in the current issue's **구현 범위** and **탐색 시작점** fields.
-For each open PR, run `gh pr diff <number> --name-only` and compare against that file list.
+**Identify dependency PRs first:**
+Parse the current issue body for `**의존 이슈:**` and collect all listed issue numbers as `DEP_ISSUES`.
+From the open PR list, find PRs whose body contains `Closes #M` where `#M` ∈ `DEP_ISSUES`. Mark these as **dependency PRs** — they are intentionally expected to overlap and must be excluded from the conflict check.
 
-**If any open PR touches overlapping files — stop:**
+**For all remaining (non-dependency) open PRs:**
+Extract the file paths listed in the current issue's **탐색 시작점** field (present in all issue types).
+For each non-dependency open PR, run `gh pr diff <number> --name-only` and compare against that file list.
+
+**If any non-dependency PR touches overlapping files — skip this issue:**
+
+Output the following marker (used by auto-develop-all to detect skipped issues) and halt:
 ```
-⚠️  PR #N "제목"이 <겹치는 파일>을 수정합니다.
-해당 PR을 먼저 머지한 뒤 다시 실행하세요.
+SKIP #<N>: PR #M "제목"이 <겹치는 파일>을 수정합니다. 해당 PR 머지 후 재실행 필요.
 ```
 
-**If no overlap — warn and continue:**
+Then run `git checkout dev` before exiting.
+
+**If no conflict — warn and continue:**
 ```
-ℹ️  열린 PR N개가 있습니다: #A "...", #B "..."
-현재 이슈와 파일 겹침 없음 — 파이프라인을 계속 진행합니다.
+ℹ️  열린 PR N개 중 의존 PR M개 제외, 파일 겹침 없음 — 파이프라인을 계속 진행합니다.
 ```
 
 ---
@@ -64,7 +71,7 @@ Read `.claude/commands/auto-implement.md` and execute all its steps with issue n
 On completion: all commit units are implemented and committed.
 
 ### Phase 3 — Sync
-Read `.claude/commands/auto-sync.md` and execute all its steps.
+Read `.claude/commands/auto-sync.md` and execute all its steps with issue number `<N>`.
 
 On completion: docs are in sync with the implementation.
 
@@ -72,6 +79,15 @@ On completion: docs are in sync with the implementation.
 Read `.claude/commands/auto-pr.md` and execute all its steps with issue number `<N>`.
 
 On completion: PR is open and targeting `dev`.
+
+### Phase 5 — Cleanup
+**Always run, regardless of which phase stopped (Phase 1 through 4, success or halt):**
+```
+git checkout dev
+git pull
+```
+This ensures the workspace is ready for the next issue in a batch run.
+If `git checkout dev` fails (already on dev), treat as success and continue.
 
 ---
 
@@ -87,7 +103,7 @@ After Phase 4 completes, output the following debrief in Korean. Write each sect
 PR:     <URL>
 
 커밋 이력:
-<git log --oneline dev..HEAD 출력>
+<git log --oneline <BASE>..HEAD 출력  (BASE는 auto-plan이 결정한 base 브랜치)>
 
 ---
 
@@ -109,7 +125,7 @@ PR:     <URL>
 (PR에서 집중해서 볼 파일/로직. 단순 chore면 생략)
 
 ## 다음 이슈 제안
-(현재 열린 이슈 중 자연스러운 다음 작업 1개. gh issue list로 확인)
+(배치 실행(/auto-develop-all) 중이 아닐 때만 출력. 현재 열린 이슈 중 자연스러운 다음 작업 1개. gh issue list로 확인)
 ```
 
 ---
@@ -121,7 +137,7 @@ If the pipeline was previously interrupted mid-way (e.g. auto-implement posted a
 1. Resolve the issue (fix the code, clarify the spec, etc.)
 2. Re-run `/auto-develop <N>`
 3. Each phase self-detects its completion state and skips already-done work:
-   - auto-plan: skips if work plan comment already exists on issue
+   - auto-plan: if work plan comment already exists, skip posting — but **checkout the branch named in the comment** (`브랜치: feature/xxx` line) before proceeding to Phase 2
    - auto-implement: skips already-committed units (cross-checks git log)
    - auto-sync: skips if no discrepancies found
    - auto-pr: skips if PR already exists for the branch

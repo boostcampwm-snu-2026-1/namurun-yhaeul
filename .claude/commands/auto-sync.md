@@ -4,7 +4,7 @@ Compares implemented code against docs, applies any needed updates, and commits 
 
 ## Usage
 
-`/auto-sync` (runs on current branch)
+`/auto-sync [<issue-number>]` (runs on current branch; issue number used to determine base branch)
 
 ---
 
@@ -19,9 +19,16 @@ Compares implemented code against docs, applies any needed updates, and commits 
 
 ## Execution
 
-### Step 1 — Read context (run in parallel)
+### Step 1 — Read context
 
-- `git diff dev...HEAD --name-only` — files changed on this branch
+**Determine base branch:**
+- If issue number `<N>` was provided: run `gh issue view <N> --comments` and extract `<BASE>` from the work plan comment's `브랜치:` line:
+  - `브랜치: feature/xxx (base: feature/yyy)` → `BASE=feature/yyy`
+  - `브랜치: feature/xxx` (no annotation) → `BASE=dev`
+- If no issue number provided: `BASE=dev`
+
+Run in parallel:
+- `git diff <BASE>...HEAD --name-only` — files changed on this branch (excluding BASE's own changes)
 - Read `CLAUDE.md` → get docs file list from `## 상세 문서`
 
 ### Step 2 — Read relevant docs

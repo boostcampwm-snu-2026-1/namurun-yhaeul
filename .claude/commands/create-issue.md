@@ -39,13 +39,111 @@ Do **not** ask the user for information you can look up in the code.
 Fill in all template fields based on the description and Step 2 research.  
 For fields where intent is unclear, write your best guess and mark it `[?]`.
 
-Use the field structure matching the chosen type:
+Use the **exact** markdown template for the chosen type below. Field names must match exactly — the automation pipeline parses them by bold-text key (`**필드명:**`).
 
-**feat** — 배경 / 구현 범위 / 완료 기준 / 탐색 시작점  
-**fix** — 증상 / 재현 조건 / 관련 코드 / 완료 기준 / 탐색 시작점  
-**refactor** — 현재 상태 / 목표 상태 / 범위 / 완료 기준 / 탐색 시작점  
-**chore** — 배경 / 변경 범위 / 완료 기준 / 탐색 시작점  
-**test** — 테스트 대상 / 테스트 케이스 / 파일 범위 / 탐색 시작점
+---
+
+**feat**
+```markdown
+**배경:** (왜 이 기능이 필요한가)
+
+**구현 범위:**
+- 신규: (새로 만들 파일)
+- 수정: (변경할 파일)
+
+**완료 기준:**
+- [ ] (검증 가능한 완료 조건)
+
+**탐색 시작점:**
+- src/path/to/file.tsx
+```
+
+---
+
+**fix**
+```markdown
+**증상:** (무엇이 잘못 동작하는가)
+
+**재현 조건:**
+1. (재현 단계)
+
+**관련 코드:** (버그가 있는 위치 간단 설명)
+
+**완료 기준:**
+- [ ] (검증 가능한 완료 조건)
+
+**탐색 시작점:**
+- src/path/to/file.tsx
+```
+
+---
+
+**refactor**
+```markdown
+**현재 상태:** (현재 코드의 문제)
+
+**목표 상태:** (리팩터링 후 기대하는 구조)
+
+**변경 범위:**
+- 수정: (변경할 파일)
+
+**완료 기준:**
+- [ ] (검증 가능한 완료 조건)
+
+**탐색 시작점:**
+- src/path/to/file.tsx
+```
+
+---
+
+**chore**
+```markdown
+**배경:** (왜 이 작업이 필요한가)
+
+**변경 범위:**
+- (변경될 내용)
+
+**완료 기준:**
+- [ ] (검증 가능한 완료 조건)
+
+**탐색 시작점:**
+- package.json
+- src/path/to/config.ts
+```
+
+---
+
+**test**
+```markdown
+**테스트 대상:** (무엇을 테스트하는가)
+
+**테스트 케이스:**
+- (케이스 1)
+- (케이스 2)
+
+**변경 범위:**
+- 신규: (새로 만들 테스트 파일)
+
+**완료 기준:**
+- [ ] (검증 가능한 완료 조건)
+
+**탐색 시작점:**
+- src/path/to/target.tsx
+```
+
+---
+
+**공통 규칙:**
+
+`**의존 이슈:**` — 이 이슈 구현에 다른 이슈의 코드가 선행되어야 할 때만 맨 아래에 추가:
+```
+**의존 이슈:** #N
+```
+단순 관련이 아닌, 코드 의존이 있을 때만. 없으면 이 줄 자체를 생략.
+
+`**완료 기준:**` — `- [ ] ...` 체크리스트만 허용. "잘", "충분히", "적절히" 같은 검증 불가 표현 금지.
+
+`**탐색 시작점:**` — `src/...` 형식의 실제 파일 경로만 허용. 컴포넌트명·모듈명 단독 사용 금지.
 
 ### Step 4 — Ask focused questions
 
@@ -59,10 +157,12 @@ Go through these two sources and list every question candidate:
 
 1. **Draft markers**: every `[?]` you wrote in Step 3 must become a question — no exceptions.
 2. **Mandatory checklist**: go through each item below and ask yourself "do I know the answer with certainty?" If not, add it as a question.
+3. **의존 이슈 확인**: 이 이슈 구현에 다른 이슈의 코드가 선행되어야 하는가? 그렇다면 의존 이슈 번호를 확인한다.
 
 | Category | What to verify |
 |----------|---------------|
-| 완료 기준 | Each criterion unambiguous? No vague verbs like "잘 보여야 한다"? |
+| 완료 기준 형식 | 모든 항목이 `- [ ] ...` 체크리스트 형식인가? 모호한 동사("잘", "충분히", "보여야") 없는가? |
+| 탐색 시작점 | 모든 항목이 `src/...` 형식의 실제 파일 경로인가? 추상적 이름(컴포넌트명만)은 없는가? |
 | 구현 방식 | Multiple valid approaches exist? (DB vs client, hook vs inline, A vs B) |
 | 오류/예외 처리 | What happens on network error? Empty state? Loading state? |
 | UI/UX | If UI is involved: layout, navigation behavior, what text to show? |
@@ -104,7 +204,16 @@ After the user answers, re-check: do any answers introduce new ambiguities? If y
 
 ### Step 5 — Refine and confirm
 
-Incorporate user's answers. Present the final draft in Korean:
+Incorporate user's answers. Before presenting the final draft, run this internal checklist — fix any failure silently before showing to the user:
+
+| Check | Rule |
+|-------|------|
+| 완료 기준 형식 | 모든 항목이 `- [ ] ...` 형식인가 |
+| 탐색 시작점 형식 | 모든 항목이 실제 파일 경로(`src/...`)인가 |
+| 의존 이슈 형식 | 있다면 정확히 `**의존 이슈:** #N` 형식인가 |
+| 모호한 표현 | 완료 기준에 "잘", "충분히", "적절히" 등 검증 불가 표현이 없는가 |
+
+Present the final draft in Korean:
 
 ```
 ## 최종 이슈

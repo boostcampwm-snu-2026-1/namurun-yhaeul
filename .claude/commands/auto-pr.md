@@ -23,20 +23,39 @@ Pushes the current branch and creates a PR to dev. No human approval steps.
 ### Step 1 — Read context (run in parallel)
 
 - `git branch --show-current`
-- `git log --oneline dev..HEAD`
 - `gh issue view <N> --comments` — issue body and work plan comment
 - `gh pr list --head <branch> --state open` — check if PR already exists
+
+After reading the work plan comment, extract `<BASE>` from the `브랜치:` line:
+- `브랜치: feature/xxx (base: feature/yyy)` → `BASE=feature/yyy`
+- `브랜치: feature/xxx` (no annotation) → `BASE=dev`
+
+Then run: `git log --oneline <BASE>..HEAD`
 
 If a PR already exists for this branch, output its URL and stop:
 ```
 이미 PR이 존재합니다: <URL>
 ```
 
+### Step 1.5 — Resolve PR base branch
+
+Using `<BASE>` extracted in Step 1:
+
+- If `BASE=dev`: `PR_BASE=dev`
+- If `BASE=feature/yyy`: confirm the branch still exists on remote:
+  ```
+  git ls-remote --heads origin feature/yyy
+  ```
+  - Exists → `PR_BASE=feature/yyy`
+  - Not found (already merged and deleted) → `PR_BASE=dev`
+
+Store as `PR_BASE` for use in Step 5.
+
 ### Step 2 — Docs sync check
 
-Run `git log --oneline dev..HEAD`.  
+Run `git log --oneline <BASE>..HEAD` (using `<BASE>` from Step 1).  
 If no `docs:` commit exists AND no files under `docs/` or `CLAUDE.md` were changed:  
-→ Read `.claude/commands/auto-sync.md` and execute all its steps before continuing.
+→ Read `.claude/commands/auto-sync.md` and execute all its steps with issue number `<N>` before continuing.
 
 ### Step 3 — Push
 
@@ -65,7 +84,7 @@ Closes #N
 ### Step 5 — Create PR
 
 ```
-gh pr create --base dev --title "<title>" --body "<body>"
+gh pr create --base <PR_BASE> --title "<title>" --body "<body>"
 ```
 
 ### Step 6 — Output log
@@ -74,6 +93,11 @@ gh pr create --base dev --title "<title>" --body "<body>"
 ✓ auto-pr 완료
 
 PR: <URL>
-브랜치: feature/xxx → dev
+브랜치: feature/xxx → <PR_BASE>
 Closes #N
+```
+
+If `PR_BASE` is not `dev`, append a note:
+```
+ℹ️  base가 feature 브랜치입니다. #M PR 머지 시 GitHub이 자동으로 base를 dev로 변경합니다.
 ```

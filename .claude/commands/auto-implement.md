@@ -25,9 +25,14 @@ Check each condition. On failure, print the reason and stop.
 ### Step 1 — Read context (run in parallel)
 
 - `gh issue view <N> --comments` — issue body and work plan comment
-- `git log --oneline dev..HEAD` — already completed commits on this branch
 - Read all files listed in the issue's **탐색 시작점** field
 - Read all relevant docs from `CLAUDE.md`'s `## 상세 문서` section
+
+After reading the work plan comment, extract `<BASE>` from the `브랜치:` line:
+- If line is `브랜치: feature/xxx (base: feature/yyy)` → `BASE=feature/yyy`
+- If line is `브랜치: feature/xxx` (no base annotation) → `BASE=dev`
+
+Then run: `git log --oneline <BASE>..HEAD` — already completed commits on this branch
 
 ### Step 2 — Extract and resume
 
@@ -101,7 +106,7 @@ Repeat for the next unit.
 
 커밋: N개
 ```
-`git log --oneline dev..HEAD` 출력
+`git log --oneline <BASE>..HEAD` 출력 (`<BASE>` = Step 1에서 추출한 값)
 
 ```
 → /auto-sync 로 docs 동기화를 진행하세요.
