@@ -19,7 +19,8 @@
         "pages": [
           "docs/architecture",
           "docs/db-schema",
-          "docs/data-pipeline"
+          "docs/data-pipeline",
+          "docs/design-system"
         ]
       }
     ]
