@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import type { Article } from '../lib/r2'
+import hljs from 'highlight.js'
+import 'highlight.js/styles/github.css'
 
 declare global {
   interface Window {
@@ -99,6 +101,47 @@ export function ArticleViewer({ article }: Props) {
     // 초기 ⊖/⊕ → SVG 아이콘으로 교체 + 숫자 왼쪽으로 이동
     // 구조: <span id="_sub"> 텍스트 <sub> ✎(숨김) 접기버튼 </sub> </span>
     // 접기 버튼을 span의 firstChild 앞으로 옮겨 텍스트 왼쪽에 배치
+    contentRef.current?.querySelectorAll<HTMLElement>('pre code[class]').forEach((el) => {
+      hljs.highlightElement(el)
+    })
+
+    // ul 다음에 오는 인라인 노드(텍스트·링크·br 등)를 블록 요소 직전까지 묶어 들여쓰기 적용
+    const BLOCK_TAGS = new Set(['DIV', 'P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'UL', 'OL', 'TABLE', 'BLOCKQUOTE', 'PRE', 'HR'])
+    contentRef.current?.querySelectorAll('ul').forEach((ul) => {
+      const lastLi = ul.querySelector<HTMLElement>('li:last-child')
+      const liMarginLeft = lastLi ? parseInt(lastLi.style.marginLeft || '0', 10) : 0
+
+      const inlineNodes: ChildNode[] = []
+      let consecutiveBrs = 0
+      let node: ChildNode | null = ul.nextSibling
+      while (node && !BLOCK_TAGS.has((node as Element).nodeName)) {
+        if ((node as Element).nodeName === 'BR') {
+          consecutiveBrs++
+          if (consecutiveBrs >= 2) break  // <br><br> = 새 문단, 수집 중단
+        } else {
+          consecutiveBrs = 0
+        }
+        inlineNodes.push(node)
+        node = node.nextSibling
+      }
+
+      const hasText = inlineNodes.some(
+        (n) => n.nodeType === Node.TEXT_NODE && (n.textContent ?? '').trim(),
+      )
+      if (!hasText) return
+
+      // 첫 번째 의미 있는 노드가 <br>이면 새 문단 — 들여쓰기 적용 안 함
+      const firstMeaningful = inlineNodes.find(
+        (n) => !(n.nodeType === Node.TEXT_NODE && !(n.textContent ?? '').trim()),
+      )
+      if (!firstMeaningful || (firstMeaningful as Element).nodeName === 'BR') return
+
+      const wrapper = document.createElement('div')
+      wrapper.style.paddingLeft = `calc(1.5rem + ${liMarginLeft}px)`
+      ul.parentNode?.insertBefore(wrapper, inlineNodes[0])
+      inlineNodes.forEach((n) => wrapper.appendChild(n))
+    })
+
     contentRef.current?.querySelectorAll<HTMLElement>('[onclick*="opennamu_heading_folding"]').forEach((btn) => {
       const isCollapsed = btn.textContent?.trim() === '⊕'
       setFoldIcon(btn, isCollapsed ? 'right' : 'down')
