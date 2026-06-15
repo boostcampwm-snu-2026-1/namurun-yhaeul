@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import type { Article } from '../lib/r2'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css'
+import katex from 'katex'
+import 'katex/dist/katex.min.css'
 
 declare global {
   interface Window {
@@ -140,6 +142,22 @@ export function ArticleViewer({ article }: Props) {
       wrapper.style.paddingLeft = `calc(1.5rem + ${liMarginLeft}px)`
       ul.parentNode?.insertBefore(wrapper, inlineNodes[0])
       inlineNodes.forEach((n) => wrapper.appendChild(n))
+    })
+
+    // namumark가 [math(LaTeX)] 를 <span id="opennamu_math_N">JS_escaped_LaTeX</span> 으로 변환하고
+    // katex.render 호출은 renderDataJS(JS 코드)에만 담아 반환 — 워커에서 버리므로 수동 렌더링 필요.
+    // textContent는 getToolJSSafe 이스케이프 적용 상태 → JSON.parse로 역변환 후 KaTeX 렌더링.
+    contentRef.current?.querySelectorAll<HTMLElement>('span[id*="opennamu_math_"]').forEach((span) => {
+      const escaped = span.textContent ?? ''
+      if (!escaped) return
+      try {
+        // getToolJSSafe: \n→\\n, \→\\, '→\', "→\" — JSON.parse는 \'를 지원하지 않으므로 먼저 처리
+        const jsonSafe = escaped.split("\\'").join("'")
+        const latex = JSON.parse('"' + jsonSafe + '"') as string
+        katex.render(latex, span, { throwOnError: false })
+      } catch {
+        // 파싱 실패 시 원문 그대로 유지
+      }
     })
 
     // namumark는 주석(footnote)을 renderData 끝에 추가한 뒤 heading을 처리하므로

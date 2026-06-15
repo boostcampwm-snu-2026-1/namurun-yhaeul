@@ -14,6 +14,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.107.0",
     "highlight.js": "^11.11.1",
+    "katex": "^0.17.0",
     "namumark-clone-core": "github:jhk1090/namumark-clone-core",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
