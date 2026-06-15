@@ -262,15 +262,13 @@
 .article-viewer .article-content h4 a[onclick*="opennamu_heading_folding"],
 .article-viewer .article-content h5 a[onclick*="opennamu_heading_folding"],
 .article-viewer .article-content h6 a[onclick*="opennamu_heading_folding"] {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-block;
   color: var(--color-on-surface-variant);
   margin-right: 0.35em;
   text-decoration: none;
-  opacity: 0.65;
   cursor: pointer;
-  flex-shrink: 0;
+  vertical-align: middle;
+  line-height: 1;
 }
 
 /* 목차(TOC) */

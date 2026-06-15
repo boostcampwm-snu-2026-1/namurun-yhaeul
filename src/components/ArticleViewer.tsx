@@ -7,9 +7,35 @@ declare global {
   }
 }
 
-// 접기 버튼 SVG 아이콘 — 나무위키 스타일 셰브론
-const SVG_EXPANDED = `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 12 12" style="display:inline-block;vertical-align:middle"><path d="M2 4.5 L6 8.5 L10 4.5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`
-const SVG_COLLAPSED = `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 12 12" style="display:inline-block;vertical-align:middle"><path d="M4.5 2 L8.5 6 L4.5 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+const SVG_NS = 'http://www.w3.org/2000/svg'
+
+// SVG 네임스페이스로 직접 생성 — innerHTML 방식은 브라우저 파싱 컨텍스트 따라 렌더링 실패 가능
+function makeFoldIcon(direction: 'down' | 'right'): SVGSVGElement {
+  const svg = document.createElementNS(SVG_NS, 'svg')
+  svg.setAttribute('width', '12')
+  svg.setAttribute('height', '12')
+  svg.setAttribute('viewBox', '0 0 12 12')
+  svg.setAttribute('aria-hidden', 'true')
+  const path = document.createElementNS(SVG_NS, 'path')
+  path.setAttribute(
+    'd',
+    direction === 'down'
+      ? 'M2 4 L6 8 L10 4'   // ∨ 펼침
+      : 'M4 2 L8 6 L4 10',  // > 접힘
+  )
+  path.setAttribute('stroke', 'currentColor')
+  path.setAttribute('stroke-width', '2')
+  path.setAttribute('fill', 'none')
+  path.setAttribute('stroke-linecap', 'round')
+  path.setAttribute('stroke-linejoin', 'round')
+  svg.appendChild(path)
+  return svg
+}
+
+function setFoldIcon(el: HTMLElement, direction: 'down' | 'right') {
+  el.innerHTML = ''
+  el.appendChild(makeFoldIcon(direction))
+}
 
 // namumark가 heading에 박는 인라인 onclick이 호출하는 섹션 접기 함수.
 // 원본(media/render.js)을 그대로 옮김 — 서버 API 의존 없는 순수 DOM 토글.
@@ -20,11 +46,11 @@ window.opennamu_heading_folding = (data, element) => {
   if (['', 'inline-block', 'block'].includes(fol.style.display)) {
     fol.style.display = 'none'
     if (sub) sub.style.opacity = '0.5'
-    if (element) element.innerHTML = SVG_COLLAPSED
+    if (element) setFoldIcon(element, 'right')
   } else {
     fol.style.display = 'block'
     if (sub) sub.style.opacity = '1'
-    if (element) element.innerHTML = SVG_EXPANDED
+    if (element) setFoldIcon(element, 'down')
   }
 }
 
@@ -70,10 +96,10 @@ export function ArticleViewer({ article }: Props) {
 
   // HTML 주입 후 목차 접기 토글 연결
   useEffect(() => {
-    // 초기 ⊖/⊕ → SVG 셰브론으로 교체 (namumark HTML에 하드코딩된 문자)
+    // 초기 ⊖/⊕ → SVG 아이콘으로 교체
     contentRef.current?.querySelectorAll<HTMLElement>('[onclick*="opennamu_heading_folding"]').forEach((btn) => {
-      if (btn.innerHTML.trim() === '⊖') btn.innerHTML = SVG_EXPANDED
-      else if (btn.innerHTML.trim() === '⊕') btn.innerHTML = SVG_COLLAPSED
+      const isCollapsed = btn.textContent?.trim() === '⊕'
+      setFoldIcon(btn, isCollapsed ? 'right' : 'down')
     })
 
     const toc = contentRef.current?.querySelector<HTMLElement>('.opennamu_TOC')
