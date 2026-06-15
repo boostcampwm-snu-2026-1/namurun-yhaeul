@@ -1,4 +1,5 @@
 import { NamuMark } from 'namumark-clone-core'
+import { preprocessIncludes, restoreIncludes } from './includeTemplates'
 
 interface ParseRequest {
   id: number
@@ -20,9 +21,11 @@ self.onmessage = (e: MessageEvent<ParseRequest>) => {
   const { id, text, title } = e.data
   try {
     const safeText = text.split('$').join(DOLLAR_PUA)
-    const database = { data: [{ data: safeText, title }] }
-    const result = new NamuMark(safeText, { docName: title }, database).parse()
-    const html = (result[0] as string).split(DOLLAR_PUA).join('$')
+    const { text: processedText, tokens } = preprocessIncludes(safeText, title)
+    const database = { data: [{ data: processedText, title }] }
+    const result = new NamuMark(processedText, { docName: title }, database).parse()
+    let html = (result[0] as string).split(DOLLAR_PUA).join('$')
+    html = restoreIncludes(html, tokens)
     self.postMessage({ id, html } satisfies ParseResponse)
   } catch (err) {
     const msg = err instanceof Error ? `${err.name}: ${err.message}` : String(err)

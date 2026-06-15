@@ -417,3 +417,39 @@
 .article-viewer a[href^="/upload"] {
   display: none;
 }
+
+/* ── include 틀 박스 ────────────────────────────────────────────────────── */
+.article-viewer .namu-include {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.375rem 0.625rem;
+  margin: 0.375rem 0;
+  background: var(--color-surface-container-low);
+  border-left: 3px solid var(--color-primary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.article-viewer .namu-include__icon {
+  flex-shrink: 0;
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  margin-top: 2px;
+}
+.article-viewer .namu-include__body {
+  flex: 1;
+  min-width: 0;
+}
+.article-viewer .namu-include__body a {
+  color: var(--color-link);
+}
+.article-viewer .namu-include__body a:hover {
+  text-decoration: underline;
+}
+.article-viewer .namu-include--other-meaning {
+  border-left-color: var(--color-outline);
+}
+.article-viewer .namu-include--other-meaning .namu-include__icon {
+  color: var(--color-on-surface-variant);
+}
