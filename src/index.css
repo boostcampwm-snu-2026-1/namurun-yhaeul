@@ -417,3 +417,96 @@
 .article-viewer a[href^="/upload"] {
   display: none;
 }
+
+/* ── include 틀 박스 ────────────────────────────────────────────────────── */
+.article-viewer .namu-include {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.375rem 0.625rem;
+  margin: 0.375rem 0;
+  background: var(--color-surface-container-low);
+  border-left: 3px solid var(--color-primary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.article-viewer .namu-include__icon {
+  flex-shrink: 0;
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  margin-top: 2px;
+}
+.article-viewer .namu-include__body {
+  flex: 1;
+  min-width: 0;
+}
+.article-viewer .namu-include__body a {
+  color: var(--color-link);
+}
+.article-viewer .namu-include__body a:hover {
+  text-decoration: underline;
+}
+.article-viewer .namu-include--other-meaning {
+  border-left-color: var(--color-outline);
+}
+.article-viewer .namu-include--other-meaning .namu-include__icon {
+  color: var(--color-on-surface-variant);
+}
+
+/* ── 네모틀 (인라인 박스) ────────────────────────────────────────────────── */
+.article-viewer .namu-box {
+  display: inline;
+  border: 1px solid currentColor;
+  padding: 0 0.2em;
+}
+
+/* ── 글배경 (인라인 배경색) ─────────────────────────────────────────────── */
+.article-viewer .namu-bg {
+  display: inline;
+}
+
+/* ── 날짜 이동 (날짜 문서 네비게이션 테이블) ───────────────────────────── */
+.article-viewer .namu-date-nav {
+  width: fit-content !important;
+  margin: 0.5rem auto;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  text-align: center;
+}
+.article-viewer .namu-date-nav th {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  padding: 0.25rem 1.5rem;
+  font-weight: 600;
+}
+.article-viewer .namu-date-nav td {
+  border: 1px solid var(--color-outline);
+  padding: 0.2rem 0.5rem;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.article-viewer .namu-date-nav__side--prev {
+  text-align: right;
+}
+.article-viewer .namu-date-nav__side--next {
+  text-align: left;
+}
+.article-viewer td.namu-date-nav__label {
+  font-size: 0.75rem;
+  color: var(--color-on-surface-variant);
+  padding: 0.15rem 0.4rem;
+  line-height: 1.4;
+  text-align: center !important;
+}
+.article-viewer .namu-date-nav__today {
+  font-weight: 600;
+  padding: 0 1rem;
+  white-space: nowrap;
+}
+.article-viewer .namu-date-nav a {
+  color: var(--color-link);
+}
+.article-viewer .namu-date-nav a:hover {
+  text-decoration: underline;
+}
