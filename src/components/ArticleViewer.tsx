@@ -142,6 +142,16 @@ export function ArticleViewer({ article }: Props) {
       inlineNodes.forEach((n) => wrapper.appendChild(n))
     })
 
+    // namumark는 주석(footnote)을 renderData 끝에 추가한 뒤 heading을 처리하므로
+    // 마지막 소제목 content div 안에 주석이 갇힘 → 접기 시 주석까지 사라지는 버그.
+    // 소제목 div 안에 있는 footnote를 article-content 직계 자식으로 이동해 해결.
+    contentRef.current?.querySelectorAll<HTMLElement>('.opennamu_footnote').forEach((footnoteEl) => {
+      const parent = footnoteEl.parentElement
+      if (parent && /opennamu_heading_/.test(parent.id)) {
+        contentRef.current?.appendChild(footnoteEl)
+      }
+    })
+
     contentRef.current?.querySelectorAll<HTMLElement>('[onclick*="opennamu_heading_folding"]').forEach((btn) => {
       const isCollapsed = btn.textContent?.trim() === '⊕'
       setFoldIcon(btn, isCollapsed ? 'right' : 'down')
