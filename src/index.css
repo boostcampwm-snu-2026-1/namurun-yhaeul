@@ -64,6 +64,7 @@
 
   /* ── 색상: Link ── */
   --color-link:                      #1558d6;
+  --color-link-external:             #c96a00;
 
   /* ── 스페이싱 ── */
   --spacing-sidebar-width:           320px;
@@ -186,6 +187,11 @@
   text-decoration: none;
 }
 
+/* 외부 링크 — 게임에서 클릭 차단, 주황색으로 구분 */
+.article-viewer a.opennamu_link_out {
+  color: var(--color-link-external);
+}
+
 /* 목록 — Tailwind preflight이 list-style 초기화하므로 복원 */
 .article-viewer ul {
   list-style-type: disc;
@@ -207,6 +213,9 @@
 .article-viewer li.opennamu_list_3,
 .article-viewer li.opennamu_list_5 {
   list-style-type: square;
+}
+.article-viewer li.opennamu_list_none {
+  list-style: none;
 }
 
 /* 인용문 */
