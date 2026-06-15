@@ -96,10 +96,17 @@ export function ArticleViewer({ article }: Props) {
 
   // HTML 주입 후 목차 접기 토글 연결
   useEffect(() => {
-    // 초기 ⊖/⊕ → SVG 아이콘으로 교체
+    // 초기 ⊖/⊕ → SVG 아이콘으로 교체 + 숫자 왼쪽으로 이동
+    // 구조: <span id="_sub"> 텍스트 <sub> ✎(숨김) 접기버튼 </sub> </span>
+    // 접기 버튼을 span의 firstChild 앞으로 옮겨 텍스트 왼쪽에 배치
     contentRef.current?.querySelectorAll<HTMLElement>('[onclick*="opennamu_heading_folding"]').forEach((btn) => {
       const isCollapsed = btn.textContent?.trim() === '⊕'
       setFoldIcon(btn, isCollapsed ? 'right' : 'down')
+
+      const span = btn.parentElement?.parentElement // sub → span[id*="_sub"]
+      if (span?.id.endsWith('_sub') && span.firstChild) {
+        span.insertBefore(btn, span.firstChild)
+      }
     })
 
     const toc = contentRef.current?.querySelector<HTMLElement>('.opennamu_TOC')
