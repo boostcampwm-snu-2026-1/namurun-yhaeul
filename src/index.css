@@ -164,7 +164,17 @@
 .article-viewer td {
   border: 1px solid var(--color-outline-variant);
   padding: 4px 8px;
-  text-align: left;
+  /* namumark가 td에 인라인 style="text-align: right/center" 를 삽입하므로
+     !important 없이는 CSS가 무시됨 */
+  text-align: left !important;
+}
+
+/* 수식만 담은 표 셀 — td:has(.katex)는 일반 td 규칙보다 명시도가 높아
+   !important 충돌 시 이 쪽이 이김 */
+.article-viewer td:has(.katex) {
+  text-align: center !important;
+  border: none;
+  padding: 0.25rem 0;
 }
 
 .article-viewer th {
