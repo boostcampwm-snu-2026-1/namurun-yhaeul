@@ -182,6 +182,7 @@ src/
     PathSidebar.tsx       ← 이동 경로 사이드바 (현재 문서 하이라이트) ✅
     NamurunLogo.tsx       ← 나무런 하이브리드 로고 SVG 컴포넌트 ✅
     HowToPlay.tsx         ← 로비 하단 게임 방법 안내 (3단계 카드 + 관련 영상 슬롯) ✅
+    LobbyNav.tsx          ← 로비 좌측 고정 섹션 목차 (게임 시작·게임 방법·관련 영상, IntersectionObserver로 활성 섹션 감지, xl 이상만 표시) ✅
   hooks/
     useGame.ts            ← 게임 상태 (elapsedMs, clickCount, path) ✅
     useMainPage.ts        ← 메인 화면 데이터 (일일 문제 조회, 랜덤 문서 선택) ✅
