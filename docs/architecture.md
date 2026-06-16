@@ -50,12 +50,21 @@
   ├─ 소요 시간(MM:SS.s), 총 클릭 수, 거쳐온 경로 표시
   ├─ 마운트 시 game_records INSERT (user_name=null) → recordId 확보
   ├─ 닉네임 입력 (필수, 직전 제출값을 localStorage `namurun_nickname`에서 자동 prefill) → game_records UPDATE (user_name)
-  └─ 제출 완료 → 닉네임 localStorage 저장 → navigate('/leaderboard', { state: { startArticle, endArticle, recordId } })
+  └─ 제출 완료 → 닉네임 localStorage 저장 → navigate('/leaderboard', { state: { tab, dailyDate, recordId } })
+       tab은 게임의 challenge_type('daily' | 'random'), dailyDate는 daily일 때만 사용
 
 [리더보드 화면 /leaderboard]
-  ├─ 동일 start_article + end_article 기준 상위 10개
-  ├─ 정렬: click_count ASC → elapsed_ms ASC
-  ├─ 컬럼: 순위, 닉네임, 클릭 수, 소요 시간, 시작 문서, 도착 문서
+  ├─ 탭: `오늘의 문제`(challenge_type='daily') / `랜덤 도전`(challenge_type='random')
+  │    결과 화면에서 진입 시 직전 게임의 challenge_type을 location.state.tab으로 전달해 자동 선택
+  ├─ 날짜 네비게이터 (daily 탭 전용)
+  │    daily_prompts에서 최근 60일치 날짜 목록을 조회 → 이전/다음 날짜로 이동
+  │    기본값은 KST 기준 오늘 (`new Date(Date.now() + 9h).toISOString().slice(0,10)`)
+  │    선택한 날짜의 시작/도착 문서를 daily_prompts에서 조회해 헤더에 표시
+  ├─ 정렬 기준 선택: 소요 시간(elapsed_ms) / 클릭 수(click_count)
+  │    선택한 기준 ASC → 나머지 기준 ASC 보조 정렬
+  ├─ 필터: `user_name IS NOT NULL` — 닉네임 미제출 행 제외
+  ├─ 상위 10개, 컬럼: 순위, 닉네임, 클릭 수, 소요 시간
+  │    랜덤 도전 탭에서는 문제별로 시작/도착 문서가 다르므로 해당 컬럼 추가 노출
   ├─ 현재 게임 행(recordId 일치) 하이라이트
   └─ 다시 하기 버튼 → navigate('/')
 ```
@@ -121,8 +130,12 @@
 
 ### useLeaderboard
 
-- `game_records WHERE start_article=X AND end_article=Y AND user_name IS NOT NULL ORDER BY click_count ASC, elapsed_ms ASC LIMIT 10`
-- startArticle/endArticle이 바뀔 때마다 재쿼리 (useEffect deps)
+- 인자: `(tab: 'daily' | 'random', date: string, sortBy: 'elapsed_ms' | 'click_count')`
+- 공통 조건: `user_name IS NOT NULL`, 상위 10개
+- tab='daily': `WHERE challenge_type='daily' AND daily_date=$date`
+- tab='random': `WHERE challenge_type='random'` (날짜 무관, 전체 랜덤 도전 통합 랭킹)
+- 정렬: 선택한 `sortBy` ASC → 나머지 컬럼(elapsed_ms ↔ click_count) ASC 보조 정렬
+- tab/date/sortBy가 바뀔 때마다 재쿼리 (useEffect deps)
 
 ### ResultPage
 
@@ -131,7 +144,7 @@
 - path는 GamePage의 `handleClick`에서 `[...path, resolved]`로 직접 조합 후 전달 — `recordVisit` setState가 비동기이므로 클로저의 path에 resolved를 직접 추가
 - 닉네임 입력은 필수 — 비어 있거나 isSaved=false(INSERT 미완료)이면 제출 불가
 - 닉네임 입력 초기값은 `localStorage.getItem('namurun_nickname')` — 직전 게임에서 제출한 닉네임을 자동 prefill (없으면 빈 문자열). 제출 성공 시 `localStorage.setItem('namurun_nickname', nickname.trim())`으로 갱신
-- 제출 성공 시 `/leaderboard`로 navigate, state에 `{ startArticle, endArticle, recordId }` 전달
+- 제출 성공 시 `/leaderboard`로 navigate, state에 `{ tab, dailyDate, recordId }` 전달 — tab은 게임의 `challenge_type`('daily' | 'random'), dailyDate는 daily 챌린지일 때만 채워 리더보드가 해당 날짜로 진입하도록 함
 
 ### GamePage
 
@@ -159,7 +172,7 @@ src/
     MainPage.tsx          ← 오늘의 문제, 랜덤 시작 ✅
     GamePage.tsx          ← 게임 화면 (링크 인터셉트, 이동 플로우) ✅
     ResultPage.tsx        ← 결과 화면 (소요 시간/클릭 수/경로 표시, 닉네임 입력 → /leaderboard) ✅
-    LeaderboardPage.tsx   ← 리더보드 화면 (동일 문제 기준 상위 10개, 현재 행 하이라이트) ✅
+    LeaderboardPage.tsx   ← 리더보드 화면 (오늘의 문제·랜덤 도전 탭, 날짜 네비게이션, 정렬 기준 선택, 현재 행 하이라이트) ✅
     RenderDemoPage.tsx    ← 개발용 렌더링 테스트 (/render-demo, 배포 무관)
   components/
     ArticleViewer.tsx        ← namumark 렌더링 + 문서 제목 표시 ✅
@@ -174,7 +187,7 @@ src/
     useArticle.ts         ← R2 fetch + 로딩/에러 상태 관리 ✅
     useRedirect.ts        ← Supabase redirects 조회 ✅
     useGameRecord.ts      ← game_records INSERT + recordId 반환 + updateUserName ✅
-    useLeaderboard.ts     ← game_records 리더보드 쿼리 (상위 10개) ✅
+    useLeaderboard.ts     ← game_records 리더보드 쿼리 (탭·날짜·정렬 기준별 상위 10개) ✅
   lib/
     supabase.ts           ← Supabase 클라이언트 싱글톤 ✅
     r2.ts                 ← R2 fetch 유틸 ✅
