@@ -214,7 +214,7 @@ function GamePage() {
               <ArticleViewer article={article} onReady={handleArticleReady} onRenderError={handleRenderError} />
               {hasRenderError && (
                 <ArticleFallbackLinks
-                  hasPrev={path.length > 1}
+                  hasPrev={path.length >= 1}
                   disabled={isRendering}
                   onPrev={() => void handleFallbackPrev()}
                   onRandom={() => void handleFallbackRandom()}
