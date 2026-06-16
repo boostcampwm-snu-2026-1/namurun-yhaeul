@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { fetchRandomArticleTitle } from '../lib/articles'
 import { useGame } from '../hooks/useGame'
 import { useArticle } from '../hooks/useArticle'
+import { useArticleSummary } from '../hooks/useArticleSummary'
 import { useRedirect } from '../hooks/useRedirect'
 import { ArticleViewer } from '../components/ArticleViewer'
 import { ArticleFallbackLinks } from '../components/ArticleFallbackLinks'
@@ -100,6 +101,7 @@ function GamePage() {
 
   const { elapsedMs, clickCount, path, startGame, restoreGame, recordVisit, undoLastVisit, stopGame } = useGame()
   const { article, isLoading, error: articleError, loadArticle, loadArticleOptimistic } = useArticle()
+  const { summary: targetSummary, status: summaryStatus } = useArticleSummary(gameEnd)
   const { resolveRedirect } = useRedirect()
 
   const [toast, setToast] = useState<string | null>(null)
@@ -299,7 +301,14 @@ function GamePage() {
 
   return (
     <div className="flex flex-col h-screen bg-background">
-      <GameHeader targetTitle={gameEnd} elapsedMs={elapsedMs} clickCount={clickCount} onQuit={() => setIsQuitModalOpen(true)} />
+      <GameHeader
+        targetTitle={gameEnd}
+        targetSummary={targetSummary}
+        summaryStatus={summaryStatus}
+        elapsedMs={elapsedMs}
+        clickCount={clickCount}
+        onQuit={() => setIsQuitModalOpen(true)}
+      />
 
       <div className="flex flex-1 overflow-hidden">
         <PathSidebar path={path} />

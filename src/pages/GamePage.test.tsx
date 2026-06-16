@@ -31,6 +31,13 @@ vi.mock('../hooks/useRedirect', () => ({
   }),
 }))
 
+vi.mock('../hooks/useArticleSummary', () => ({
+  useArticleSummary: () => ({
+    summary: '조선의 제4대 임금으로 한글 창제를 주도했다.',
+    status: 'success',
+  }),
+}))
+
 vi.mock('../components/ArticleViewer', () => ({
   ArticleViewer: () => <div data-testid="article-viewer">Article</div>,
 }))
