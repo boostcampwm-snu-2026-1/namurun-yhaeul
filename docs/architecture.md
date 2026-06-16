@@ -97,8 +97,9 @@
 
 - 타이머: `Date.now()` 스냅샷 방식 (`elapsedMs = Date.now() - startTime`) — 백그라운드 탭에서 `setInterval`이 throttle되어도 실제 경과 시간을 정확하게 추적. 누적 increment 방식이면 배경 탭에서 시간이 느리게 가는 문제 발생
 - 100ms 인터벌로 UI 갱신 — 타이머 표시에 충분한 주기
-- `startGame`/`recordVisit`/`undoLastVisit`/`stopGame` 모두 `useCallback(fn, [])` — 내부에서 ref와 setState만 사용하므로 외부 deps 없이 안정적
+- `startGame`/`recordVisit`/`undoLastVisit`/`stopGame`/`restoreGame` 모두 `useCallback(fn, [])` — 내부에서 ref와 setState만 사용하므로 외부 deps 없이 안정적
 - `undoLastVisit()`: namumark 파싱 실패 시 호출 — path 마지막 항목 제거 + clickCount 감소. 실패 문서를 기록에서 소급 제거
+- `restoreGame(path, clickCount, startTime)`: 새로고침 복원 시 호출 — 저장된 startTime을 `startTimeRef`에 주입해 `elapsedMs = Date.now() - startTime`이 연속 시간을 재개
 
 ### useMainPage
 
@@ -143,6 +144,7 @@
 - `location.state`를 `useState(() => ...)` 초기값으로 캡처 — 이후 리렌더에서도 gameStart/gameEnd가 안정적인 문자열로 유지됨
 - **렌더링 실패 복구 흐름**: `ArticleViewer`의 `onRenderError` → `handleRenderError` → `undoLastVisit()`(실패 문서 path·clickCount 소급 제거) + `hasRenderError = true`. `ArticleFallbackLinks`(이전 문서 / 랜덤 문서) 표시. 복구 이동 시 `isNavigatingRef`/`isRendering`으로 기존 이동과 동일하게 잠금·오버레이 처리. `hasPrev` 조건: undo 후 `path.length >= 1`(시작 문서 실패 시 path = [] → 숨김)
 - **타이머 지연 시작**: 초기 문서 로드 시 `startGame`을 `useEffect`에서 즉시 호출하지 않음. `loadArticle`만 호출하고, `onReady` 첫 번째 콜백 시점(Worker 파싱 + DOM 커밋 완료)에 `startGame` 실행. `hasStartedRef`(ref)로 stale closure 없이 "최초 호출" 여부 판별. `hasGameStarted`(state)로 로딩 표시와 아티클 영역 가시성 제어 — `article`이 세팅되면 즉시 `ArticleViewer`를 `hidden`으로 마운트해 Worker 파싱을 시작하되, `hasGameStarted`가 `true`가 되어야 표시. 두 번째 문서부터는 기존 `isNavigatingRef`/`isRendering` 흐름 유지
+- **새로고침 세션 복원**: `sessionStorage['namurun_game_session']`에 `{ gameStart, gameEnd, path, clickCount, startTime, currentArticle }` 저장. 저장 시점: 최초 `onReady`(게임 시작) + 매 문서 이동 성공(`handleClick`에서 `recordVisit` 직후). 마운트 시 `location.state`가 null이면 sessionStorage에서 복원 시도 — 성공 시 `currentArticle` 로드 + `restoreGame` 호출로 타이머 재개. 세션 삭제: 목표 문서 도달(`navigate('/result')` 직전) + 포기 확인. sessionStorage 없으면 기존 "잘못된 접근" 표시
 
 ---
 
