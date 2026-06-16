@@ -9,7 +9,7 @@ export function PathSidebar({ path }: Props) {
 
   useEffect(() => {
     if (!asideRef.current) return
-    asideRef.current.scrollTo({ top: asideRef.current.scrollHeight, behavior: 'smooth' })
+    asideRef.current.scrollTo?.({ top: asideRef.current.scrollHeight, behavior: 'smooth' })
   }, [path])
 
   return (
