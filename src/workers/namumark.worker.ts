@@ -10,6 +10,7 @@ interface ParseRequest {
 interface ParseResponse {
   id: number
   html: string
+  error?: boolean
 }
 
 // namumark 내부 replace()에서 $ 뒤에 숫자가 오면 capture group 참조로 해석됨.
@@ -33,6 +34,6 @@ self.onmessage = (e: MessageEvent<ParseRequest>) => {
     const msg = err instanceof Error ? `${err.name}: ${err.message}` : String(err)
     console.error('[namumark worker] parse failed title:', title)
     console.error('[namumark worker] error:', err instanceof Error ? err.stack : err)
-    self.postMessage({ id, html: `<p>렌더링 실패: ${msg}</p>` } satisfies ParseResponse)
+    self.postMessage({ id, html: `<p>렌더링 실패: ${msg}</p>`, error: true } satisfies ParseResponse)
   }
 }

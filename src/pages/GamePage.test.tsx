@@ -10,6 +10,7 @@ vi.mock('../hooks/useGame', () => ({
     isRunning: false,
     startGame: vi.fn(),
     recordVisit: vi.fn(),
+    undoLastVisit: vi.fn(),
     stopGame: vi.fn(),
   }),
 }))
@@ -31,6 +32,10 @@ vi.mock('../hooks/useRedirect', () => ({
 
 vi.mock('../components/ArticleViewer', () => ({
   ArticleViewer: () => <div data-testid="article-viewer">Article</div>,
+}))
+
+vi.mock('../lib/articles', () => ({
+  fetchRandomArticleTitle: vi.fn().mockResolvedValue('랜덤문서'),
 }))
 
 vi.mock('../components/GameHeader', () => ({

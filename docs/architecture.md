@@ -83,6 +83,7 @@
 - **나무마크 소스 전처리** (`src/workers/namumark.worker.ts`, `src/workers/includeTemplates.ts`): namumark에 넘기기 전 두 단계 정규화 적용.
   1. **비표준 테이블 속성 정규화** (`namumark.worker.ts`): `<table bgcolor=...>` / `<table\nbordercolor=...>` 처럼 공백·줄바꿈이 끼어 있는 비표준 속성을 `<tablebgcolor=...>` 등 나무마크 표준 형태로 변환 (`/<table[\s\n]+([a-z])/gi`). 미처리 시 namumark가 해당 속성 문자열을 텍스트로 누출.
   2. **`{{{#!html}}}` · `[include(틀:...)]` PUA 토큰화** (`includeTemplates.ts`): `preprocessIncludes` 단일 루프에서 두 패턴을 선후 위치 비교로 처리. `{{{#!html content}}}` 블록은 namumark가 내용을 이스케이프해 텍스트로 출력하므로 파싱 전 PUA 토큰(U+E025/U+E026)으로 추출 → 복원 시 원본 HTML 그대로 삽입. `[include(틀:...)]`는 known 틀만 토큰화하고 unknown은 원문 유지 → 기존 CSS 숨김(`a[href^="/w/%ED%8B%80%3A"]`) 적용. 지원 틀: `틀:상세 내용`, `틀:상위 문서`, `틀:하위 문서`, `틀:관련 문서`, `틀:다른 뜻`/`틀:다른 뜻1`, `틀:네모틀`/`틀:네모틀b` (인라인 테두리 박스), `틀:글배경`/`틀:글배경b`/`틀:글배경r`/`틀:글배경br` (인라인 배경색), `틀:날짜 이동` (날짜 문서 네비게이션). 파라미터 체계: `틀:다른 뜻`은 `설명N`/`문서명N`, `틀:다른 뜻1`은 `otherN`/`rdN` (병행 지원). 색상·CSS 값 파라미터는 `sanitizeColor`/`sanitizeCSSValue`로 화이트리스트 검증 후 인라인 스타일 삽입. CSS 클래스: 블록 네비게이션 박스 `.namu-include`, 인라인 테두리 `.namu-box`, 인라인 배경색 `.namu-bg`, 날짜 이동 테이블 `.namu-date-nav`.
+- **Worker 파싱 실패 시 `error` 플래그**: catch 블록에서 `{ id, html: '<p>렌더링 실패: ...</p>', error: true }`를 postMessage. `ArticleViewer`의 `worker.onmessage`에서 `e.data.error`가 true이면 `onRenderError?.()` 콜백 호출 → GamePage의 `handleRenderError`로 전달
 - **HTML 주입 후 JS post-processing** (`useEffect([html])`): ① `hljs.highlightElement` — `pre code[class]` 구문 강조, ② ul 연속 문단 들여쓰기 — 블록 요소 또는 `<br><br>` 직전까지 인라인 노드를 수집해 `div`로 래핑 + 최하위 `li`의 `marginLeft`만큼 추가 패딩, ③ KaTeX 수식 렌더링 — namumark가 `[math(LaTeX)]`를 `<span id="*opennamu_math_N">JS_escaped_LaTeX</span>` 플레이스홀더로만 출력하고 실제 `katex.render()` 호출은 버려지는 JS에 담으므로, 파싱 후 DOM에서 `span[id*="opennamu_math_"]`를 찾아 직접 렌더링. `getToolJSSafe` 이스케이프 역변환: `\'` 처리 후 `JSON.parse`로 unescape, ④ footnote rescue — namumark가 footnote를 마지막 소제목 content div 안에 배치하므로 소제목 접기 시 주석이 함께 사라지는 버그 발생. `.opennamu_footnote`를 `article-content` 직계 자식으로 이동해 해결, ⑤ 접기 버튼 SVG 교체 — ⊖/⊕ 텍스트 → chevron SVG, `<sub>` 내 첫 자식 앞으로 DOM 이동, ⑥ TOC `.toc-content` wrapper 생성 — `opennamu_TOC_title` 이후 노드를 `div.toc-content`로 묶어 접기 토글 대상 단일화
 
 ## 훅 설계 결정
@@ -96,7 +97,8 @@
 
 - 타이머: `Date.now()` 스냅샷 방식 (`elapsedMs = Date.now() - startTime`) — 백그라운드 탭에서 `setInterval`이 throttle되어도 실제 경과 시간을 정확하게 추적. 누적 increment 방식이면 배경 탭에서 시간이 느리게 가는 문제 발생
 - 100ms 인터벌로 UI 갱신 — 타이머 표시에 충분한 주기
-- `startGame`/`recordVisit`/`stopGame` 모두 `useCallback(fn, [])` — 내부에서 ref와 setState만 사용하므로 외부 deps 없이 안정적
+- `startGame`/`recordVisit`/`undoLastVisit`/`stopGame` 모두 `useCallback(fn, [])` — 내부에서 ref와 setState만 사용하므로 외부 deps 없이 안정적
+- `undoLastVisit()`: namumark 파싱 실패 시 호출 — path 마지막 항목 제거 + clickCount 감소. 실패 문서를 기록에서 소급 제거
 
 ### useMainPage
 
@@ -139,6 +141,7 @@
 - 중복 클릭 방지: `isNavigatingRef`(ref) 사용 — 상태 대신 ref를 쓰면 재렌더 없이 동기적으로 잠금/해제 가능. 잠금 해제는 `ArticleViewer`의 `onReady` 콜백에서 수행 — R2 fetch 완료(article 상태 변경) 시점이 아닌 namumark Worker 파싱 + HTML DOM 커밋 완료 시점까지 잠금 유지. fetch 실패(catch)에서는 `onReady`가 호출되지 않으므로 catch에서 직접 해제
 - 이동 중 오버레이: `isRendering` state — 링크 클릭 시 `true`, `onReady`/catch에서 `false`. `isLoading`(R2 fetch 기준)이 아닌 `isRendering`(Worker 렌더링 기준)으로 overlay를 제어해 본문이 실제로 교체되기 전까지 뿌옇게 유지
 - `location.state`를 `useState(() => ...)` 초기값으로 캡처 — 이후 리렌더에서도 gameStart/gameEnd가 안정적인 문자열로 유지됨
+- **렌더링 실패 복구 흐름**: `ArticleViewer`의 `onRenderError` → `handleRenderError` → `undoLastVisit()`(실패 문서 path·clickCount 소급 제거) + `hasRenderError = true`. `ArticleFallbackLinks`(이전 문서 / 랜덤 문서) 표시. 복구 이동 시 `isNavigatingRef`/`isRendering`으로 기존 이동과 동일하게 잠금·오버레이 처리. `hasPrev` 조건: undo 후 `path.length >= 1`(시작 문서 실패 시 path = [] → 숨김)
 
 ---
 
@@ -155,8 +158,9 @@ src/
     LeaderboardPage.tsx   ← 리더보드 화면 (동일 문제 기준 상위 10개, 현재 행 하이라이트) ✅
     RenderDemoPage.tsx    ← 개발용 렌더링 테스트 (/render-demo, 배포 무관)
   components/
-    ArticleViewer.tsx     ← namumark 렌더링 + 문서 제목 표시 ✅
-    GameHeader.tsx        ← 타이머(MM:SS.s), 클릭 수, 목표 문서명 ✅
+    ArticleViewer.tsx        ← namumark 렌더링 + 문서 제목 표시 ✅
+    ArticleFallbackLinks.tsx ← 렌더링 실패 시 복구 링크 (이전 문서 / 랜덤 문서) ✅
+    GameHeader.tsx           ← 타이머(MM:SS.s), 클릭 수, 목표 문서명 ✅
     PathSidebar.tsx       ← 이동 경로 사이드바 (현재 문서 하이라이트) ✅
     NamurunLogo.tsx       ← 나무런 하이브리드 로고 SVG 컴포넌트 ✅
   hooks/
@@ -169,6 +173,7 @@ src/
   lib/
     supabase.ts           ← Supabase 클라이언트 싱글톤 ✅
     r2.ts                 ← R2 fetch 유틸 ✅
+    articles.ts           ← articles 테이블 유틸 (`fetchRandomArticleTitle`) ✅
   workers/
     namumark.worker.ts    ← NamuMark().parse() 전담 Web Worker ✅
     includeTemplates.ts   ← [include(틀:...)] pre/post-processing (known 틀 → HTML 박스) ✅

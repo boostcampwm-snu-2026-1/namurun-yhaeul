@@ -61,12 +61,13 @@ window.opennamu_heading_folding = (data, element) => {
 interface Props {
   article: Article
   onReady?: () => void
+  onRenderError?: () => void
 }
 
 // 모듈 수준 카운터 — 여러 인스턴스가 있어도 요청 ID가 전역적으로 유일함
 let requestCounter = 0
 
-export function ArticleViewer({ article, onReady }: Props) {
+export function ArticleViewer({ article, onReady, onRenderError }: Props) {
   const [html, setHtml] = useState('')
   const [displayedTitle, setDisplayedTitle] = useState(article.title)
   const workerRef = useRef<Worker | null>(null)
@@ -81,11 +82,12 @@ export function ArticleViewer({ article, onReady }: Props) {
     )
     workerRef.current = worker
 
-    worker.onmessage = (e: MessageEvent<{ id: number; html: string }>) => {
+    worker.onmessage = (e: MessageEvent<{ id: number; html: string; error?: boolean }>) => {
       // 가장 최근 요청의 응답만 반영 — 빠른 연속 클릭 시 이전 결과 무시
       if (e.data.id === latestIdRef.current) {
         setHtml(e.data.html)
         setDisplayedTitle(pendingTitleRef.current)
+        if (e.data.error) onRenderError?.()
       }
     }
 
