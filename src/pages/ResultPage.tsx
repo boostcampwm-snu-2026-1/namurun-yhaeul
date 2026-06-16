@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useGameRecord } from '../hooks/useGameRecord'
 import { AppHeader } from '../components/AppHeader'
+import { Footer } from '../components/Footer'
+import { formatTime } from '../lib/formatTime'
 
 interface ResultState {
   startArticle: string
@@ -9,6 +11,8 @@ interface ResultState {
   path: string[]
   elapsedMs: number
   clickCount: number
+  challengeType: 'daily' | 'random'
+  dailyDate?: string
 }
 
 function isResultState(value: unknown): value is ResultState {
@@ -19,18 +23,11 @@ function isResultState(value: unknown): value is ResultState {
     typeof v.endArticle === 'string' &&
     Array.isArray(v.path) &&
     typeof v.elapsedMs === 'number' &&
-    typeof v.clickCount === 'number'
+    typeof v.clickCount === 'number' &&
+    (v.challengeType === 'daily' || v.challengeType === 'random')
   )
 }
 
-function formatTime(ms: number): string {
-  const totalTenths = Math.floor(ms / 100)
-  const tenths = totalTenths % 10
-  const totalSeconds = Math.floor(totalTenths / 10)
-  const seconds = totalSeconds % 60
-  const minutes = Math.floor(totalSeconds / 60)
-  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${tenths}`
-}
 
 function ResultPage() {
   const location = useLocation()
@@ -38,7 +35,7 @@ function ResultPage() {
   const [result] = useState<ResultState | null>(() =>
     isResultState(location.state) ? location.state : null,
   )
-  const [nickname, setNickname] = useState('')
+  const [nickname, setNickname] = useState(() => localStorage.getItem('namurun_nickname') ?? '')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
@@ -54,10 +51,11 @@ function ResultPage() {
     setSubmitError(null)
     try {
       await updateUserName(nickname.trim())
+      localStorage.setItem('namurun_nickname', nickname.trim())
       navigate('/leaderboard', {
         state: {
-          startArticle: result!.startArticle,
-          endArticle: result!.endArticle,
+          tab: result!.challengeType,
+          dailyDate: result!.dailyDate,
           recordId,
         },
       })
@@ -89,7 +87,7 @@ function ResultPage() {
             </p>
           </div>
           <div className="bg-surface-container-low rounded-xl p-stack-md text-center">
-            <p className="text-label-mono font-label-mono text-on-surface-variant mb-1 uppercase tracking-wider">클릭 수</p>
+            <p className="text-label-mono font-label-mono text-on-surface-variant mb-1 uppercase tracking-wider">이동 횟수</p>
             <p className="text-2xl font-semibold text-on-surface">{result.clickCount}</p>
           </div>
         </div>
@@ -147,6 +145,7 @@ function ResultPage() {
         </div>
       </div>
       </div>
+      <Footer />
     </div>
   )
 }

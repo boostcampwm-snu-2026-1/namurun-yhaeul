@@ -54,6 +54,31 @@ export function useGame() {
     }))
   }, [])
 
+  const undoLastVisit = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      path: prev.path.slice(0, -1),
+      clickCount: Math.max(0, prev.clickCount - 1),
+    }))
+  }, [])
+
+  const restoreGame = useCallback((savedPath: string[], savedClickCount: number, savedStartTime: number) => {
+    if (intervalRef.current !== null) clearInterval(intervalRef.current)
+    startTimeRef.current = savedStartTime
+    setState({
+      elapsedMs: Date.now() - savedStartTime,
+      clickCount: savedClickCount,
+      path: savedPath,
+      isRunning: true,
+    })
+    intervalRef.current = setInterval(() => {
+      setState((prev) => ({
+        ...prev,
+        elapsedMs: Date.now() - savedStartTime,
+      }))
+    }, 100)
+  }, [])
+
   const stopGame = useCallback((): number => {
     if (intervalRef.current !== null) {
       clearInterval(intervalRef.current)
@@ -68,5 +93,5 @@ export function useGame() {
     return finalElapsed
   }, [])
 
-  return { ...state, startGame, recordVisit, stopGame }
+  return { ...state, startGame, restoreGame, recordVisit, undoLastVisit, stopGame }
 }

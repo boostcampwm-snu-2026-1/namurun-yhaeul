@@ -23,6 +23,7 @@ const testResult = {
   path: ['이순신', '조선', '세종대왕'],
   elapsedMs: 12345,
   clickCount: 2,
+  challengeType: 'random' as const,
 }
 
 beforeEach(() => {

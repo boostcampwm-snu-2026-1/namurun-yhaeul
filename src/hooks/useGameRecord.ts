@@ -7,6 +7,8 @@ interface GameResult {
   path: string[]
   elapsedMs: number
   clickCount: number
+  challengeType: 'daily' | 'random'
+  dailyDate?: string
 }
 
 export function useGameRecord(result: GameResult | null) {
@@ -29,6 +31,8 @@ export function useGameRecord(result: GameResult | null) {
           elapsed_ms: result.elapsedMs,
           path: result.path,
           user_name: null,
+          challenge_type: result.challengeType,
+          daily_date: result.dailyDate ?? null,
         })
         .select('id')
         .single()
