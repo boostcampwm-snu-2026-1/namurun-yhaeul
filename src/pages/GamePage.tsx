@@ -229,7 +229,7 @@ function GamePage() {
         const newClickCount = clickCount + 1
         recordVisit(resolved)
         saveSession(newPath, newClickCount, resolved)
-        if (contentRef.current) contentRef.current.scrollTop = 0
+        if (contentRef.current) contentRef.current.scrollTo({ top: 0, behavior: 'instant' })
 
         if (resolved === gameEnd) {
           clearSession()
@@ -276,7 +276,7 @@ function GamePage() {
       <div className="flex flex-1 overflow-hidden">
         <PathSidebar path={path} />
 
-        <div className="flex-1 overflow-y-auto pr-14" ref={contentRef}>
+        <div className="flex-1 overflow-y-auto pr-14 scroll-smooth" ref={contentRef}>
           {!hasGameStarted && (
             <div className="flex items-center justify-center p-8">
               <p className="text-on-surface-variant font-body-sm text-body-sm">불러오는 중...</p>
