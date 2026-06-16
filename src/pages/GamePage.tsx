@@ -6,6 +6,7 @@ import { useArticle } from '../hooks/useArticle'
 import { useRedirect } from '../hooks/useRedirect'
 import { ArticleViewer } from '../components/ArticleViewer'
 import { ArticleFallbackLinks } from '../components/ArticleFallbackLinks'
+import { ArticleNavButtons } from '../components/ArticleNavButtons'
 import { GameHeader } from '../components/GameHeader'
 import { PathSidebar } from '../components/PathSidebar'
 import { QuitConfirmModal } from '../components/QuitConfirmModal'
@@ -82,6 +83,7 @@ function GamePage() {
   const [isQuitModalOpen, setIsQuitModalOpen] = useState(false)
   const [hasRenderError, setHasRenderError] = useState(false)
   const [hasGameStarted, setHasGameStarted] = useState(false)
+  const [hasToc, setHasToc] = useState(false)
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isNavigatingRef = useRef(false)
   const hasStartedRef = useRef(false)
@@ -135,6 +137,7 @@ function GamePage() {
       isNavigatingRef.current = false
       setIsRendering(false)
     }
+    setHasToc(!!contentRef.current?.querySelector('.opennamu_TOC'))
   }, [startGame, restoreGame, gameStart, savedSession, saveSession])
 
   const showToast = useCallback((message: string) => {
@@ -273,7 +276,7 @@ function GamePage() {
       <div className="flex flex-1 overflow-hidden">
         <PathSidebar path={path} />
 
-        <div className="flex-1 overflow-y-auto relative" ref={contentRef}>
+        <div className="flex-1 overflow-y-auto" ref={contentRef}>
           {!hasGameStarted && (
             <div className="flex items-center justify-center p-8">
               <p className="text-on-surface-variant font-body-sm text-body-sm">불러오는 중...</p>
@@ -281,21 +284,26 @@ function GamePage() {
           )}
 
           {article && (
-            <div className={hasGameStarted ? 'relative' : 'hidden'} onClick={(e) => void handleClick(e)}>
-              {isRendering && (
-                <div className="absolute inset-0 bg-surface/60 z-10 flex items-center justify-center pointer-events-none">
-                  <p className="text-on-surface-variant font-body-sm text-body-sm">이동 중...</p>
-                </div>
-              )}
-              <ArticleViewer article={article} onReady={handleArticleReady} onRenderError={handleRenderError} />
-              {hasRenderError && (
-                <ArticleFallbackLinks
-                  hasPrev={path.length >= 1}
-                  disabled={isRendering}
-                  onPrev={() => void handleFallbackPrev()}
-                  onRandom={() => void handleFallbackRandom()}
-                />
-              )}
+            <div className={hasGameStarted ? 'flex' : 'hidden'}>
+              <div className="flex-1 min-w-0 relative" onClick={(e) => void handleClick(e)}>
+                {isRendering && (
+                  <div className="absolute inset-0 bg-surface/60 z-10 flex items-center justify-center pointer-events-none">
+                    <p className="text-on-surface-variant font-body-sm text-body-sm">이동 중...</p>
+                  </div>
+                )}
+                <ArticleViewer article={article} onReady={handleArticleReady} onRenderError={handleRenderError} />
+                {hasRenderError && (
+                  <ArticleFallbackLinks
+                    hasPrev={path.length >= 1}
+                    disabled={isRendering}
+                    onPrev={() => void handleFallbackPrev()}
+                    onRandom={() => void handleFallbackRandom()}
+                  />
+                )}
+              </div>
+              <div className="w-10 shrink-0 relative">
+                <ArticleNavButtons containerRef={contentRef} hasToc={hasToc} />
+              </div>
             </div>
           )}
         </div>
