@@ -19,7 +19,7 @@ export function ArticleNavButtons({ containerRef, hasToc }: Props) {
   }
 
   return (
-    <div className="sticky bottom-4 flex flex-col gap-2 items-center">
+    <div className="fixed right-4 bottom-4 z-30 flex flex-col gap-2 items-center">
       {hasToc && (
         <button className={BTN_CLASS} onClick={scrollToToc} aria-label="목차로 이동">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
