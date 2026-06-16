@@ -1,12 +1,20 @@
+import { useEffect, useRef } from 'react'
+
 interface Props {
   path: string[]
 }
 
 export function PathSidebar({ path }: Props) {
+  const lastItemRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    lastItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+  }, [path])
+
   return (
     <aside className="w-36 shrink-0 border-r border-outline-variant bg-surface-container-low flex flex-col p-3 gap-0.5 overflow-y-auto">
       {path.map((title, i) => (
-        <div key={i}>
+        <div key={i} ref={i === path.length - 1 ? lastItemRef : null}>
           <div
             className={`text-xs px-2 py-1 rounded truncate ${
               i === path.length - 1
