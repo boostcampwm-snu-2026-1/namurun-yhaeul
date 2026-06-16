@@ -329,16 +329,15 @@ function GamePage() {
                   />
                 )}
               </div>
-              <div className="w-10 shrink-0 relative">
-                <ArticleNavButtons containerRef={contentRef} hasToc={hasToc} />
-              </div>
             </div>
           )}
         </div>
       </div>
 
+      <ArticleNavButtons containerRef={contentRef} hasToc={hasToc} />
+
       {toast !== null && (
-        <div className="fixed bottom-4 right-4 bg-inverse-surface text-inverse-on-surface px-4 py-2 rounded-lg shadow-lg font-body-sm text-body-sm">
+        <div className="fixed bottom-4 right-4 z-40 bg-inverse-surface text-inverse-on-surface px-4 py-2 rounded-lg shadow-lg font-body-sm text-body-sm">
           {toast}
         </div>
       )}
