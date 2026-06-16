@@ -1,5 +1,6 @@
 import { useMainPage } from '../hooks/useMainPage'
 import { AppHeader } from '../components/AppHeader'
+import { Footer } from '../components/Footer'
 
 function getKstDateLabel(): string {
   return new Date(Date.now() + 9 * 60 * 60 * 1000).toLocaleDateString('ko-KR', {
@@ -125,6 +126,7 @@ function MainPage() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   )
 }

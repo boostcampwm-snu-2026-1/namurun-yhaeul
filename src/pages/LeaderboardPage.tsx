@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useLeaderboard, type LeaderboardTab, type SortBy } from '../hooks/useLeaderboard'
 import { AppHeader } from '../components/AppHeader'
+import { Footer } from '../components/Footer'
 import { formatTime } from '../lib/formatTime'
 import { supabase } from '../lib/supabase'
 
@@ -280,6 +281,7 @@ function LeaderboardPage() {
         </button>
       </div>
       </div>
+      <Footer />
     </div>
   )
 }

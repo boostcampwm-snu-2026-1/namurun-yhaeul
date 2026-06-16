@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useGameRecord } from '../hooks/useGameRecord'
 import { AppHeader } from '../components/AppHeader'
+import { Footer } from '../components/Footer'
 import { formatTime } from '../lib/formatTime'
 
 interface ResultState {
@@ -144,6 +145,7 @@ function ResultPage() {
         </div>
       </div>
       </div>
+      <Footer />
     </div>
   )
 }
