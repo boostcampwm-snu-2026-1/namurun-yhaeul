@@ -46,7 +46,7 @@ describe('ArticleViewer', () => {
       worker.simulateMessage({ id, html: '<p>이순신은 장군이다</p>' })
     })
 
-    expect(container.querySelector('.article-viewer')?.innerHTML).toBe('<p>이순신은 장군이다</p>')
+    expect(container.querySelector('.article-content')?.innerHTML).toBe('<p>이순신은 장군이다</p>')
   })
 
   it('오래된 요청 결과는 무시하고 최신 결과만 반영한다', async () => {
@@ -67,6 +67,6 @@ describe('ArticleViewer', () => {
       worker.simulateMessage({ id: newId, html: '<p>세종대왕</p>' })
     })
 
-    expect(container.querySelector('.article-viewer')?.innerHTML).toBe('<p>세종대왕</p>')
+    expect(container.querySelector('.article-content')?.innerHTML).toBe('<p>세종대왕</p>')
   })
 })
