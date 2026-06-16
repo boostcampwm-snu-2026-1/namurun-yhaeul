@@ -6,20 +6,30 @@
 
 ```sql
 CREATE TABLE articles (
+  id         SERIAL,       -- 랜덤 offset 선택용 (마이그레이션: supabase/migrations/add_articles_id_serial.sql)
   title      TEXT PRIMARY KEY,
   links      TEXT[],       -- 내부 링크 목록 ["이순신", "조선", ...]
-  byte_size  INTEGER,      -- 본문 바이트 수. 랜덤 시작/도착점 후보 선택 시 필터 기준으로 사용
+  byte_size  INTEGER,
   created_at TIMESTAMP DEFAULT NOW()
 );
 ```
 
-랜덤 시작/도착점 후보 선택: `ORDER BY RANDOM()`은 인덱스를 타지 않아 571K 건에서 느림. 실제 구현은 `byte_size DESC LIMIT 100`으로 상위 문서를 fetch한 뒤 클라이언트에서 Fisher-Yates shuffle로 2개 선택.
+랜덤 시작/도착점 후보 선택: `ORDER BY RANDOM()`은 인덱스를 타지 않아 571K 건에서 느림. `COUNT(*)`로 전체 문서 수를 구한 뒤 클라이언트에서 랜덤 정수 생성 → `WHERE id >= $random_id LIMIT 1`으로 단건 fetch.
 
 ```sql
+-- 마운트 시 1회 (전체 문서 수)
+SELECT COUNT(*) FROM articles;
+
+-- 시작 문서 (random offset)
 SELECT title FROM articles
-ORDER BY byte_size DESC
-LIMIT 100;
--- 이후 클라이언트 shuffle → 앞 2개 사용
+WHERE id >= $random_id
+LIMIT 1;
+
+-- 도착 문서 (다른 random offset, '/' 포함 문서 제외)
+SELECT title FROM articles
+WHERE id >= $random_id
+  AND title NOT LIKE '%/%'
+LIMIT 1;
 ```
 
 ### redirects — 리다이렉트 매핑
@@ -62,8 +72,8 @@ CREATE TABLE daily_prompts (
 ## 인덱스
 
 ```sql
--- 랜덤 문제 추출 시 byte_size 상위 문서 필터링용
-CREATE INDEX idx_articles_byte_size ON articles(byte_size DESC);
+-- 랜덤 offset 선택용
+CREATE INDEX idx_articles_id ON articles(id);
 
 -- 리더보드: 동일 문제 기준 정렬
 CREATE INDEX idx_game_records_articles ON game_records(start_article, end_article);

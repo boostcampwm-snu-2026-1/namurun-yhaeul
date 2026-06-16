@@ -101,8 +101,7 @@
 ### useMainPage
 
 - KST 날짜: 클라이언트에서 `Date.now() + 9h` offset으로 ISO 문자열 생성. 서버 개입 없음
-- 랜덤 문서 선택: DB `ORDER BY RANDOM()` 대신 `byte_size DESC LIMIT 100` fetch 후 클라이언트 Fisher-Yates shuffle — `ORDER BY RANDOM()`은 인덱스를 타지 않아 571K 건 테이블에서 느림
-- top-100 마운트 시 미리 fetch — 랜덤 시작 버튼 클릭 즉시 이동 가능 (클릭 시점 fetch면 딜레이 발생)
+- 랜덤 문서 선택: `count: 'estimated'` HEAD 쿼리로 전체 행 수 추정 → `Math.random() * totalCount`로 randomId 생성 → `gte('id', randomId).limit(1)` 단건 fetch. 빈 결과(estimated가 실제 max ID 초과)이면 range × 0.9로 줄여 재시도 — range < 1이 되면 throw. `count: 'exact'`는 전체 스캔으로 대형 테이블에서 500 오류 발생 가능하여 제외
 - daily_prompts 오류 → graceful degradation: null 처리로 "오늘의 문제 없음" 상태 표시. articles 오류만 error state 설정 (랜덤 모드 자체가 불가한 경우)
 
 ### useArticle
