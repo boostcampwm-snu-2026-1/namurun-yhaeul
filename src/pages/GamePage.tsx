@@ -1,9 +1,11 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
 import { useGame } from '../hooks/useGame'
 import { useArticle } from '../hooks/useArticle'
 import { useRedirect } from '../hooks/useRedirect'
 import { ArticleViewer } from '../components/ArticleViewer'
+import { ArticleFallbackLinks } from '../components/ArticleFallbackLinks'
 import { GameHeader } from '../components/GameHeader'
 import { PathSidebar } from '../components/PathSidebar'
 import { QuitConfirmModal } from '../components/QuitConfirmModal'
@@ -32,13 +34,14 @@ function GamePage() {
   const [gameStart] = useState<string>(() => locationState?.start ?? '')
   const [gameEnd] = useState<string>(() => locationState?.end ?? '')
 
-  const { elapsedMs, clickCount, path, startGame, recordVisit, stopGame } = useGame()
+  const { elapsedMs, clickCount, path, startGame, recordVisit, undoLastVisit, stopGame } = useGame()
   const { article, isLoading, error: articleError, loadArticle, loadArticleOptimistic } = useArticle()
   const { resolveRedirect } = useRedirect()
 
   const [toast, setToast] = useState<string | null>(null)
   const [isRendering, setIsRendering] = useState(false)
   const [isQuitModalOpen, setIsQuitModalOpen] = useState(false)
+  const [hasRenderError, setHasRenderError] = useState(false)
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isNavigatingRef = useRef(false)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -67,6 +70,36 @@ function GamePage() {
     if (toastTimerRef.current !== null) clearTimeout(toastTimerRef.current)
     toastTimerRef.current = setTimeout(() => setToast(null), 3000)
   }, [])
+
+  const handleRenderError = useCallback(() => {
+    undoLastVisit()
+    setHasRenderError(true)
+    isNavigatingRef.current = false
+    setIsRendering(false)
+  }, [undoLastVisit])
+
+  const handleFallbackPrev = useCallback(async () => {
+    const prevTitle = path[path.length - 1]
+    if (!prevTitle) return
+    await loadArticle(prevTitle)
+    setHasRenderError(false)
+  }, [path, loadArticle])
+
+  const handleFallbackRandom = useCallback(async () => {
+    try {
+      const { count } = await supabase.from('articles').select('*', { count: 'estimated', head: true })
+      const total = count ?? 100000
+      const randomId = Math.floor(Math.random() * total)
+      const { data } = await supabase.from('articles').select('title').gte('id', randomId).limit(1).single()
+      if (!data) return
+      const title = (data as { title: string }).title
+      const resolved = await loadArticleOptimistic(title, resolveRedirect)
+      recordVisit(resolved)
+      setHasRenderError(false)
+    } catch {
+      showToast('이동이 불가능합니다')
+    }
+  }, [loadArticleOptimistic, resolveRedirect, recordVisit, showToast])
 
   const handleClick = useCallback(
     async (e: React.MouseEvent<HTMLDivElement>) => {
@@ -168,7 +201,14 @@ function GamePage() {
                   <p className="text-on-surface-variant font-body-sm text-body-sm">이동 중...</p>
                 </div>
               )}
-              <ArticleViewer article={article} onReady={handleArticleReady} />
+              <ArticleViewer article={article} onReady={handleArticleReady} onRenderError={handleRenderError} />
+              {hasRenderError && (
+                <ArticleFallbackLinks
+                  hasPrev={path.length > 1}
+                  onPrev={() => void handleFallbackPrev()}
+                  onRandom={() => void handleFallbackRandom()}
+                />
+              )}
             </div>
           )}
         </div>

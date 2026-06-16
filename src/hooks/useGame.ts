@@ -54,6 +54,14 @@ export function useGame() {
     }))
   }, [])
 
+  const undoLastVisit = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      path: prev.path.slice(0, -1),
+      clickCount: Math.max(0, prev.clickCount - 1),
+    }))
+  }, [])
+
   const stopGame = useCallback((): number => {
     if (intervalRef.current !== null) {
       clearInterval(intervalRef.current)
@@ -68,5 +76,5 @@ export function useGame() {
     return finalElapsed
   }, [])
 
-  return { ...state, startGame, recordVisit, stopGame }
+  return { ...state, startGame, recordVisit, undoLastVisit, stopGame }
 }
