@@ -5,16 +5,17 @@ interface Props {
 }
 
 export function PathSidebar({ path }: Props) {
-  const lastItemRef = useRef<HTMLDivElement>(null)
+  const asideRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
-    lastItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    if (!asideRef.current) return
+    asideRef.current.scrollTo({ top: asideRef.current.scrollHeight, behavior: 'smooth' })
   }, [path])
 
   return (
-    <aside className="w-36 shrink-0 border-r border-outline-variant bg-surface-container-low flex flex-col p-3 gap-0.5 overflow-y-auto">
+    <aside ref={asideRef} className="w-36 shrink-0 border-r border-outline-variant bg-surface-container-low flex flex-col p-3 pb-10 gap-0.5 overflow-y-auto">
       {path.map((title, i) => (
-        <div key={i} ref={i === path.length - 1 ? lastItemRef : null}>
+        <div key={i}>
           <div
             className={`text-xs px-2 py-1 rounded truncate ${
               i === path.length - 1
