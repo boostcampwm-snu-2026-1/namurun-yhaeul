@@ -1,6 +1,8 @@
 import { useMainPage } from '../hooks/useMainPage'
 import { AppHeader } from '../components/AppHeader'
 import { Footer } from '../components/Footer'
+import { HowToPlay } from '../components/HowToPlay'
+import { LobbyNav } from '../components/LobbyNav'
 
 function getKstDateLabel(): string {
   return new Date(Date.now() + 9 * 60 * 60 * 1000).toLocaleDateString('ko-KR', {
@@ -33,7 +35,9 @@ function MainPage() {
     <div className="min-h-screen bg-background circuit-bg">
       <AppHeader />
 
-      <main className="pt-16 min-h-screen flex flex-col items-center justify-center px-gutter py-12">
+      <LobbyNav />
+      <main className="pt-16">
+        <div id="game-start" className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-gutter py-12">
         <div className="w-full max-w-[960px] flex flex-col gap-10">
 
           {/* Identity */}
@@ -59,7 +63,7 @@ function MainPage() {
 
               <div className="relative flex flex-col h-full gap-4">
                 <div className="flex items-center justify-between">
-                  <span className="font-label-mono text-label-mono text-primary uppercase tracking-widest">
+                  <span className="font-headline-md text-lg font-semibold text-primary uppercase tracking-wider">
                     오늘의 도전
                   </span>
                   <span className="font-label-mono text-label-mono text-on-surface-variant">
@@ -102,7 +106,7 @@ function MainPage() {
 
             {/* Random challenge */}
             <div className="md:col-span-5 border border-outline-variant bg-surface-container-lowest flex flex-col p-8 min-h-64">
-              <span className="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-widest">
+              <span className="font-headline-md text-lg font-semibold text-on-surface-variant uppercase tracking-wider">
                 랜덤 도전
               </span>
 
@@ -125,7 +129,9 @@ function MainPage() {
 
           </div>
         </div>
+        </div>
       </main>
+      <HowToPlay />
       <Footer />
     </div>
   )
