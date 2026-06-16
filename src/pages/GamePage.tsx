@@ -63,15 +63,30 @@ function isLocationState(value: unknown): value is LocationState {
   )
 }
 
+// 새로고침/뒤로가기 시 브라우저가 history.state를 보존하므로 location.state 유무만으로는
+// 새 게임 진입과 새로고침을 구분할 수 없음. Navigation Timing API로 navigate 타입을 확인한다.
+function isDirectNavigation(): boolean {
+  try {
+    const entries = performance.getEntriesByType('navigation')
+    if (entries.length > 0) {
+      return (entries[0] as PerformanceNavigationTiming).type === 'navigate'
+    }
+  } catch {
+    // API 미지원 환경
+  }
+  return true
+}
+
 function GamePage() {
   const location = useLocation()
   const navigate = useNavigate()
 
   const locationState = isLocationState(location.state) ? location.state : null
 
-  // Restore session from sessionStorage if location.state is absent (e.g., on page refresh)
+  // 새로고침/뒤로가기 시 location.state가 history에 남아 있어 직접 진입과 구분이 안 됨.
+  // Navigation Timing API로 navigate 타입을 확인해 새 게임 진입일 때만 복원을 건너뜀.
   const [savedSession] = useState<GameSession | null>(() => {
-    if (locationState) return null
+    if (locationState && isDirectNavigation()) return null
     return readGameSession()
   })
 
