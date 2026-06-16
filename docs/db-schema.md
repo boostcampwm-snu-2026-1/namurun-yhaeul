@@ -9,12 +9,20 @@ CREATE TABLE articles (
   id         SERIAL,       -- 랜덤 offset 선택용 (마이그레이션: supabase/migrations/add_articles_id_serial.sql)
   title      TEXT PRIMARY KEY,
   links      TEXT[],       -- 내부 링크 목록 ["이순신", "조선", ...]
+  summary    TEXT,         -- 목표 문서 설명 툴팁용 한국어 요약 (온디맨드 생성 후 캐시)
   byte_size  INTEGER,
   created_at TIMESTAMP DEFAULT NOW()
 );
 ```
 
 랜덤 시작/도착점 후보 선택: `ORDER BY RANDOM()`은 인덱스를 타지 않아 571K 건에서 느림. `COUNT(*)`로 전체 문서 수를 구한 뒤 클라이언트에서 랜덤 정수 생성 → `WHERE id >= $random_id LIMIT 1`으로 단건 fetch.
+
+목표 문서 설명 툴팁은 `summary` 컬럼을 사용한다.
+
+- 프론트엔드가 먼저 `SELECT summary FROM articles WHERE title = $title` 조회
+- 값이 없으면 Supabase Edge Function `article-summary` 호출
+- Edge Function이 R2 본문을 읽어 Gemini로 1~2문장 한국어 요약 생성 후 `UPDATE articles SET summary = ...`
+- 이후 요청은 캐시된 `summary`를 재사용
 
 ```sql
 -- 마운트 시 1회 (전체 문서 수)
