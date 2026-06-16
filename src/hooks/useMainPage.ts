@@ -72,7 +72,6 @@ export function useMainPage(): UseMainPageResult {
         }
 
         if (countResult.error) {
-          console.error('articles count error:', countResult.error)
           setError('문서 목록을 불러오지 못했습니다.')
         } else if (countResult.count !== null) {
           setTotalCount(countResult.count)
