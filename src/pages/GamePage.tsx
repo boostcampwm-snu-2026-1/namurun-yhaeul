@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
+import { fetchRandomArticleTitle } from '../lib/articles'
 import { useGame } from '../hooks/useGame'
 import { useArticle } from '../hooks/useArticle'
 import { useRedirect } from '../hooks/useRedirect'
@@ -94,16 +94,12 @@ function GamePage() {
     isNavigatingRef.current = true
     setIsRendering(true)
     try {
-      const { count } = await supabase.from('articles').select('*', { count: 'estimated', head: true })
-      const total = count ?? 100000
-      const randomId = Math.floor(Math.random() * total)
-      const { data } = await supabase.from('articles').select('title').gte('id', randomId).limit(1).single()
-      if (!data) {
+      const title = await fetchRandomArticleTitle()
+      if (!title) {
         isNavigatingRef.current = false
         setIsRendering(false)
         return
       }
-      const title = (data as { title: string }).title
       const resolved = await loadArticleOptimistic(title, resolveRedirect)
       recordVisit(resolved)
       setHasRenderError(false)
