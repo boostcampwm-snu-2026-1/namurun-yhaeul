@@ -31,7 +31,7 @@ const supabaseUrl = Deno.env.get('SUPABASE_URL')
 const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 const r2BaseUrl = Deno.env.get('R2_BASE_URL')
 const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
-const geminiModel = Deno.env.get('GEMINI_MODEL') ?? 'gemini-2.5-flash'
+const geminiModel = Deno.env.get('GEMINI_MODEL') ?? 'gemini-3.1-flash-lite'
 
 if (!supabaseUrl || !serviceRoleKey) {
   throw new Error('SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY 환경변수가 필요합니다.')
