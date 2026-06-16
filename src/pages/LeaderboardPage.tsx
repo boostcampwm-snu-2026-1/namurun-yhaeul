@@ -182,21 +182,13 @@ function LeaderboardPage() {
 
         {/* Leaderboard table */}
         <div className="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden shadow-sm">
-          {isLoading && (
-            <div className="p-8 text-center text-on-surface-variant font-body-sm text-body-sm">불러오는 중...</div>
-          )}
-
-          {!isLoading && error && (
+          {error && (
             <div className="p-8 text-center text-error font-body-sm text-body-sm">
               순위를 불러올 수 없습니다.
             </div>
           )}
 
-          {!isLoading && !error && entries.length === 0 && (
-            <div className="p-8 text-center text-on-surface-variant font-body-sm text-body-sm">아직 기록이 없습니다.</div>
-          )}
-
-          {!isLoading && !error && entries.length > 0 && (
+          {!error && (
             <table className="w-full font-body-sm text-body-sm">
               <thead>
                 <tr className="bg-surface-container-highest text-on-surface-variant font-label-mono text-label-mono uppercase tracking-wider">
@@ -213,11 +205,12 @@ function LeaderboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {entries.map((entry, i) => {
-                  const isCurrentUser = entry.id === recordId
+                {Array.from({ length: 10 }, (_, i) => {
+                  const entry = entries[i]
+                  const isCurrentUser = !!entry && entry.id === recordId
                   return (
                     <tr
-                      key={entry.id}
+                      key={entry?.id ?? `empty-${i}`}
                       className={`border-t border-outline-variant ${isCurrentUser ? 'bg-primary/10' : 'hover:bg-surface-container-low'}`}
                     >
                       <td className="px-4 py-3 text-center font-semibold">
@@ -232,24 +225,42 @@ function LeaderboardPage() {
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <span className={isCurrentUser ? 'font-bold text-primary' : 'text-on-surface'}>
-                          {entry.user_name}
-                        </span>
-                        {isCurrentUser && (
-                          <span className="ml-1 text-xs text-primary font-label-mono">← 나</span>
+                        {isLoading ? (
+                          <span className="text-on-surface-variant">—</span>
+                        ) : entry ? (
+                          <>
+                            <span className={isCurrentUser ? 'font-bold text-primary' : 'text-on-surface'}>
+                              {entry.user_name}
+                            </span>
+                            {isCurrentUser && (
+                              <span className="ml-1 text-xs text-primary font-label-mono">← 나</span>
+                            )}
+                          </>
+                        ) : (
+                          <span className="text-outline-variant">—</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-center text-on-surface">{entry.click_count}</td>
-                      <td className="px-4 py-3 text-center font-display-timer text-on-surface">
-                        {formatTime(entry.elapsed_ms)}
+                      <td className="px-4 py-3 text-center">
+                        {isLoading || !entry ? (
+                          <span className="text-outline-variant">—</span>
+                        ) : (
+                          <span className="text-on-surface">{entry.click_count}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        {isLoading || !entry ? (
+                          <span className="text-outline-variant">—</span>
+                        ) : (
+                          <span className="font-display-timer text-on-surface">{formatTime(entry.elapsed_ms)}</span>
+                        )}
                       </td>
                       {activeTab === 'random' && (
                         <>
                           <td className="px-4 py-3 text-on-surface-variant truncate max-w-[120px]">
-                            {entry.start_article}
+                            {!isLoading && entry ? entry.start_article : <span className="text-outline-variant">—</span>}
                           </td>
                           <td className="px-4 py-3 text-on-surface-variant truncate max-w-[120px]">
-                            {entry.end_article}
+                            {!isLoading && entry ? entry.end_article : <span className="text-outline-variant">—</span>}
                           </td>
                         </>
                       )}
