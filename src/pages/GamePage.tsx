@@ -52,6 +52,12 @@ function GamePage() {
     }
   }, [])
 
+  // article/articleError가 커밋된 이후에 잠금 해제 — 캐시 히트 시 finally가 즉각 실행되어
+  // React 렌더 전에 ref가 풀리는 연타 허용 문제를 방지한다
+  useEffect(() => {
+    isNavigatingRef.current = false
+  }, [article, articleError])
+
   const showToast = useCallback((message: string) => {
     setToast(message)
     if (toastTimerRef.current !== null) clearTimeout(toastTimerRef.current)
@@ -113,8 +119,6 @@ function GamePage() {
         }
       } catch {
         showToast('이동이 불가능합니다')
-      } finally {
-        isNavigatingRef.current = false
       }
     },
     [resolveRedirect, loadArticleOptimistic, recordVisit, showToast, gameEnd, gameStart, path, clickCount, stopGame, navigate],
