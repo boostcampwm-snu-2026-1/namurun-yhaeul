@@ -31,7 +31,7 @@ function ResultPage() {
   const [result] = useState<ResultState | null>(() =>
     isResultState(location.state) ? location.state : null,
   )
-  const [nickname, setNickname] = useState('')
+  const [nickname, setNickname] = useState(() => localStorage.getItem('namurun_nickname') ?? '')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
@@ -47,6 +47,7 @@ function ResultPage() {
     setSubmitError(null)
     try {
       await updateUserName(nickname.trim())
+      localStorage.setItem('namurun_nickname', nickname.trim())
       navigate('/leaderboard', {
         state: {
           startArticle: result!.startArticle,
