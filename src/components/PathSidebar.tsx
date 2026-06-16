@@ -1,10 +1,19 @@
+import { useEffect, useRef } from 'react'
+
 interface Props {
   path: string[]
 }
 
 export function PathSidebar({ path }: Props) {
+  const asideRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    if (!asideRef.current) return
+    asideRef.current.scrollTo?.({ top: asideRef.current.scrollHeight, behavior: 'smooth' })
+  }, [path])
+
   return (
-    <aside className="w-36 shrink-0 border-r border-outline-variant bg-surface-container-low flex flex-col p-3 gap-0.5 overflow-y-auto">
+    <aside ref={asideRef} className="w-36 shrink-0 border-r border-outline-variant bg-surface-container-low flex flex-col p-3 pb-10 gap-0.5 overflow-y-auto">
       {path.map((title, i) => (
         <div key={i}>
           <div
