@@ -304,7 +304,7 @@ function GamePage() {
       <div className="flex flex-1 overflow-hidden">
         <PathSidebar path={path} />
 
-        <div className="flex-1 overflow-y-auto" ref={contentRef}>
+        <div className="flex-1 overflow-y-auto pr-14" ref={contentRef}>
           {!hasGameStarted && (
             <div className="flex items-center justify-center p-8">
               <p className="text-on-surface-variant font-body-sm text-body-sm">불러오는 중...</p>
