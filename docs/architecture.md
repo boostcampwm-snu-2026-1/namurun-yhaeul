@@ -49,8 +49,8 @@
 [결과 화면]
   ├─ 소요 시간(MM:SS.s), 총 클릭 수, 거쳐온 경로 표시
   ├─ 마운트 시 game_records INSERT (user_name=null) → recordId 확보
-  ├─ 닉네임 입력 (필수) → game_records UPDATE (user_name)
-  └─ 제출 완료 → navigate('/leaderboard', { state: { startArticle, endArticle, recordId } })
+  ├─ 닉네임 입력 (필수, 직전 제출값을 localStorage `namurun_nickname`에서 자동 prefill) → game_records UPDATE (user_name)
+  └─ 제출 완료 → 닉네임 localStorage 저장 → navigate('/leaderboard', { state: { startArticle, endArticle, recordId } })
 
 [리더보드 화면 /leaderboard]
   ├─ 동일 start_article + end_article 기준 상위 10개
@@ -127,6 +127,7 @@
 - `stopGame()`이 finalElapsed(number)를 반환 — navigate 시점에 setState가 아직 반영되지 않으므로 ref에서 직접 계산한 값을 전달받아 정확한 종료 시각 보장
 - path는 GamePage의 `handleClick`에서 `[...path, resolved]`로 직접 조합 후 전달 — `recordVisit` setState가 비동기이므로 클로저의 path에 resolved를 직접 추가
 - 닉네임 입력은 필수 — 비어 있거나 isSaved=false(INSERT 미완료)이면 제출 불가
+- 닉네임 입력 초기값은 `localStorage.getItem('namurun_nickname')` — 직전 게임에서 제출한 닉네임을 자동 prefill (없으면 빈 문자열). 제출 성공 시 `localStorage.setItem('namurun_nickname', nickname.trim())`으로 갱신
 - 제출 성공 시 `/leaderboard`로 navigate, state에 `{ startArticle, endArticle, recordId }` 전달
 
 ### GamePage
