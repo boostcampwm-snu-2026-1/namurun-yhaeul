@@ -2,7 +2,7 @@ import { useMainPage } from '../hooks/useMainPage'
 import { AppHeader } from '../components/AppHeader'
 
 function MainPage() {
-  const { isLoading, error, dailyPrompt, startDaily, startRandom } = useMainPage()
+  const { isLoading, error, dailyPrompt, startDaily, startRandom, goToLeaderboard } = useMainPage()
 
   if (isLoading) {
     return (
@@ -98,6 +98,24 @@ function MainPage() {
                 className="px-6 py-2 bg-primary text-on-primary hover:brightness-110 transition-all font-body-sm text-body-sm font-semibold"
               >
                 랜덤 스피드런
+              </button>
+            </div>
+
+            {/* Leaderboard card */}
+            <div className="md:col-span-12 bg-surface-container border border-outline-variant p-gutter flex items-center justify-between">
+              <div>
+                <p className="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-widest mb-1">
+                  리더보드
+                </p>
+                <p className="font-body-sm text-body-sm text-on-surface-variant">
+                  날짜별 랭킹과 랜덤도전 랭킹을 확인하세요.
+                </p>
+              </div>
+              <button
+                onClick={goToLeaderboard}
+                className="px-6 py-2 border border-outline-variant text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all font-body-sm text-body-sm"
+              >
+                순위 보기
               </button>
             </div>
           </div>
