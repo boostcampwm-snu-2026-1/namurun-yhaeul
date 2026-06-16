@@ -51,7 +51,8 @@ describe('useLeaderboard', () => {
   })
 
   it('쿼리 실패 시 error가 설정된다', async () => {
-    mockQuery.eq.mockResolvedValueOnce({ data: null, error: { message: 'query error' } })
+    // daily tab: first eq('challenge_type') returns mockQuery for chaining, second eq returns data
+    mockQuery.eq.mockReturnValueOnce(mockQuery).mockResolvedValueOnce({ data: null, error: { message: 'query error' } })
 
     const { result } = renderHook(() => useLeaderboard('daily', '2026-06-16', 'click_count'))
 

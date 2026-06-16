@@ -17,6 +17,18 @@ vi.mock('../hooks/useLeaderboard', () => ({
   useLeaderboard: () => ({ entries: mockEntries, isLoading: false, error: null }),
 }))
 
+// LeaderboardPage now calls supabase directly for date list and daily prompt info
+vi.mock('../lib/supabase', () => ({
+  supabase: {
+    from: () => ({
+      select: () => ({
+        order: () => ({ limit: () => Promise.resolve({ data: [], error: null }) }),
+        eq: () => ({ maybeSingle: () => Promise.resolve({ data: null, error: null }) }),
+      }),
+    }),
+  },
+}))
+
 const mockNavigate = vi.fn()
 let mockLocationState: unknown = null
 
@@ -30,8 +42,7 @@ vi.mock('react-router-dom', async (importOriginal) => {
 })
 
 const validState = {
-  startArticle: '이순신',
-  endArticle: '세종대왕',
+  tab: 'random' as const,
   recordId: 'uuid-1',
 }
 
@@ -44,16 +55,16 @@ describe('LeaderboardPage', () => {
     cleanup()
   })
 
-  it('location.state가 없으면 navigate("/")를 호출한다', () => {
+  it('location.state가 없어도 리더보드가 기본 탭으로 표시된다', () => {
     mockLocationState = null
     render(<LeaderboardPage />)
-    expect(mockNavigate).toHaveBeenCalledWith('/', { replace: true })
+    expect(screen.getByText('리더보드')).toBeTruthy()
   })
 
   it('유효한 state로 접근하면 리더보드가 표시된다', () => {
     mockLocationState = validState
     render(<LeaderboardPage />)
-    expect(screen.getByText('전체 순위')).toBeTruthy()
+    expect(screen.getByText('리더보드')).toBeTruthy()
     expect(screen.getByText('테스터')).toBeTruthy()
     expect(screen.getByText('3')).toBeTruthy()
   })

@@ -65,7 +65,7 @@ describe('GamePage', () => {
   })
 
   it('유효한 state로 접근하면 GameHeader가 목표 문서명과 함께 렌더링된다', () => {
-    mockLocationState = { start: '이순신', end: '세종대왕' }
+    mockLocationState = { start: '이순신', end: '세종대왕', challengeType: 'random' }
     render(<GamePage />)
     expect(screen.getByTestId('game-header')).toBeTruthy()
     expect(screen.getByText('세종대왕')).toBeTruthy()
