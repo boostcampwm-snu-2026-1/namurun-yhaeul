@@ -24,6 +24,16 @@ export function AppHeader() {
         >
           메인 로비
         </button>
+        <button
+          onClick={() => navigate('/leaderboard')}
+          className={`h-full flex items-center px-4 font-body-sm text-body-sm transition-colors duration-75 ${
+            location.pathname === '/leaderboard'
+              ? 'text-primary font-bold border-b-2 border-primary'
+              : 'text-on-surface-variant font-medium hover:bg-primary hover:text-on-primary'
+          }`}
+        >
+          리더보드
+        </button>
       </nav>
     </header>
   )
