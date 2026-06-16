@@ -61,7 +61,7 @@ function MainPage() {
 
               <div className="relative flex flex-col h-full gap-4">
                 <div className="flex items-center justify-between">
-                  <span className="font-headline-md text-xs font-semibold text-primary uppercase tracking-wider">
+                  <span className="font-headline-md text-sm font-semibold text-primary uppercase tracking-wider">
                     오늘의 도전
                   </span>
                   <span className="font-label-mono text-label-mono text-on-surface-variant">
@@ -104,7 +104,7 @@ function MainPage() {
 
             {/* Random challenge */}
             <div className="md:col-span-5 border border-outline-variant bg-surface-container-lowest flex flex-col p-8 min-h-64">
-              <span className="font-headline-md text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
+              <span className="font-headline-md text-sm font-semibold text-on-surface-variant uppercase tracking-wider">
                 랜덤 도전
               </span>
 
