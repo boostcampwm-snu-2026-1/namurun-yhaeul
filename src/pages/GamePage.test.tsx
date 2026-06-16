@@ -9,6 +9,7 @@ vi.mock('../hooks/useGame', () => ({
     path: [],
     isRunning: false,
     startGame: vi.fn(),
+    restoreGame: vi.fn(),
     recordVisit: vi.fn(),
     undoLastVisit: vi.fn(),
     stopGame: vi.fn(),

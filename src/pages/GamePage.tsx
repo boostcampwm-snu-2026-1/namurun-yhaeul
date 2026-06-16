@@ -15,6 +15,37 @@ interface LocationState {
   end: string
 }
 
+interface GameSession {
+  gameStart: string
+  gameEnd: string
+  path: string[]
+  clickCount: number
+  startTime: number
+  currentArticle: string
+}
+
+const GAME_SESSION_KEY = 'namurun_game_session'
+
+function readGameSession(): GameSession | null {
+  try {
+    const raw = sessionStorage.getItem(GAME_SESSION_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as unknown
+    if (
+      typeof parsed !== 'object' || parsed === null ||
+      typeof (parsed as Record<string, unknown>).gameStart !== 'string' ||
+      typeof (parsed as Record<string, unknown>).gameEnd !== 'string' ||
+      !Array.isArray((parsed as Record<string, unknown>).path) ||
+      typeof (parsed as Record<string, unknown>).clickCount !== 'number' ||
+      typeof (parsed as Record<string, unknown>).startTime !== 'number' ||
+      typeof (parsed as Record<string, unknown>).currentArticle !== 'string'
+    ) return null
+    return parsed as GameSession
+  } catch {
+    return null
+  }
+}
+
 function isLocationState(value: unknown): value is LocationState {
   return (
     typeof value === 'object' &&
@@ -30,11 +61,19 @@ function GamePage() {
 
   const locationState = isLocationState(location.state) ? location.state : null
 
-  // Capture initial game params as stable strings (useState initial value runs once)
-  const [gameStart] = useState<string>(() => locationState?.start ?? '')
-  const [gameEnd] = useState<string>(() => locationState?.end ?? '')
+  // Restore session from sessionStorage if location.state is absent (e.g., on page refresh)
+  const [savedSession] = useState<GameSession | null>(() => {
+    if (locationState) return null
+    return readGameSession()
+  })
 
-  const { elapsedMs, clickCount, path, startGame, recordVisit, undoLastVisit, stopGame } = useGame()
+  // Capture initial game params as stable strings (useState initial value runs once)
+  const [gameStart] = useState<string>(() => locationState?.start ?? savedSession?.gameStart ?? '')
+  const [gameEnd] = useState<string>(() => locationState?.end ?? savedSession?.gameEnd ?? '')
+  // On restore, load the last visited article; on fresh start, load gameStart
+  const [initialArticle] = useState<string>(() => savedSession?.currentArticle ?? locationState?.start ?? '')
+
+  const { elapsedMs, clickCount, path, startGame, restoreGame, recordVisit, undoLastVisit, stopGame } = useGame()
   const { article, isLoading, error: articleError, loadArticle, loadArticleOptimistic } = useArticle()
   const { resolveRedirect } = useRedirect()
 
@@ -46,12 +85,13 @@ function GamePage() {
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isNavigatingRef = useRef(false)
   const hasStartedRef = useRef(false)
+  const gameStartTimeRef = useRef<number>(0)
   const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!gameStart) return
-    void loadArticle(gameStart)
-  }, [gameStart, loadArticle])
+    if (!initialArticle) return
+    void loadArticle(initialArticle)
+  }, [initialArticle, loadArticle])
 
   useEffect(() => {
     return () => {
@@ -59,18 +99,43 @@ function GamePage() {
     }
   }, [])
 
+  const saveSession = useCallback((currentPath: string[], currentClickCount: number, currentArticle: string) => {
+    sessionStorage.setItem(GAME_SESSION_KEY, JSON.stringify({
+      gameStart,
+      gameEnd,
+      path: currentPath,
+      clickCount: currentClickCount,
+      startTime: gameStartTimeRef.current,
+      currentArticle,
+    } satisfies GameSession))
+  }, [gameStart, gameEnd])
+
+  const clearSession = useCallback(() => {
+    sessionStorage.removeItem(GAME_SESSION_KEY)
+  }, [])
+
   // Worker 파싱 완료 후 잠금 해제 — article 상태 변경(R2 fetch 완료) 시점이 아닌
   // namumark HTML이 실제로 DOM에 커밋된 이후 클릭을 허용해야 연타 문제가 해결됨
   const handleArticleReady = useCallback(() => {
     if (!hasStartedRef.current) {
       hasStartedRef.current = true
-      startGame(gameStart)
+      if (savedSession !== null) {
+        // 새로고침 복원: 저장된 타임스탬프로 타이머 재개
+        gameStartTimeRef.current = savedSession.startTime
+        restoreGame(savedSession.path, savedSession.clickCount, savedSession.startTime)
+      } else {
+        // 최초 시작: 타이머 시작 + 세션 저장
+        const startTime = Date.now()
+        gameStartTimeRef.current = startTime
+        startGame(gameStart)
+        saveSession([gameStart], 0, gameStart)
+      }
       setHasGameStarted(true)
     } else {
       isNavigatingRef.current = false
       setIsRendering(false)
     }
-  }, [startGame, gameStart])
+  }, [startGame, restoreGame, gameStart, savedSession, saveSession])
 
   const showToast = useCallback((message: string) => {
     setToast(message)
@@ -157,18 +222,22 @@ function GamePage() {
       try {
         const rawTitle = decodeURIComponent(href.slice(3).split('#')[0])
         const resolved = await loadArticleOptimistic(rawTitle, resolveRedirect)
+        const newPath = [...path, resolved]
+        const newClickCount = clickCount + 1
         recordVisit(resolved)
+        saveSession(newPath, newClickCount, resolved)
         if (contentRef.current) contentRef.current.scrollTop = 0
 
         if (resolved === gameEnd) {
+          clearSession()
           const finalElapsed = stopGame()
           navigate('/result', {
             state: {
               startArticle: gameStart,
               endArticle: gameEnd,
-              path: [...path, resolved],
+              path: newPath,
               elapsedMs: finalElapsed,
-              clickCount: clickCount + 1,
+              clickCount: newClickCount,
             },
           })
         }
@@ -178,7 +247,7 @@ function GamePage() {
         setIsRendering(false)
       }
     },
-    [resolveRedirect, loadArticleOptimistic, recordVisit, showToast, gameEnd, gameStart, path, clickCount, stopGame, navigate],
+    [resolveRedirect, loadArticleOptimistic, recordVisit, saveSession, clearSession, showToast, gameEnd, gameStart, path, clickCount, stopGame, navigate],
   )
 
   if (!gameStart || !gameEnd) {
@@ -240,7 +309,7 @@ function GamePage() {
 
       {isQuitModalOpen && (
         <QuitConfirmModal
-          onConfirm={() => navigate('/')}
+          onConfirm={() => { clearSession(); navigate('/') }}
           onCancel={() => setIsQuitModalOpen(false)}
         />
       )}
