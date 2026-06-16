@@ -58,15 +58,15 @@ describe('LeaderboardPage', () => {
   it('location.state가 없어도 리더보드가 기본 탭으로 표시된다', () => {
     mockLocationState = null
     render(<LeaderboardPage />)
-    expect(screen.getByText('리더보드')).toBeTruthy()
+    expect(screen.getAllByText('리더보드').length).toBeGreaterThanOrEqual(1)
   })
 
   it('유효한 state로 접근하면 리더보드가 표시된다', () => {
     mockLocationState = validState
     render(<LeaderboardPage />)
-    expect(screen.getByText('리더보드')).toBeTruthy()
+    expect(screen.getAllByText('리더보드').length).toBeGreaterThanOrEqual(1)
     expect(screen.getByText('테스터')).toBeTruthy()
-    expect(screen.getByText('3')).toBeTruthy()
+    expect(screen.getAllByText('3').length).toBeGreaterThanOrEqual(1)
   })
 
   it('현재 사용자 행에 "← 나" 표시가 붙는다', () => {
