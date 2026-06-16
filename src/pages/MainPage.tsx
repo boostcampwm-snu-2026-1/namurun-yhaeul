@@ -2,6 +2,7 @@ import { useMainPage } from '../hooks/useMainPage'
 import { AppHeader } from '../components/AppHeader'
 import { Footer } from '../components/Footer'
 import { HowToPlay } from '../components/HowToPlay'
+import { LobbyNav } from '../components/LobbyNav'
 
 function getKstDateLabel(): string {
   return new Date(Date.now() + 9 * 60 * 60 * 1000).toLocaleDateString('ko-KR', {
@@ -34,8 +35,9 @@ function MainPage() {
     <div className="min-h-screen bg-background circuit-bg">
       <AppHeader />
 
+      <LobbyNav />
       <main className="pt-16">
-        <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-gutter py-12">
+        <div id="game-start" className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-gutter py-12">
         <div className="w-full max-w-[960px] flex flex-col gap-10">
 
           {/* Identity */}

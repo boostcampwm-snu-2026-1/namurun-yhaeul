@@ -1,5 +1,5 @@
-// 침착맨 플레이 영상 URL을 여기에 입력 (비워두면 관련 영상 섹션이 표시되지 않음)
-const CHIMCHAK_VIDEO_URL = 'https://youtu.be/EONlXsPEoJA?si=goPXX1kVcQJfLPib&t=529'
+// 영상 URL을 여기에 입력 (비워두면 관련 영상 섹션이 표시되지 않음)
+const VIDEO_URL = 'https://youtu.be/EONlXsPEoJA?si=goPXX1kVcQJfLPib&t=529'
 
 function getEmbedUrl(url: string): string | null {
   if (!url.trim()) return null
@@ -81,10 +81,10 @@ const STEPS = [
 ]
 
 export function HowToPlay() {
-  const embedUrl = getEmbedUrl(CHIMCHAK_VIDEO_URL)
+  const embedUrl = getEmbedUrl(VIDEO_URL)
 
   return (
-    <section className="w-full bg-surface-container border-t border-outline-variant">
+    <section id="how-to-play" className="w-full bg-surface-container border-t border-outline-variant">
       <div className="w-full max-w-[960px] mx-auto px-gutter py-14 flex flex-col gap-10">
 
         {/* Section heading */}
@@ -140,7 +140,7 @@ export function HowToPlay() {
 
         {/* Related video */}
         {embedUrl && (
-          <div className="flex flex-col gap-6 pt-6 border-t border-outline-variant">
+          <div id="related-video" className="flex flex-col gap-6 pt-6 border-t border-outline-variant">
             <div className="flex items-center gap-4">
               <span className="font-headline-md text-lg font-semibold text-primary uppercase tracking-wider shrink-0">
                 관련 영상
