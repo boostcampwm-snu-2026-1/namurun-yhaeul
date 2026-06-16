@@ -4,6 +4,7 @@
 
 **[위키피디아 스피드런(The Wiki Game)](https://wikispeedruns.com/)** 의 나무위키 버전입니다.
 
+
 🔗 **[namurun-yhaeul.vercel.app](https://namurun-yhaeul.vercel.app/)**
 
 ---
