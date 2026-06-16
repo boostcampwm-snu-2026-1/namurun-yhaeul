@@ -1,13 +1,23 @@
 import { formatTime } from '../lib/formatTime'
+import { GoalArticleInfoTooltip } from './GoalArticleInfoTooltip'
 
 interface Props {
   targetTitle: string
+  targetSummary: string | null
+  summaryStatus: 'idle' | 'loading' | 'success' | 'error'
   elapsedMs: number
   clickCount: number
   onQuit: () => void
 }
 
-export function GameHeader({ targetTitle, elapsedMs, clickCount, onQuit }: Props) {
+export function GameHeader({
+  targetTitle,
+  targetSummary,
+  summaryStatus,
+  elapsedMs,
+  clickCount,
+  onQuit,
+}: Props) {
   return (
     <header className="bg-surface-container-low border-b border-outline-variant shadow-[0_0_12px_rgba(0,164,149,0.1)] flex items-center w-full h-20 px-gutter sticky top-0 z-50">
       {/* Left: target */}
@@ -20,6 +30,7 @@ export function GameHeader({ targetTitle, elapsedMs, clickCount, onQuit }: Props
           <span className="font-headline-md text-headline-md text-primary glow-text truncate leading-tight bg-primary/10 border border-primary/30 px-3 py-0.5">
             {targetTitle}
           </span>
+          <GoalArticleInfoTooltip summary={targetSummary} status={summaryStatus} />
         </div>
       </div>
 

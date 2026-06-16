@@ -32,7 +32,10 @@
       ↓
 
 [게임 화면]
-  ├─ 상단 헤더: 목표 문서명 | 경과 시간 타이머 | 클릭 수 카운터
+  ├─ 상단 헤더: 목표 문서명 | 설명 툴팁(i hover/focus) | 경과 시간 타이머 | 클릭 수 카운터
+  │    설명 툴팁: `articles.summary` 조회 → 없으면 Edge Function(`article-summary`) 호출
+  │      → Edge Function이 R2 본문을 읽어 Gemini 요약 생성 → `articles.summary`에 캐시
+  │      → 성공 시 한국어 1~2문장 요약 표시, 실패 시 "설명을 불러올 수 없습니다"
   ├─ 좌측 사이드바: 이동 경로 (시작 문서부터 현재 문서까지 순서대로 표시)
   ├─ 문서 영역: R2 fetch → namumark-clone-core 렌더링
   ├─ 링크 클릭 → href 형식 판별 → redirects 확인 → R2 fetch → 이동
@@ -159,6 +162,7 @@
 - **타이머 지연 시작**: 초기 문서 로드 시 `startGame`을 `useEffect`에서 즉시 호출하지 않음. `loadArticle`만 호출하고, `onReady` 첫 번째 콜백 시점(Worker 파싱 + DOM 커밋 완료)에 `startGame` 실행. `hasStartedRef`(ref)로 stale closure 없이 "최초 호출" 여부 판별. `hasGameStarted`(state)로 로딩 표시와 아티클 영역 가시성 제어 — `article`이 세팅되면 즉시 `ArticleViewer`를 `hidden`으로 마운트해 Worker 파싱을 시작하되, `hasGameStarted`가 `true`가 되어야 표시. 두 번째 문서부터는 기존 `isNavigatingRef`/`isRendering` 흐름 유지
 - **새로고침 세션 복원**: `sessionStorage['namurun_game_session']`에 `{ gameStart, gameEnd, path, clickCount, startTime, currentArticle }` 저장. 저장 시점: 최초 `onReady`(게임 시작) + 매 문서 이동 성공(`handleClick`에서 `recordVisit` 직후). 마운트 시 `location.state`가 null이면 sessionStorage에서 복원 시도 — 성공 시 `currentArticle` 로드 + `restoreGame` 호출로 타이머 재개. 세션 삭제: 목표 문서 도달(`navigate('/result')` 직전) + 포기 확인. sessionStorage 없으면 기존 "잘못된 접근" 표시
 - **콘텐츠 영역 레이아웃**: `overflow-y-auto` div 내부를 `flex` row로 구성 — 좌: 아티클 래퍼(`flex-1 min-w-0 relative`), 우: 버튼 거터(`w-10 shrink-0 relative`). `hasToc` state: `handleArticleReady` 시점에 `contentRef.current?.querySelector('.opennamu_TOC')`로 TOC 유무를 감지해 `ArticleNavButtons`에 전달
+- **목표 문서 설명 로딩**: `useArticleSummary(gameEnd)`가 게임 진행과 독립적으로 동작 — 먼저 `articles.summary`를 조회하고, 비어 있으면 Supabase Edge Function `article-summary`를 invoke. Edge Function은 R2에서 목표 문서 원문을 fetch한 뒤 Gemini로 "찾는 데 도움이 되는 식별 정보 + 핵심 맥락" 1~2문장 요약을 생성하고 `articles.summary`에 캐시한다. Gemini가 `429`, `500`, `503` 같은 일시적 오류를 반환하면 최대 3회까지 짧은 백오프와 함께 재시도한다. 프론트는 로딩 중에도 타이머/문서 이동을 막지 않으며, 실패 시 툴팁에 `"설명을 불러올 수 없습니다"`를 표시
 
 ---
 
@@ -179,6 +183,7 @@ src/
     ArticleFallbackLinks.tsx ← 렌더링 실패 시 복구 링크 (이전 문서 / 랜덤 문서) ✅
     ArticleNavButtons.tsx    ← 문서 내 스크롤 버튼 (목차·맨 위·맨 아래) ✅
     GameHeader.tsx           ← 타이머(MM:SS.s), 클릭 수, 목표 문서명 ✅
+    GoalArticleInfoTooltip.tsx ← 목표 문서 설명 툴팁 (hover/focus/click) ✅
     PathSidebar.tsx       ← 이동 경로 사이드바 (현재 문서 하이라이트) ✅
     NamurunLogo.tsx       ← 나무런 하이브리드 로고 SVG 컴포넌트 ✅
     HowToPlay.tsx         ← 로비 하단 게임 방법 안내 (3단계 카드 + 관련 영상 슬롯) ✅
@@ -187,6 +192,7 @@ src/
     useGame.ts            ← 게임 상태 (elapsedMs, clickCount, path) ✅
     useMainPage.ts        ← 메인 화면 데이터 (일일 문제 조회, 랜덤 문서 선택) ✅
     useArticle.ts         ← R2 fetch + 로딩/에러 상태 관리 ✅
+    useArticleSummary.ts  ← 목표 문서 요약 조회 + 온디맨드 생성 요청 ✅
     useRedirect.ts        ← Supabase redirects 조회 ✅
     useGameRecord.ts      ← game_records INSERT + recordId 반환 + updateUserName ✅
     useLeaderboard.ts     ← game_records 리더보드 쿼리 (탭·날짜·정렬 기준별 상위 10개) ✅
@@ -199,6 +205,12 @@ src/
     includeTemplates.ts   ← [include(틀:...)] pre/post-processing (known 틀 → HTML 박스) ✅
   shims/
     crypto.ts             ← namumark-clone-core가 요구하는 crypto mock ✅
+  supabase/
+    functions/
+      article-summary/
+        index.ts          ← 목표 문서 요약 Edge Function (R2 fetch → Gemini 요약/재시도 → articles.summary 캐시) ✅
+    migrations/
+      add_articles_summary_column.sql ← articles.summary 컬럼 추가 ✅
   types/
     namumark-clone-core.d.ts  ← 외부 라이브러리 타입 선언 ✅
 ```
