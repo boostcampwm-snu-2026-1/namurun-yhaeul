@@ -5,7 +5,9 @@ import { HowToPlay } from '../components/HowToPlay'
 import { LobbyNav } from '../components/LobbyNav'
 
 function getKstDateLabel(): string {
-  return new Date(Date.now() + 9 * 60 * 60 * 1000).toLocaleDateString('ko-KR', {
+  const kstIso = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10)
+  const [year, month, day] = kstIso.split('-').map(Number)
+  return new Date(year, month - 1, day).toLocaleDateString('ko-KR', {
     month: 'long',
     day: 'numeric',
     weekday: 'short',
