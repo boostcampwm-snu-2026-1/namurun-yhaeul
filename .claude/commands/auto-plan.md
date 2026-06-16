@@ -71,7 +71,16 @@ Check each condition in order. On first failure, post the stop comment (see form
 
 ### Step 4 — Generate work plan
 
-Derive a branch name from the issue title using kebab-case: `feature/<topic>`.
+Derive a branch name from the issue title using kebab-case. Use the prefix that matches the issue type:
+
+| 이슈 타입 | 브랜치 prefix |
+|-----------|--------------|
+| `feat`    | `feature/`   |
+| `fix`     | `fix/`       |
+| `refactor`| `refactor/`  |
+| `chore`   | `chore/`     |
+| `docs`    | `docs/`      |
+| `test`    | `test/`      |
 Generate the plan in this exact format:
 
 ```

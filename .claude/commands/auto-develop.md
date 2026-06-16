@@ -39,20 +39,39 @@ From the open PR list, find PRs whose body contains `Closes #M` where `#M` ∈ `
 **For all remaining (non-dependency) open PRs:**
 Extract the file paths listed in the current issue's **탐색 시작점** field (present in all issue types).
 For each non-dependency open PR, run `gh pr diff <number> --name-only` and compare against that file list.
+Collect all PRs with overlapping files as `CONFLICT_PRS`.
 
-**If any non-dependency PR touches overlapping files — skip this issue:**
+**파일 겹침은 SKIP 사유가 아니다.** 겹치는 PR의 브랜치를 base로 잡으면 개발이 가능하기 때문이다. SKIP은 오직 base를 결정할 수 없어 개발 자체가 불가능할 때만 한다.
 
-Output the following marker (used by auto-develop-all to detect skipped issues) and halt:
-```
-SKIP #<N>: PR #M "제목"이 <겹치는 파일>을 수정합니다. 해당 PR 머지 후 재실행 필요.
-```
-
-Then run `git checkout dev` before exiting.
-
-**If no conflict — warn and continue:**
+**`CONFLICT_PRS`가 없는 경우 — 그대로 진행:**
 ```
 ℹ️  열린 PR N개 중 의존 PR M개 제외, 파일 겹침 없음 — 파이프라인을 계속 진행합니다.
 ```
+
+**`CONFLICT_PRS`가 1개인 경우 — 해당 PR 브랜치를 base로 설정하고 진행:**
+- `<BASE>` = `CONFLICT_PRS[0].headRefName`
+- auto-plan Step 1.5의 base branch 결정을 이 값으로 override한다
+- 로그 출력:
+```
+ℹ️  PR #M "제목"과 파일이 겹칩니다. feature/xxx 브랜치를 base로 사용합니다.
+```
+
+**`CONFLICT_PRS`가 2개 이상이고 체인 관계인 경우 (한 PR이 다른 PR의 브랜치를 base로 함) — 가장 마지막(하위) 브랜치를 base로 설정하고 진행:**
+- 체인의 끝 브랜치를 `<BASE>`로 사용
+- 로그 출력:
+```
+ℹ️  PR #A, #B가 파일이 겹칩니다. 체인 끝 feature/zzz 브랜치를 base로 사용합니다.
+```
+
+**`CONFLICT_PRS`가 2개 이상이고 서로 독립적인 경우 — SKIP:**
+서로 다른 base를 가진 독립 PR이 둘 이상 있으면 단일 base를 결정할 수 없으므로 개발이 불가능하다.
+
+Output the following marker and halt:
+```
+SKIP #<N>: PR #A "제목", PR #B "제목"이 독립적으로 <겹치는 파일>을 수정합니다. 해당 PR들을 머지한 뒤 재실행 필요.
+```
+
+Then run `git checkout dev` before exiting.
 
 ---
 
