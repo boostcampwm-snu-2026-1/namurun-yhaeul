@@ -79,24 +79,38 @@ function GamePage() {
   }, [undoLastVisit])
 
   const handleFallbackPrev = useCallback(async () => {
+    if (isNavigatingRef.current) return
     const prevTitle = path[path.length - 1]
     if (!prevTitle) return
+    isNavigatingRef.current = true
+    setIsRendering(true)
     await loadArticle(prevTitle)
     setHasRenderError(false)
+    // isRendering/isNavigatingRef reset은 handleArticleReady에서 처리
   }, [path, loadArticle])
 
   const handleFallbackRandom = useCallback(async () => {
+    if (isNavigatingRef.current) return
+    isNavigatingRef.current = true
+    setIsRendering(true)
     try {
       const { count } = await supabase.from('articles').select('*', { count: 'estimated', head: true })
       const total = count ?? 100000
       const randomId = Math.floor(Math.random() * total)
       const { data } = await supabase.from('articles').select('title').gte('id', randomId).limit(1).single()
-      if (!data) return
+      if (!data) {
+        isNavigatingRef.current = false
+        setIsRendering(false)
+        return
+      }
       const title = (data as { title: string }).title
       const resolved = await loadArticleOptimistic(title, resolveRedirect)
       recordVisit(resolved)
       setHasRenderError(false)
+      // isRendering/isNavigatingRef reset은 handleArticleReady에서 처리
     } catch {
+      isNavigatingRef.current = false
+      setIsRendering(false)
       showToast('이동이 불가능합니다')
     }
   }, [loadArticleOptimistic, resolveRedirect, recordVisit, showToast])
@@ -205,6 +219,7 @@ function GamePage() {
               {hasRenderError && (
                 <ArticleFallbackLinks
                   hasPrev={path.length > 1}
+                  disabled={isRendering}
                   onPrev={() => void handleFallbackPrev()}
                   onRandom={() => void handleFallbackRandom()}
                 />
