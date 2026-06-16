@@ -96,7 +96,8 @@
 
 - 타이머: `Date.now()` 스냅샷 방식 (`elapsedMs = Date.now() - startTime`) — 백그라운드 탭에서 `setInterval`이 throttle되어도 실제 경과 시간을 정확하게 추적. 누적 increment 방식이면 배경 탭에서 시간이 느리게 가는 문제 발생
 - 100ms 인터벌로 UI 갱신 — 타이머 표시에 충분한 주기
-- `startGame`/`recordVisit`/`stopGame` 모두 `useCallback(fn, [])` — 내부에서 ref와 setState만 사용하므로 외부 deps 없이 안정적
+- `startGame`/`recordVisit`/`undoLastVisit`/`stopGame` 모두 `useCallback(fn, [])` — 내부에서 ref와 setState만 사용하므로 외부 deps 없이 안정적
+- `undoLastVisit()`: namumark 파싱 실패 시 호출 — path 마지막 항목 제거 + clickCount 감소. 실패 문서를 기록에서 소급 제거
 
 ### useMainPage
 
@@ -155,8 +156,9 @@ src/
     LeaderboardPage.tsx   ← 리더보드 화면 (동일 문제 기준 상위 10개, 현재 행 하이라이트) ✅
     RenderDemoPage.tsx    ← 개발용 렌더링 테스트 (/render-demo, 배포 무관)
   components/
-    ArticleViewer.tsx     ← namumark 렌더링 + 문서 제목 표시 ✅
-    GameHeader.tsx        ← 타이머(MM:SS.s), 클릭 수, 목표 문서명 ✅
+    ArticleViewer.tsx        ← namumark 렌더링 + 문서 제목 표시 ✅
+    ArticleFallbackLinks.tsx ← 렌더링 실패 시 복구 링크 (이전 문서 / 랜덤 문서) ✅
+    GameHeader.tsx           ← 타이머(MM:SS.s), 클릭 수, 목표 문서명 ✅
     PathSidebar.tsx       ← 이동 경로 사이드바 (현재 문서 하이라이트) ✅
     NamurunLogo.tsx       ← 나무런 하이브리드 로고 SVG 컴포넌트 ✅
   hooks/
