@@ -2,17 +2,22 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { useLeaderboard } from './useLeaderboard'
 
-const mockLimit = vi.fn()
-const mockOrder2 = vi.fn(() => ({ limit: mockLimit }))
-const mockOrder1 = vi.fn(() => ({ order: mockOrder2 }))
-const mockNot = vi.fn(() => ({ order: mockOrder1 }))
-const mockEqEnd = vi.fn(() => ({ not: mockNot }))
-const mockEqStart = vi.fn(() => ({ eq: mockEqEnd }))
-const mockSelect = vi.fn(() => ({ eq: mockEqStart }))
+const mockQuery = {
+  select: vi.fn(),
+  not: vi.fn(),
+  order: vi.fn(),
+  limit: vi.fn(),
+  eq: vi.fn(),
+}
+
+// Each method returns the same mockQuery object to support chaining
+Object.values(mockQuery).forEach((fn) => {
+  ;(fn as ReturnType<typeof vi.fn>).mockReturnValue(mockQuery)
+})
 
 vi.mock('../lib/supabase', () => ({
   supabase: {
-    from: () => ({ select: mockSelect }),
+    from: () => mockQuery,
   },
 }))
 
@@ -28,14 +33,16 @@ const sampleEntries = [
 ]
 
 beforeEach(() => {
-  mockLimit.mockReset()
+  Object.values(mockQuery).forEach((fn) => {
+    ;(fn as ReturnType<typeof vi.fn>).mockReturnValue(mockQuery)
+  })
 })
 
 describe('useLeaderboard', () => {
   it('쿼리 성공 시 entries가 설정된다', async () => {
-    mockLimit.mockResolvedValue({ data: sampleEntries, error: null })
+    mockQuery.eq.mockResolvedValueOnce({ data: sampleEntries, error: null })
 
-    const { result } = renderHook(() => useLeaderboard('이순신', '세종대왕'))
+    const { result } = renderHook(() => useLeaderboard('random', '', 'elapsed_ms'))
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.entries).toHaveLength(1)
@@ -44,9 +51,9 @@ describe('useLeaderboard', () => {
   })
 
   it('쿼리 실패 시 error가 설정된다', async () => {
-    mockLimit.mockResolvedValue({ data: null, error: { message: 'query error' } })
+    mockQuery.eq.mockResolvedValueOnce({ data: null, error: { message: 'query error' } })
 
-    const { result } = renderHook(() => useLeaderboard('이순신', '세종대왕'))
+    const { result } = renderHook(() => useLeaderboard('daily', '2026-06-16', 'click_count'))
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.error?.message).toBe('query error')
