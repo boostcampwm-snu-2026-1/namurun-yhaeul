@@ -6,6 +6,7 @@ import { useRedirect } from '../hooks/useRedirect'
 import { ArticleViewer } from '../components/ArticleViewer'
 import { GameHeader } from '../components/GameHeader'
 import { PathSidebar } from '../components/PathSidebar'
+import { QuitConfirmModal } from '../components/QuitConfirmModal'
 
 interface LocationState {
   start: string
@@ -37,6 +38,7 @@ function GamePage() {
 
   const [toast, setToast] = useState<string | null>(null)
   const [isRendering, setIsRendering] = useState(false)
+  const [isQuitModalOpen, setIsQuitModalOpen] = useState(false)
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isNavigatingRef = useRef(false)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -147,7 +149,7 @@ function GamePage() {
 
   return (
     <div className="flex flex-col h-screen bg-background">
-      <GameHeader targetTitle={gameEnd} elapsedMs={elapsedMs} clickCount={clickCount} onQuit={() => navigate('/')} />
+      <GameHeader targetTitle={gameEnd} elapsedMs={elapsedMs} clickCount={clickCount} onQuit={() => setIsQuitModalOpen(true)} />
 
       <div className="flex flex-1 overflow-hidden">
         <PathSidebar path={path} />
@@ -176,6 +178,13 @@ function GamePage() {
         <div className="fixed bottom-4 right-4 bg-inverse-surface text-inverse-on-surface px-4 py-2 rounded-lg shadow-lg font-body-sm text-body-sm">
           {toast}
         </div>
+      )}
+
+      {isQuitModalOpen && (
+        <QuitConfirmModal
+          onConfirm={() => navigate('/')}
+          onCancel={() => setIsQuitModalOpen(false)}
+        />
       )}
     </div>
   )
