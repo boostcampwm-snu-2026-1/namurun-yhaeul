@@ -125,7 +125,7 @@ describe('useMainPage', () => {
     })
 
     expect(mockNavigate).toHaveBeenCalledWith('/game', {
-      state: { start: '이순신', end: '세종대왕' },
+      state: expect.objectContaining({ start: '이순신', end: '세종대왕', challengeType: 'daily' }),
     })
   })
 })

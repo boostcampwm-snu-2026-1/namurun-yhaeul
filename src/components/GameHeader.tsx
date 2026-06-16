@@ -36,7 +36,7 @@ export function GameHeader({ targetTitle, elapsedMs, clickCount, onQuit }: Props
           </span>
         </div>
         <div className="flex flex-col items-center">
-          <span className="font-label-mono text-label-mono text-on-surface-variant">클릭 횟수</span>
+          <span className="font-label-mono text-label-mono text-on-surface-variant">이동 횟수</span>
           <span className="font-display-timer text-display-timer text-primary">
             {clickCount}
           </span>

@@ -100,6 +100,7 @@ function MainPage() {
                 랜덤 스피드런
               </button>
             </div>
+
           </div>
         </div>
       </main>

@@ -10,6 +10,8 @@ interface ResultState {
   path: string[]
   elapsedMs: number
   clickCount: number
+  challengeType: 'daily' | 'random'
+  dailyDate?: string
 }
 
 function isResultState(value: unknown): value is ResultState {
@@ -20,7 +22,8 @@ function isResultState(value: unknown): value is ResultState {
     typeof v.endArticle === 'string' &&
     Array.isArray(v.path) &&
     typeof v.elapsedMs === 'number' &&
-    typeof v.clickCount === 'number'
+    typeof v.clickCount === 'number' &&
+    (v.challengeType === 'daily' || v.challengeType === 'random')
   )
 }
 
@@ -50,8 +53,8 @@ function ResultPage() {
       localStorage.setItem('namurun_nickname', nickname.trim())
       navigate('/leaderboard', {
         state: {
-          startArticle: result!.startArticle,
-          endArticle: result!.endArticle,
+          tab: result!.challengeType,
+          dailyDate: result!.dailyDate,
           recordId,
         },
       })
@@ -83,7 +86,7 @@ function ResultPage() {
             </p>
           </div>
           <div className="bg-surface-container-low rounded-xl p-stack-md text-center">
-            <p className="text-label-mono font-label-mono text-on-surface-variant mb-1 uppercase tracking-wider">클릭 수</p>
+            <p className="text-label-mono font-label-mono text-on-surface-variant mb-1 uppercase tracking-wider">이동 횟수</p>
             <p className="text-2xl font-semibold text-on-surface">{result.clickCount}</p>
           </div>
         </div>

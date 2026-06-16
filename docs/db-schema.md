@@ -54,10 +54,14 @@ CREATE TABLE game_records (
   end_article      TEXT,
   click_count      INTEGER,
   elapsed_ms       INTEGER,
-  path             TEXT[],   -- 거쳐온 문서 순서 ["시작", "중간1", ..., "도착"]
+  path             TEXT[],        -- 거쳐온 문서 순서 ["시작", "중간1", ..., "도착"]
+  challenge_type   TEXT CHECK (challenge_type IN ('daily', 'random')),
+  daily_date       DATE,          -- challenge_type = 'daily'일 때만 값 존재
   created_at       TIMESTAMP DEFAULT NOW()
 );
 ```
+
+마이그레이션: `supabase/migrations/add_game_records_challenge_columns.sql`
 
 ### daily_prompts — 일일 문제
 
@@ -75,8 +79,11 @@ CREATE TABLE daily_prompts (
 -- 랜덤 offset 선택용
 CREATE INDEX idx_articles_id ON articles(id);
 
--- 리더보드: 동일 문제 기준 정렬
+-- 리더보드: 동일 문제 기준 정렬 (구버전 호환)
 CREATE INDEX idx_game_records_articles ON game_records(start_article, end_article);
+
+-- 리더보드: challenge_type 기반 정렬 (마이그레이션: add_game_records_challenge_columns.sql)
+CREATE INDEX idx_game_records_challenge_type ON game_records(challenge_type, daily_date);
 ```
 
 ## RLS 정책
