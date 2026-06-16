@@ -78,7 +78,7 @@
 - `[[문서명]]` / `[[실제명|표시텍스트]]` 링크 렌더링이 최우선
 - `NamuMark().parse()`는 **Web Worker**(`src/workers/namumark.worker.ts`)에서 실행 — 메인 스레드 블로킹으로 타이머 UI가 멈추는 문제 방지. 요청 ID 비교로 빠른 연속 클릭 시 이전 파싱 결과를 무시(race condition 방지)
 - **`$` 에스케이프 workaround**: namumark 내부 `String.replace(regex, string)` 호출에서 교체 문자열 안의 `$1`, `$2` 등이 캡처 그룹 참조로 해석됨. 각주에 달러 금액(`$1.30` 등)이 있는 문서에서 RangeError 발생. 파싱 전 `$`를 PUA 문자(U+E024)로 치환하고 파싱 후 HTML에서 복원하는 방식으로 우회. `split/join` 사용(`replace`도 동일 문제 있으므로)
-- **문서 제목은 namumark 파싱 결과 외부에서 렌더링** — `ArticleViewer`가 `article.title`을 별도 `<h1>` 요소로 표시. XSS 방지: dangerouslySetInnerHTML에 제목을 넣지 않는다
+- **문서 제목은 namumark 파싱 결과 외부에서 렌더링** — `ArticleViewer`가 `displayedTitle` state를 별도 `<h1>` 요소로 표시. XSS 방지: dangerouslySetInnerHTML에 제목을 넣지 않는다. `displayedTitle`은 `article.title` 즉시 반영이 아닌 Worker 응답 시점에 `setHtml`과 함께 갱신 — 본문과 제목이 동일한 렌더에 전환되어 제목만 먼저 바뀌는 깜빡임 방지. `pendingTitleRef`에 postMessage 시점의 제목을 저장해두고 Worker 응답 시 참조
 - **namumark 생성 클래스 · 엘리먼트 (CSS 타깃)**: `opennamu_TOC`(목차 컨테이너), `opennamu_TOC_title`(목차 헤딩), `opennamu_footnote`(주석 섹션), `opennamu_category`(카테고리 섹션 숨김), `opennamu_list_N`(중첩 레벨별 bullet — 1·3·5: disc/square, 2·4: circle), `hr.main_hr`(본문 첫 줄 구분선 숨김), `img[src=""]`(JS 미실행으로 src가 빈 이미지 숨김). 틀:/파일: 링크는 `opennamu_not_exist_link` 클래스로 타깃하지 않음(DB에 없는 내부 링크 전체에 붙으므로 게임 링크까지 숨겨짐) — URL prefix(`a[href^="/w/%ED%8B%80%3A"]`, `a[href^="/upload"]`)로 대신 타깃
 - **나무마크 소스 전처리** (`src/workers/namumark.worker.ts`, `src/workers/includeTemplates.ts`): namumark에 넘기기 전 두 단계 정규화 적용.
   1. **비표준 테이블 속성 정규화** (`namumark.worker.ts`): `<table bgcolor=...>` / `<table\nbordercolor=...>` 처럼 공백·줄바꿈이 끼어 있는 비표준 속성을 `<tablebgcolor=...>` 등 나무마크 표준 형태로 변환 (`/<table[\s\n]+([a-z])/gi`). 미처리 시 namumark가 해당 속성 문자열을 텍스트로 누출.
@@ -136,7 +136,8 @@
 - `#anchor` 링크(목차 `#s-1.1`, 주석 `#fn-1` 등)는 `preventDefault` 없이 브라우저 기본 스크롤에 위임 — 게임 이동과 무관하므로 인터셉트하지 않음
 - 콘텐츠 영역은 `overflow-y-auto` div로 독립 스크롤 (window 스크롤 아님) — 헤더·사이드바 고정을 위해 `h-screen + overflow-hidden` 레이아웃 사용
 - 문서 이동 성공 시 `contentRef.scrollTop = 0`으로 스크롤 초기화 — 이전 문서의 스크롤 위치가 유지되지 않도록
-- 중복 클릭 방지: `isNavigatingRef`(ref) 사용 — 상태 대신 ref를 쓰면 재렌더 없이 동기적으로 잠금/해제 가능
+- 중복 클릭 방지: `isNavigatingRef`(ref) 사용 — 상태 대신 ref를 쓰면 재렌더 없이 동기적으로 잠금/해제 가능. 잠금 해제는 `ArticleViewer`의 `onReady` 콜백에서 수행 — R2 fetch 완료(article 상태 변경) 시점이 아닌 namumark Worker 파싱 + HTML DOM 커밋 완료 시점까지 잠금 유지. fetch 실패(catch)에서는 `onReady`가 호출되지 않으므로 catch에서 직접 해제
+- 이동 중 오버레이: `isRendering` state — 링크 클릭 시 `true`, `onReady`/catch에서 `false`. `isLoading`(R2 fetch 기준)이 아닌 `isRendering`(Worker 렌더링 기준)으로 overlay를 제어해 본문이 실제로 교체되기 전까지 뿌옇게 유지
 - `location.state`를 `useState(() => ...)` 초기값으로 캡처 — 이후 리렌더에서도 gameStart/gameEnd가 안정적인 문자열로 유지됨
 
 ---
