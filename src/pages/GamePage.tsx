@@ -36,6 +36,7 @@ function GamePage() {
   const { resolveRedirect } = useRedirect()
 
   const [toast, setToast] = useState<string | null>(null)
+  const [isRendering, setIsRendering] = useState(false)
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isNavigatingRef = useRef(false)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -52,11 +53,12 @@ function GamePage() {
     }
   }, [])
 
-  // article/articleError가 커밋된 이후에 잠금 해제 — 캐시 히트 시 finally가 즉각 실행되어
-  // React 렌더 전에 ref가 풀리는 연타 허용 문제를 방지한다
-  useEffect(() => {
+  // Worker 파싱 완료 후 잠금 해제 — article 상태 변경(R2 fetch 완료) 시점이 아닌
+  // namumark HTML이 실제로 DOM에 커밋된 이후 클릭을 허용해야 연타 문제가 해결됨
+  const handleArticleReady = useCallback(() => {
     isNavigatingRef.current = false
-  }, [article, articleError])
+    setIsRendering(false)
+  }, [])
 
   const showToast = useCallback((message: string) => {
     setToast(message)
@@ -98,6 +100,7 @@ function GamePage() {
 
       if (isNavigatingRef.current) return
       isNavigatingRef.current = true
+      setIsRendering(true)
 
       try {
         const rawTitle = decodeURIComponent(href.slice(3).split('#')[0])
@@ -119,6 +122,8 @@ function GamePage() {
         }
       } catch {
         showToast('이동이 불가능합니다')
+        isNavigatingRef.current = false
+        setIsRendering(false)
       }
     },
     [resolveRedirect, loadArticleOptimistic, recordVisit, showToast, gameEnd, gameStart, path, clickCount, stopGame, navigate],
@@ -156,12 +161,12 @@ function GamePage() {
 
           {article && (
             <div className="relative" onClick={(e) => void handleClick(e)}>
-              {isLoading && (
+              {isRendering && (
                 <div className="absolute inset-0 bg-surface/60 z-10 flex items-center justify-center pointer-events-none">
                   <p className="text-on-surface-variant font-body-sm text-body-sm">이동 중...</p>
                 </div>
               )}
-              <ArticleViewer article={article} />
+              <ArticleViewer article={article} onReady={handleArticleReady} />
             </div>
           )}
         </div>

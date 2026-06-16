@@ -60,15 +60,18 @@ window.opennamu_heading_folding = (data, element) => {
 
 interface Props {
   article: Article
+  onReady?: () => void
 }
 
 // 모듈 수준 카운터 — 여러 인스턴스가 있어도 요청 ID가 전역적으로 유일함
 let requestCounter = 0
 
-export function ArticleViewer({ article }: Props) {
+export function ArticleViewer({ article, onReady }: Props) {
   const [html, setHtml] = useState('')
+  const [displayedTitle, setDisplayedTitle] = useState(article.title)
   const workerRef = useRef<Worker | null>(null)
   const latestIdRef = useRef(0)
+  const pendingTitleRef = useRef(article.title)
   const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -82,6 +85,7 @@ export function ArticleViewer({ article }: Props) {
       // 가장 최근 요청의 응답만 반영 — 빠른 연속 클릭 시 이전 결과 무시
       if (e.data.id === latestIdRef.current) {
         setHtml(e.data.html)
+        setDisplayedTitle(pendingTitleRef.current)
       }
     }
 
@@ -93,10 +97,16 @@ export function ArticleViewer({ article }: Props) {
 
   useEffect(() => {
     if (!workerRef.current) return
+    pendingTitleRef.current = article.title
     const id = ++requestCounter
     latestIdRef.current = id
     workerRef.current.postMessage({ id, text: article.text, title: article.title })
   }, [article.title, article.text])
+
+  // html이 DOM에 커밋된 직후 호출 — 네비게이션 잠금 해제 신호
+  useEffect(() => {
+    if (html) onReady?.()
+  }, [html, onReady])
 
   // HTML 주입 후 목차 접기 토글 연결
   useEffect(() => {
@@ -209,7 +219,7 @@ export function ArticleViewer({ article }: Props) {
   // namumark 렌더링 결과를 삽입하는 유일한 지점 — 라이브러리 출력만 허용 (XSS 정책)
   return (
     <div className="article-viewer">
-      <h1 className="article-doc-title">{article.title}</h1>
+      <h1 className="article-doc-title">{displayedTitle}</h1>
       <div ref={contentRef} className="article-content" dangerouslySetInnerHTML={{ __html: html }} />
     </div>
   )
