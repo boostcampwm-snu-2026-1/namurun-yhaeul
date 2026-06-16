@@ -14,6 +14,8 @@ import { QuitConfirmModal } from '../components/QuitConfirmModal'
 interface LocationState {
   start: string
   end: string
+  challengeType: 'daily' | 'random'
+  dailyDate?: string
 }
 
 interface GameSession {
@@ -23,6 +25,8 @@ interface GameSession {
   clickCount: number
   startTime: number
   currentArticle: string
+  challengeType: 'daily' | 'random'
+  dailyDate?: string
 }
 
 const GAME_SESSION_KEY = 'namurun_game_session'
@@ -39,7 +43,9 @@ function readGameSession(): GameSession | null {
       !Array.isArray((parsed as Record<string, unknown>).path) ||
       typeof (parsed as Record<string, unknown>).clickCount !== 'number' ||
       typeof (parsed as Record<string, unknown>).startTime !== 'number' ||
-      typeof (parsed as Record<string, unknown>).currentArticle !== 'string'
+      typeof (parsed as Record<string, unknown>).currentArticle !== 'string' ||
+      ((parsed as Record<string, unknown>).challengeType !== 'daily' &&
+        (parsed as Record<string, unknown>).challengeType !== 'random')
     ) return null
     return parsed as GameSession
   } catch {
@@ -48,11 +54,12 @@ function readGameSession(): GameSession | null {
 }
 
 function isLocationState(value: unknown): value is LocationState {
+  if (typeof value !== 'object' || value === null) return false
+  const v = value as Record<string, unknown>
   return (
-    typeof value === 'object' &&
-    value !== null &&
-    typeof (value as Record<string, unknown>).start === 'string' &&
-    typeof (value as Record<string, unknown>).end === 'string'
+    typeof v.start === 'string' &&
+    typeof v.end === 'string' &&
+    (v.challengeType === 'daily' || v.challengeType === 'random')
   )
 }
 
@@ -71,6 +78,8 @@ function GamePage() {
   // Capture initial game params as stable strings (useState initial value runs once)
   const [gameStart] = useState<string>(() => locationState?.start ?? savedSession?.gameStart ?? '')
   const [gameEnd] = useState<string>(() => locationState?.end ?? savedSession?.gameEnd ?? '')
+  const [challengeType] = useState<'daily' | 'random'>(() => locationState?.challengeType ?? savedSession?.challengeType ?? 'random')
+  const [dailyDate] = useState<string | undefined>(() => locationState?.dailyDate ?? savedSession?.dailyDate)
   // On restore, load the last visited article; on fresh start, load gameStart
   const [initialArticle] = useState<string>(() => savedSession?.currentArticle ?? locationState?.start ?? '')
 
@@ -109,8 +118,10 @@ function GamePage() {
       clickCount: currentClickCount,
       startTime: gameStartTimeRef.current,
       currentArticle,
+      challengeType,
+      dailyDate,
     } satisfies GameSession))
-  }, [gameStart, gameEnd])
+  }, [gameStart, gameEnd, challengeType, dailyDate])
 
   const clearSession = useCallback(() => {
     sessionStorage.removeItem(GAME_SESSION_KEY)
@@ -241,6 +252,8 @@ function GamePage() {
               path: newPath,
               elapsedMs: finalElapsed,
               clickCount: newClickCount,
+              challengeType,
+              dailyDate,
             },
           })
         }
@@ -250,7 +263,7 @@ function GamePage() {
         setIsRendering(false)
       }
     },
-    [resolveRedirect, loadArticleOptimistic, recordVisit, saveSession, clearSession, showToast, gameEnd, gameStart, path, clickCount, stopGame, navigate],
+    [resolveRedirect, loadArticleOptimistic, recordVisit, saveSession, clearSession, showToast, gameEnd, gameStart, path, clickCount, stopGame, navigate, challengeType, dailyDate],
   )
 
   if (!gameStart || !gameEnd) {

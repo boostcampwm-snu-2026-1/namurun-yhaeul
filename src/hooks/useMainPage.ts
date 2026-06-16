@@ -41,6 +41,7 @@ export interface UseMainPageResult {
   dailyPrompt: DailyPrompt | null
   startDaily: () => void
   startRandom: () => void
+  goToLeaderboard: () => void
 }
 
 export function useMainPage(): UseMainPageResult {
@@ -88,7 +89,10 @@ export function useMainPage(): UseMainPageResult {
 
   const startDaily = useCallback(() => {
     if (!dailyPrompt) return
-    navigate('/game', { state: { start: dailyPrompt.start_article, end: dailyPrompt.end_article } })
+    const dailyDate = getKstDateString()
+    navigate('/game', {
+      state: { start: dailyPrompt.start_article, end: dailyPrompt.end_article, challengeType: 'daily', dailyDate },
+    })
   }, [dailyPrompt, navigate])
 
   const startRandom = useCallback(async () => {
@@ -103,7 +107,7 @@ export function useMainPage(): UseMainPageResult {
           fetchRandomTitle(totalCount, true),
         ])
       } while (start === end)
-      navigate('/game', { state: { start, end } })
+      navigate('/game', { state: { start, end, challengeType: 'random' } })
     } catch {
       // 가져오기 실패 시 조용히 무시 — 버튼 재클릭으로 재시도 가능
     } finally {
@@ -111,5 +115,9 @@ export function useMainPage(): UseMainPageResult {
     }
   }, [totalCount, navigate])
 
-  return { isLoading, error, dailyPrompt, startDaily, startRandom }
+  const goToLeaderboard = useCallback(() => {
+    navigate('/leaderboard')
+  }, [navigate])
+
+  return { isLoading, error, dailyPrompt, startDaily, startRandom, goToLeaderboard }
 }
