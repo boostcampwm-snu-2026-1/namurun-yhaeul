@@ -142,6 +142,7 @@
 - 이동 중 오버레이: `isRendering` state — 링크 클릭 시 `true`, `onReady`/catch에서 `false`. `isLoading`(R2 fetch 기준)이 아닌 `isRendering`(Worker 렌더링 기준)으로 overlay를 제어해 본문이 실제로 교체되기 전까지 뿌옇게 유지
 - `location.state`를 `useState(() => ...)` 초기값으로 캡처 — 이후 리렌더에서도 gameStart/gameEnd가 안정적인 문자열로 유지됨
 - **렌더링 실패 복구 흐름**: `ArticleViewer`의 `onRenderError` → `handleRenderError` → `undoLastVisit()`(실패 문서 path·clickCount 소급 제거) + `hasRenderError = true`. `ArticleFallbackLinks`(이전 문서 / 랜덤 문서) 표시. 복구 이동 시 `isNavigatingRef`/`isRendering`으로 기존 이동과 동일하게 잠금·오버레이 처리. `hasPrev` 조건: undo 후 `path.length >= 1`(시작 문서 실패 시 path = [] → 숨김)
+- **타이머 지연 시작**: 초기 문서 로드 시 `startGame`을 `useEffect`에서 즉시 호출하지 않음. `loadArticle`만 호출하고, `onReady` 첫 번째 콜백 시점(Worker 파싱 + DOM 커밋 완료)에 `startGame` 실행. `hasStartedRef`(ref)로 stale closure 없이 "최초 호출" 여부 판별. `hasGameStarted`(state)로 로딩 표시와 아티클 영역 가시성 제어 — `article`이 세팅되면 즉시 `ArticleViewer`를 `hidden`으로 마운트해 Worker 파싱을 시작하되, `hasGameStarted`가 `true`가 되어야 표시. 두 번째 문서부터는 기존 `isNavigatingRef`/`isRendering` 흐름 유지
 
 ---
 

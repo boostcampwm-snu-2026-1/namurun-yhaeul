@@ -42,15 +42,16 @@ function GamePage() {
   const [isRendering, setIsRendering] = useState(false)
   const [isQuitModalOpen, setIsQuitModalOpen] = useState(false)
   const [hasRenderError, setHasRenderError] = useState(false)
+  const [hasGameStarted, setHasGameStarted] = useState(false)
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isNavigatingRef = useRef(false)
+  const hasStartedRef = useRef(false)
   const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!gameStart) return
-    startGame(gameStart)
     void loadArticle(gameStart)
-  }, [gameStart, startGame, loadArticle])
+  }, [gameStart, loadArticle])
 
   useEffect(() => {
     return () => {
@@ -61,9 +62,15 @@ function GamePage() {
   // Worker 파싱 완료 후 잠금 해제 — article 상태 변경(R2 fetch 완료) 시점이 아닌
   // namumark HTML이 실제로 DOM에 커밋된 이후 클릭을 허용해야 연타 문제가 해결됨
   const handleArticleReady = useCallback(() => {
-    isNavigatingRef.current = false
-    setIsRendering(false)
-  }, [])
+    if (!hasStartedRef.current) {
+      hasStartedRef.current = true
+      startGame(gameStart)
+      setHasGameStarted(true)
+    } else {
+      isNavigatingRef.current = false
+      setIsRendering(false)
+    }
+  }, [startGame, gameStart])
 
   const showToast = useCallback((message: string) => {
     setToast(message)
@@ -198,14 +205,14 @@ function GamePage() {
         <PathSidebar path={path} />
 
         <div className="flex-1 overflow-y-auto relative" ref={contentRef}>
-          {isLoading && !article && (
+          {!hasGameStarted && (
             <div className="flex items-center justify-center p-8">
               <p className="text-on-surface-variant font-body-sm text-body-sm">불러오는 중...</p>
             </div>
           )}
 
           {article && (
-            <div className="relative" onClick={(e) => void handleClick(e)}>
+            <div className={hasGameStarted ? 'relative' : 'hidden'} onClick={(e) => void handleClick(e)}>
               {isRendering && (
                 <div className="absolute inset-0 bg-surface/60 z-10 flex items-center justify-center pointer-events-none">
                   <p className="text-on-surface-variant font-body-sm text-body-sm">이동 중...</p>
