@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useGameRecord } from '../hooks/useGameRecord'
 import { AppHeader } from '../components/AppHeader'
+import { formatTime } from '../lib/formatTime'
 
 interface ResultState {
   startArticle: string
@@ -23,14 +24,6 @@ function isResultState(value: unknown): value is ResultState {
   )
 }
 
-function formatTime(ms: number): string {
-  const totalTenths = Math.floor(ms / 100)
-  const tenths = totalTenths % 10
-  const totalSeconds = Math.floor(totalTenths / 10)
-  const seconds = totalSeconds % 60
-  const minutes = Math.floor(totalSeconds / 60)
-  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${tenths}`
-}
 
 function ResultPage() {
   const location = useLocation()
