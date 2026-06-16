@@ -34,7 +34,8 @@ function MainPage() {
     <div className="min-h-screen bg-background circuit-bg">
       <AppHeader />
 
-      <main className="pt-16 min-h-screen flex flex-col items-center justify-center px-gutter py-12">
+      <main className="pt-16">
+        <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-gutter py-12">
         <div className="w-full max-w-[960px] flex flex-col gap-10">
 
           {/* Identity */}
@@ -125,6 +126,7 @@ function MainPage() {
             </div>
 
           </div>
+        </div>
         </div>
       </main>
       <HowToPlay />
