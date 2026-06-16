@@ -23,12 +23,16 @@ function getKstDateString(): string {
 }
 
 async function fetchRandomTitle(totalCount: number, excludeSlash: boolean): Promise<string> {
-  const randomId = Math.floor(Math.random() * totalCount)
-  const query = supabase.from('articles').select('title').gte('id', randomId).limit(1)
-  const finalQuery = excludeSlash ? query.not('title', 'like', '%/%') : query
-  const { data, error } = await finalQuery.single()
-  if (error || !data) throw new Error('랜덤 문서를 가져오지 못했습니다.')
-  return (data as { title: string }).title
+  let range = totalCount
+  while (range >= 1) {
+    const randomId = Math.floor(Math.random() * range)
+    const query = supabase.from('articles').select('title').gte('id', randomId).limit(1)
+    const finalQuery = excludeSlash ? query.not('title', 'like', '%/%') : query
+    const { data } = await finalQuery.single()
+    if (data) return (data as { title: string }).title
+    range = Math.floor(range * 0.9)
+  }
+  throw new Error('랜덤 문서를 가져오지 못했습니다.')
 }
 
 export interface UseMainPageResult {
@@ -60,7 +64,7 @@ export function useMainPage(): UseMainPageResult {
             .select('start_article, end_article')
             .eq('date', kstDate)
             .maybeSingle(),
-          supabase.from('articles').select('*', { count: 'exact', head: true }),
+          supabase.from('articles').select('*', { count: 'estimated', head: true }),
         ])
 
         if (isDailyPromptRow(promptResult.data)) {
@@ -68,6 +72,7 @@ export function useMainPage(): UseMainPageResult {
         }
 
         if (countResult.error) {
+          console.error('articles count error:', countResult.error)
           setError('문서 목록을 불러오지 못했습니다.')
         } else if (countResult.count !== null) {
           setTotalCount(countResult.count)

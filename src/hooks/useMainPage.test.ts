@@ -10,7 +10,8 @@ vi.mock('react-router-dom', async (importOriginal) => {
 })
 
 const mockMaybySingle = vi.fn()
-const mockLimit = vi.fn()
+const mockCountQuery = vi.fn()
+const mockSingle = vi.fn()
 
 vi.mock('../lib/supabase', () => ({
   supabase: {
@@ -18,12 +19,26 @@ vi.mock('../lib/supabase', () => ({
       if (table === 'daily_prompts') {
         return { select: () => ({ eq: () => ({ maybeSingle: mockMaybySingle }) }) }
       }
-      return { select: () => ({ order: () => ({ limit: mockLimit }) }) }
+      // articles table — 두 가지 쿼리 패턴:
+      // 1. 카운트: .select('*', { count: 'exact', head: true }) → Promise<{ count, error }>
+      // 2. 랜덤 타이틀: .select('title').gte().limit().not?().single() → Promise<{ data, error }>
+      return {
+        select: (_columns: string, options?: Record<string, unknown>) => {
+          if (options?.count) {
+            return mockCountQuery()
+          }
+          const chain = {
+            gte: () => chain,
+            limit: () => chain,
+            not: () => chain,
+            single: mockSingle,
+          }
+          return chain
+        },
+      }
     },
   },
 }))
-
-const TOP_100 = Array.from({ length: 100 }, (_, i) => ({ title: `문서${i}` }))
 
 describe('useMainPage', () => {
   beforeEach(() => {
@@ -35,7 +50,7 @@ describe('useMainPage', () => {
       data: { start_article: '이순신', end_article: '세종대왕' },
       error: null,
     })
-    mockLimit.mockResolvedValue({ data: TOP_100, error: null })
+    mockCountQuery.mockResolvedValue({ count: 100, error: null })
 
     const { result } = renderHook(() => useMainPage())
 
@@ -50,7 +65,7 @@ describe('useMainPage', () => {
 
   it('daily_prompts가 null이면 dailyPrompt는 null이다', async () => {
     mockMaybySingle.mockResolvedValue({ data: null, error: null })
-    mockLimit.mockResolvedValue({ data: TOP_100, error: null })
+    mockCountQuery.mockResolvedValue({ count: 100, error: null })
 
     const { result } = renderHook(() => useMainPage())
 
@@ -62,7 +77,7 @@ describe('useMainPage', () => {
 
   it('articles 조회 실패 시 error를 세팅한다', async () => {
     mockMaybySingle.mockResolvedValue({ data: null, error: null })
-    mockLimit.mockResolvedValue({ data: null, error: new Error('DB error') })
+    mockCountQuery.mockResolvedValue({ count: null, error: new Error('DB error') })
 
     const { result } = renderHook(() => useMainPage())
 
@@ -73,14 +88,17 @@ describe('useMainPage', () => {
 
   it('startRandom이 /game으로 navigate하며 start와 end를 전달한다', async () => {
     mockMaybySingle.mockResolvedValue({ data: null, error: null })
-    mockLimit.mockResolvedValue({ data: TOP_100, error: null })
+    mockCountQuery.mockResolvedValue({ count: 100, error: null })
+    mockSingle
+      .mockResolvedValueOnce({ data: { title: '이순신' }, error: null })
+      .mockResolvedValueOnce({ data: { title: '세종대왕' }, error: null })
 
     const { result } = renderHook(() => useMainPage())
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
 
-    act(() => {
-      result.current.startRandom()
+    await act(async () => {
+      await result.current.startRandom()
     })
 
     expect(mockNavigate).toHaveBeenCalledWith('/game', {
@@ -96,7 +114,7 @@ describe('useMainPage', () => {
       data: { start_article: '이순신', end_article: '세종대왕' },
       error: null,
     })
-    mockLimit.mockResolvedValue({ data: TOP_100, error: null })
+    mockCountQuery.mockResolvedValue({ count: 100, error: null })
 
     const { result } = renderHook(() => useMainPage())
 
