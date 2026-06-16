@@ -89,7 +89,7 @@ export function HowToPlay() {
 
         {/* Section heading */}
         <div className="flex items-center gap-4">
-          <span className="font-label-mono text-label-mono text-primary uppercase tracking-widest shrink-0">
+          <span className="font-headline-md text-xs font-semibold text-primary uppercase tracking-wider shrink-0">
             게임 방법
           </span>
           <div className="flex-1 h-px bg-outline-variant" />
@@ -142,7 +142,7 @@ export function HowToPlay() {
         {embedUrl && (
           <div className="flex flex-col gap-6 pt-6 border-t border-outline-variant">
             <div className="flex items-center gap-4">
-              <span className="font-label-mono text-label-mono text-primary uppercase tracking-widest shrink-0">
+              <span className="font-headline-md text-xs font-semibold text-primary uppercase tracking-wider shrink-0">
                 관련 영상
               </span>
               <div className="flex-1 h-px bg-outline-variant" />
