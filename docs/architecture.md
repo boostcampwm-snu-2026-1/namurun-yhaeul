@@ -162,7 +162,7 @@
 - **타이머 지연 시작**: 초기 문서 로드 시 `startGame`을 `useEffect`에서 즉시 호출하지 않음. `loadArticle`만 호출하고, `onReady` 첫 번째 콜백 시점(Worker 파싱 + DOM 커밋 완료)에 `startGame` 실행. `hasStartedRef`(ref)로 stale closure 없이 "최초 호출" 여부 판별. `hasGameStarted`(state)로 로딩 표시와 아티클 영역 가시성 제어 — `article`이 세팅되면 즉시 `ArticleViewer`를 `hidden`으로 마운트해 Worker 파싱을 시작하되, `hasGameStarted`가 `true`가 되어야 표시. 두 번째 문서부터는 기존 `isNavigatingRef`/`isRendering` 흐름 유지
 - **새로고침 세션 복원**: `sessionStorage['namurun_game_session']`에 `{ gameStart, gameEnd, path, clickCount, startTime, currentArticle }` 저장. 저장 시점: 최초 `onReady`(게임 시작) + 매 문서 이동 성공(`handleClick`에서 `recordVisit` 직후). 마운트 시 `location.state`가 null이면 sessionStorage에서 복원 시도 — 성공 시 `currentArticle` 로드 + `restoreGame` 호출로 타이머 재개. 세션 삭제: 목표 문서 도달(`navigate('/result')` 직전) + 포기 확인. sessionStorage 없으면 기존 "잘못된 접근" 표시
 - **콘텐츠 영역 레이아웃**: `overflow-y-auto` div 내부를 `flex` row로 구성 — 좌: 아티클 래퍼(`flex-1 min-w-0 relative`), 우: 버튼 거터(`w-10 shrink-0 relative`). `hasToc` state: `handleArticleReady` 시점에 `contentRef.current?.querySelector('.opennamu_TOC')`로 TOC 유무를 감지해 `ArticleNavButtons`에 전달
-- **목표 문서 설명 로딩**: `useArticleSummary(gameEnd)`가 게임 진행과 독립적으로 동작 — 먼저 `articles.summary`를 조회하고, 비어 있으면 Supabase Edge Function `article-summary`를 invoke. Edge Function은 R2에서 목표 문서 원문을 fetch한 뒤 Gemini로 "찾는 데 도움이 되는 식별 정보 + 핵심 맥락" 1~2문장 요약을 생성하고 `articles.summary`에 캐시한다. 프론트는 로딩 중에도 타이머/문서 이동을 막지 않으며, 실패 시 툴팁에 `"설명을 불러올 수 없습니다"`를 표시
+- **목표 문서 설명 로딩**: `useArticleSummary(gameEnd)`가 게임 진행과 독립적으로 동작 — 먼저 `articles.summary`를 조회하고, 비어 있으면 Supabase Edge Function `article-summary`를 invoke. Edge Function은 R2에서 목표 문서 원문을 fetch한 뒤 Gemini로 "찾는 데 도움이 되는 식별 정보 + 핵심 맥락" 1~2문장 요약을 생성하고 `articles.summary`에 캐시한다. Gemini가 `429`, `500`, `503` 같은 일시적 오류를 반환하면 최대 3회까지 짧은 백오프와 함께 재시도한다. 프론트는 로딩 중에도 타이머/문서 이동을 막지 않으며, 실패 시 툴팁에 `"설명을 불러올 수 없습니다"`를 표시
 
 ---
 
@@ -208,7 +208,7 @@ src/
   supabase/
     functions/
       article-summary/
-        index.ts          ← 목표 문서 요약 Edge Function (R2 fetch → Gemini 요약 → articles.summary 캐시) ✅
+        index.ts          ← 목표 문서 요약 Edge Function (R2 fetch → Gemini 요약/재시도 → articles.summary 캐시) ✅
     migrations/
       add_articles_summary_column.sql ← articles.summary 컬럼 추가 ✅
   types/
